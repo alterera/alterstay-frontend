@@ -6,22 +6,18 @@ import {
   WalletIcon,
 } from "lucide-react";
 
-export type MembershipFeature = {
+export type StayBenefit = {
   id: string;
   label: string;
   icon: LucideIcon;
 };
 
-export const membershipConfig = {
-  headline: "It pays to be a member",
-  subheadline: "Free membership, great benefits.",
-  loginLabel: "Log in",
-  joinLabel: "Join for free",
-  memberNote: "You're signed in — member benefits apply to your bookings.",
-  features: [
+export const stayBenefitsConfig = {
+  headline: "Do More in every Alterstay",
+  benefits: [
     {
       id: "save",
-      label: "Save up to 50% instantly",
+      label: "Save up to 30% instantly",
       icon: HandCoinsIcon,
     },
     {
@@ -31,7 +27,7 @@ export const membershipConfig = {
     },
     {
       id: "points",
-      label: "Earn Alt Coins on every booking",
+      label: "Earn coins on every booking",
       icon: WalletIcon,
     },
     {
@@ -39,5 +35,5 @@ export const membershipConfig = {
       label: "24/7 customer support",
       icon: HeadsetIcon,
     },
-  ] satisfies MembershipFeature[],
+  ] satisfies StayBenefit[],
 };

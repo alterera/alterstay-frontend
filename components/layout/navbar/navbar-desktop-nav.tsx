@@ -106,11 +106,10 @@ export function NavbarLoginButton({ className }: { className?: string }) {
     return (
       <Button
         type="button"
-        variant="outline"
         size="lg"
         onClick={openLogin}
         className={cn(
-          "rounded-sm border-brand/30 bg-white px-4 text-xs text-black backdrop-blur-sm hover:bg-white/70 hover:text-black",
+          "rounded-sm bg-[#ec1846] px-4 text-xs text-white backdrop-blur-sm hover:bg-[#ec1846]/90",
           className,
         )}
       >
@@ -125,10 +124,9 @@ export function NavbarLoginButton({ className }: { className?: string }) {
         render={
           <Button
             type="button"
-            variant="outline"
             size="lg"
             className={cn(
-              "rounded-sm border-brand/30 bg-white px-4 text-xs text-black backdrop-blur-sm hover:bg-white/70 hover:text-black",
+              "rounded-sm bg-[#ec1846] px-4 text-xs text-white backdrop-blur-sm hover:bg-[#ec1846]/90",
               className,
             )}
           >

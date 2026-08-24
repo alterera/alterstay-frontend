@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ArrowLeftIcon, HeartIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,25 @@ type PropertySectionNavProps = {
   className?: string;
 };
 
+function scrollTabIntoView(
+  scroller: HTMLElement,
+  tab: HTMLElement,
+  behavior: ScrollBehavior,
+) {
+  const scrollerRect = scroller.getBoundingClientRect();
+  const tabRect = tab.getBoundingClientRect();
+  const edgePadding = 16;
+  const overflowLeft = scrollerRect.left + edgePadding - tabRect.left;
+  const overflowRight = tabRect.right - (scrollerRect.right - edgePadding);
+
+  if (overflowLeft <= 0 && overflowRight <= 0) return;
+
+  scroller.scrollBy({
+    left: overflowLeft > 0 ? -overflowLeft : overflowRight,
+    behavior,
+  });
+}
+
 export function PropertySectionNav({
   activeId,
   onNavigate,
@@ -28,6 +48,16 @@ export function PropertySectionNav({
   onToggleFavourite,
   className,
 }: PropertySectionNavProps) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    const tab = tabRefs.current.get(activeId);
+    if (!scroller || !tab) return;
+    scrollTabIntoView(scroller, tab, "smooth");
+  }, [activeId]);
+
   return (
     <nav
       aria-label="Property sections"
@@ -72,14 +102,26 @@ export function PropertySectionNav({
         </div>
       ) : null}
 
-      <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-1 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        ref={scrollerRef}
+        className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-1 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {PROPERTY_SECTIONS.map((section) => {
           const isActive = activeId === section.id;
           return (
             <button
               key={section.id}
+              ref={(node) => {
+                if (node) tabRefs.current.set(section.id, node);
+                else tabRefs.current.delete(section.id);
+              }}
               type="button"
-              onClick={() => onNavigate(section.id)}
+              onClick={() => {
+                const scroller = scrollerRef.current;
+                const tab = tabRefs.current.get(section.id);
+                if (scroller && tab) scrollTabIntoView(scroller, tab, "smooth");
+                onNavigate(section.id);
+              }}
               className={cn(
                 "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                 isActive
