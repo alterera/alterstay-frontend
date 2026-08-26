@@ -48,9 +48,12 @@ export type PropertySearchResult = {
   area?: string;
   state?: string;
   country?: string;
+  postalCode?: string;
   imageUrls: string[];
   tags: { code: string; name: string }[];
   amenities: string[];
+  remainingRooms?: number | null;
+  reviewCount?: number;
   minTotalPrice: number | null;
   minPricePerNight: number | null;
   estimatedTaxes: number | null;

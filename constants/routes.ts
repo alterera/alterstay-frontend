@@ -35,5 +35,6 @@ export const ROUTES = {
     bookings: "/admin/bookings",
     users: "/admin/users",
     settings: "/admin/settings",
+    cities: "/admin/cities",
   },
 } as const;

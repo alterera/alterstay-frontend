@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { MapPinIcon, StarIcon } from "lucide-react";
 
 import type { PropertyDetail } from "@/types/property-detail";
@@ -9,9 +10,12 @@ type PropertyInfoSectionProps = {
 };
 
 export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
+  const [expanded, setExpanded] = useState(false);
   const locationLabel = [property.area, property.city]
     .filter(Boolean)
     .join(", ");
+  const about = property.description?.trim() ?? "";
+  const needsReadMore = about.length > 180;
 
   return (
     <section id="info" className="scroll-mt-36 space-y-3">
@@ -50,10 +54,27 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
         ) : null}
       </div>
 
-      {property.description ? (
-        <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-          {property.description}
-        </p>
+      {about ? (
+        <div className="max-w-3xl">
+          <p
+            className={
+              expanded || !needsReadMore
+                ? "text-sm leading-relaxed text-muted-foreground"
+                : "line-clamp-3 text-sm leading-relaxed text-muted-foreground"
+            }
+          >
+            {about}
+          </p>
+          {needsReadMore ? (
+            <button
+              type="button"
+              onClick={() => setExpanded((value) => !value)}
+              className="mt-1 text-sm font-medium text-brand"
+            >
+              {expanded ? "Read less" : "Read more"}
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {property.tags.length ? (

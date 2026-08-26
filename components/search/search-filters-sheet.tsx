@@ -10,7 +10,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { DEFAULT_SEARCH_FILTERS, type SearchArea, type SearchFilters, type SearchPropertyType } from "@/types/search-results";
+import { type SearchArea, type SearchFilters, type SearchPropertyType } from "@/types/search-results";
 
 type SearchFiltersSheetProps = {
   open: boolean;
@@ -33,8 +33,7 @@ function activeFilterCount(filters: SearchFilters) {
     filters.priceBuckets.length +
     filters.propertyTypeIds.length +
     (filters.minRating != null ? 1 : 0) +
-    (filters.businessHotels ? 1 : 0) +
-    (filters.sortBy !== DEFAULT_SEARCH_FILTERS.sortBy ? 1 : 0)
+    (filters.businessHotels ? 1 : 0)
   );
 }
 
@@ -59,7 +58,7 @@ export function SearchFiltersSheet({
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="inset-x-0 bottom-0 h-dvh max-h-dvh w-full gap-0 overflow-hidden rounded-none border-0 bg-background p-0 shadow-none data-[side=bottom]:h-dvh"
+        className="inset-x-0 bottom-0 h-[78dvh] max-h-[78dvh] w-full gap-0 overflow-hidden rounded-t-xl border-0 bg-background p-0 shadow-none data-[side=bottom]:h-[78dvh] data-[side=bottom]:max-h-[78dvh]"
       >
         <div className="flex h-full min-h-0 flex-col pt-[env(safe-area-inset-top)]">
           <header className="shrink-0 border-b bg-background px-5 pb-3 pt-3">

@@ -11,6 +11,8 @@ import { PropertyResultCard } from "@/components/search/property-result-card";
 import { SearchFiltersSheet } from "@/components/search/search-filters-sheet";
 import { useSearchPageLayout } from "@/components/search/search-page-layout-context";
 import { SearchFiltersPanel } from "@/components/search/search-filters-panel";
+import { SearchSortBar } from "@/components/search/search-sort-bar";
+import { SearchSortSheet } from "@/components/search/search-sort-sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -31,7 +33,7 @@ import {
   type SearchPropertyType,
 } from "@/types/search-results";
 
-type MobileSheet = "filters" | null;
+type MobileSheet = "filters" | "sort" | null;
 
 /**
  * Scroll offsets that toggle the desktop morph. The header keeps a constant
@@ -190,8 +192,7 @@ export function SearchPage() {
     filters.priceBuckets.length > 0 ||
     filters.minRating !== null ||
     filters.propertyTypeIds.length > 0 ||
-    filters.businessHotels ||
-    filters.sortBy !== "recommended";
+    filters.businessHotels;
 
   return (
     <div className="bg-neutral-100 pb-6 lg:pb-10">
@@ -260,7 +261,7 @@ export function SearchPage() {
       <Container className="px-4 py-4 lg:py-6 lg:min-h-[calc(100vh-11.5rem)]">
         <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
           <aside className="hidden lg:block">
-            <div className="sticky top-20 rounded-2xl bg-white p-4 shadow-sm">
+            <div className="sticky top-20 rounded-md bg-white p-4 shadow-sm">
               <SearchFiltersPanel
                 city={search.city}
                 areas={areas}
@@ -274,9 +275,16 @@ export function SearchPage() {
           </aside>
 
           <div className="space-y-3 lg:space-y-4">
-            <h2 className="px-0.5 text-sm font-medium text-neutral-500 lg:text-lg lg:font-semibold lg:text-foreground">
-              {count} {count === 1 ? "property" : "properties"} found
-            </h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="px-0.5 text-sm font-semibold text-neutral-900 lg:text-lg">
+                {count} {count === 1 ? "property" : "properties"} found
+              </h2>
+              <SearchSortBar
+                sortBy={filters.sortBy}
+                onChange={(sortBy) => handleFiltersChange({ ...filters, sortBy })}
+                onOpenMobileSort={() => setMobileSheet("sort")}
+              />
+            </div>
 
             {loading ? (
               <p className="text-sm text-muted-foreground">Searching properties…</p>
@@ -308,8 +316,15 @@ export function SearchPage() {
         onSearch={handleHeroSearch}
       />
 
+      <SearchSortSheet
+        open={mobileSheet === "sort"}
+        onOpenChange={(open) => !open && setMobileSheet(null)}
+        sortBy={filters.sortBy}
+        onChange={(sortBy) => handleFiltersChange({ ...filters, sortBy })}
+      />
+
       <SearchFiltersSheet
-        open={mobileSheet !== null}
+        open={mobileSheet === "filters"}
         onOpenChange={(open) => !open && setMobileSheet(null)}
         city={search.city}
         areas={areas}

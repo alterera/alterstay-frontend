@@ -10,7 +10,6 @@ import {
   type SearchArea,
   type SearchFilters,
   type SearchPropertyType,
-  type SortOption,
 } from "@/types/search-results";
 
 type SearchFiltersPanelProps = {
@@ -25,13 +24,6 @@ type SearchFiltersPanelProps = {
   compact?: boolean;
   variant?: "panel" | "sheet";
 };
-
-const SORT_OPTIONS: { id: SortOption; label: string }[] = [
-  { id: "recommended", label: "Recommended" },
-  { id: "price_asc", label: "Price: Low to high" },
-  { id: "price_desc", label: "Price: High to low" },
-  { id: "rating_desc", label: "Top rated" },
-];
 
 function FilterSection({
   title,
@@ -123,42 +115,6 @@ export function SearchFiltersPanel({
 
   return (
     <div className={cn(isSheet ? "space-y-6" : "space-y-4", className)}>
-      {isSheet ? (
-        <FilterSection title="Sort by">
-          <div className="flex flex-wrap gap-2">
-            {SORT_OPTIONS.map((option) => (
-              <Chip
-                key={option.id}
-                selected={filters.sortBy === option.id}
-                onClick={() => patch({ sortBy: option.id })}
-              >
-                {option.label}
-              </Chip>
-            ))}
-          </div>
-        </FilterSection>
-      ) : (
-        <FilterSection title="Sort by">
-          <div className="space-y-2">
-            {SORT_OPTIONS.map((option) => (
-              <label
-                key={option.id}
-                className="flex cursor-pointer items-center gap-2 text-sm"
-              >
-                <input
-                  type="radio"
-                  name="sort-by"
-                  checked={filters.sortBy === option.id}
-                  onChange={() => patch({ sortBy: option.id })}
-                  className="size-4"
-                />
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
-        </FilterSection>
-      )}
-
       <FilterSection
         title="Areas"
         hint={`Neighbourhoods in ${city}`}
@@ -170,7 +126,7 @@ export function SearchFiltersPanel({
             value={areaSearch}
             onChange={(e) => onAreaSearchChange(e.target.value)}
             placeholder={`Search areas in ${city}`}
-            className="h-11 rounded-xl pl-10"
+            className="h-11 rounded-md pl-10"
           />
         </div>
         <div
@@ -190,13 +146,13 @@ export function SearchFiltersPanel({
                 <label
                   key={area.id}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
+                    "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm",
                     selected ? "bg-brand/10" : "bg-muted/50",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex size-5 shrink-0 items-center justify-center rounded-md border",
+                      "flex size-5 shrink-0 items-center justify-center rounded-sm border",
                       selected
                         ? "border-brand bg-brand text-brand-foreground"
                         : "border-border bg-background",
@@ -310,7 +266,7 @@ export function SearchFiltersPanel({
           type="button"
           onClick={() => patch({ businessHotels: !filters.businessHotels })}
           className={cn(
-            "flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-left",
+            "flex w-full items-center justify-between rounded-md border px-4 py-3.5 text-left",
             filters.businessHotels
               ? "border-brand bg-brand/10"
               : "border-border bg-muted/40",
@@ -324,7 +280,7 @@ export function SearchFiltersPanel({
           </span>
           <span
             className={cn(
-              "flex size-5 shrink-0 items-center justify-center rounded-md border",
+              "flex size-5 shrink-0 items-center justify-center rounded-sm border",
               filters.businessHotels
                 ? "border-brand bg-brand text-brand-foreground"
                 : "border-border bg-background",

@@ -2,7 +2,7 @@
 
 import { PencilIcon, SlidersHorizontalIcon } from "lucide-react";
 
-import { formatGuestCountShort, formatNavDateRange } from "@/lib/format";
+import { formatCompactDateRange } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { PropertySearchParams } from "@/types/search";
 
@@ -14,6 +14,13 @@ type MobileSearchHeaderProps = {
   className?: string;
 };
 
+function iconButtonClass(active = false) {
+  return cn(
+    "relative inline-flex size-10 shrink-0 items-center justify-center rounded-full border bg-white text-neutral-800 shadow-sm transition-colors",
+    active ? "border-neutral-900" : "border-neutral-200",
+  );
+}
+
 export function MobileSearchHeader({
   search,
   onEdit,
@@ -21,7 +28,10 @@ export function MobileSearchHeader({
   filterActive = false,
   className,
 }: MobileSearchHeaderProps) {
-  const summary = `${formatNavDateRange(search.dateRange)} · ${formatGuestCountShort(search.guests)}`;
+  const people = search.guests.adults + search.guests.children;
+  const summary = `${formatCompactDateRange(search.dateRange)} | ${people} ${
+    people === 1 ? "person" : "people"
+  } ${search.guests.rooms} ${search.guests.rooms === 1 ? "room" : "rooms"}`;
 
   return (
     <div
@@ -31,20 +41,19 @@ export function MobileSearchHeader({
       )}
     >
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label="Edit search"
+          className={iconButtonClass()}
+        >
+          <PencilIcon className="size-4" />
+        </button>
+
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h1 className="truncate text-[17px] font-semibold tracking-tight text-neutral-900">
-              {search.city}
-            </h1>
-            <button
-              type="button"
-              onClick={onEdit}
-              aria-label="Edit search"
-              className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
-            >
-              <PencilIcon className="size-3.5" />
-            </button>
-          </div>
+          <h1 className="truncate text-[17px] font-bold tracking-tight text-neutral-900">
+            {search.city}
+          </h1>
           <p className="mt-0.5 truncate text-[13px] text-neutral-500">{summary}</p>
         </div>
 
@@ -53,12 +62,7 @@ export function MobileSearchHeader({
           onClick={onFilter}
           aria-label="Open filters"
           aria-pressed={filterActive}
-          className={cn(
-            "relative inline-flex size-10 shrink-0 items-center justify-center rounded-full border transition-colors",
-            filterActive
-              ? "border-neutral-900 bg-neutral-900 text-white"
-              : "border-neutral-200 bg-white text-neutral-800 shadow-sm",
-          )}
+          className={iconButtonClass(filterActive)}
         >
           <SlidersHorizontalIcon className="size-4" />
           {filterActive ? (

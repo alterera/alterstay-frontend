@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "AlterStays",
+  name: "AlterStay",
   description:
     "Discover stunning resorts and elegant hotels. Book your perfect stay with expert support.",
   tagline: "Unwind in Stunning Resorts, Stay in Elegant Hotels.",
@@ -27,7 +27,7 @@ export const siteConfig = {
   },
   hero: {
     backgroundImage:
-      "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1920&auto=format&fit=crop",
+      "/hero-background.webp",
     backgroundAlt: "Tropical resort with palm trees and pool",
   },
 } as const;

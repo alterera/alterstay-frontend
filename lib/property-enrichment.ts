@@ -36,21 +36,22 @@ export function splitAmenities(property: PropertyDetail) {
 
   if (perksFromCategory.length > 0) {
     return {
-      perks: perksFromCategory.map((a) => a.name),
-      amenities: amenitiesFromCategory.map((a) => a.name),
+      perks: perksFromCategory,
+      amenities: amenitiesFromCategory,
     };
   }
 
-  const perks = property.amenities
-    .filter((a) => isPerkName(a.name))
-    .map((a) => a.name);
-  const amenities = property.amenities
-    .filter((a) => !isPerkName(a.name))
-    .map((a) => a.name);
+  const perks = property.amenities.filter((a) => isPerkName(a.name));
+  const amenities = property.amenities.filter((a) => !isPerkName(a.name));
 
   if (perks.length === 0 && property.tags.length > 0) {
     return {
-      perks: property.tags.slice(0, 4).map((t) => t.name),
+      perks: property.tags.slice(0, 4).map((t) => ({
+        id: t.code,
+        name: t.name,
+        category: "PERK",
+        icon: null,
+      })),
       amenities,
     };
   }

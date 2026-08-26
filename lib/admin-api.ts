@@ -1,5 +1,8 @@
 import type { AuthResponse } from "@/types/auth";
 import type {
+  AdminArea,
+  AdminBooking,
+  AdminCity,
   Amenity,
   CancellationPolicy,
   MealPlan,
@@ -227,5 +230,104 @@ export function searchProperties(params: Record<string, string | number>) {
   }
   return adminFetch<{ results: SearchResult[]; count: number }>(
     `/search/properties?${query.toString()}`,
+  );
+}
+
+export function fetchAdminCities() {
+  return adminFetch<AdminCity[]>("/admin/cities");
+}
+
+export function createAdminCity(data: {
+  name: string;
+  state?: string;
+  country?: string;
+}) {
+  return adminFetch<AdminCity>("/admin/cities", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateAdminCity(
+  id: string,
+  data: { name?: string; state?: string; country?: string },
+) {
+  return adminFetch<AdminCity>(`/admin/cities/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteAdminCity(id: string) {
+  return adminFetch<{ success: boolean }>(`/admin/cities/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function createAdminArea(cityId: string, name: string) {
+  return adminFetch<AdminArea>(`/admin/cities/${cityId}/areas`, {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function updateAdminArea(id: string, name: string) {
+  return adminFetch<AdminArea>(`/admin/areas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function deleteAdminArea(id: string) {
+  return adminFetch<{ success: boolean }>(`/admin/areas/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function fetchAdminBookings(params?: { page?: number; status?: string }) {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.status) query.set("status", params.status);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return adminFetch<{
+    results: AdminBooking[];
+    page: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+  }>(`/admin/bookings${suffix}`);
+}
+
+export function updateAdminBooking(
+  id: string,
+  data: {
+    guestFirstName?: string;
+    guestLastName?: string;
+    guestPhone?: string;
+    guestEmail?: string;
+  },
+) {
+  return adminFetch<AdminBooking>(`/admin/bookings/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function acceptAdminBooking(id: string) {
+  return adminFetch<AdminBooking>(`/admin/bookings/${id}/accept`, {
+    method: "POST",
+  });
+}
+
+export function cancelAdminBooking(id: string) {
+  return adminFetch<AdminBooking>(`/admin/bookings/${id}/cancel`, {
+    method: "POST",
+  });
+}
+
+export function deleteAdminBooking(id: string) {
+  return adminFetch<{ success: boolean; deleted: boolean; message?: string }>(
+    `/admin/bookings/${id}`,
+    { method: "DELETE" },
   );
 }

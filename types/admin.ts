@@ -9,6 +9,59 @@ export type Amenity = {
   id: string;
   name: string;
   category: string | null;
+  icon?: string | null;
+};
+
+export type AdminCity = {
+  id: string;
+  name: string;
+  slug: string;
+  state: string | null;
+  country: string;
+  areas: AdminArea[];
+};
+
+export type AdminArea = {
+  id: string;
+  name: string;
+  slug: string;
+  cityId?: string;
+};
+
+export type AdminBooking = {
+  id: string;
+  reservationNumber: string;
+  status: string;
+  checkIn: string;
+  checkOut: string;
+  totalAmount: number;
+  currency: string;
+  createdAt: string;
+  holdExpiresAt: string | null;
+  confirmedAt: string | null;
+  property: { id: string; name: string; slug: string };
+  user: {
+    id: string;
+    phone: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+  };
+  guest: {
+    firstName: string;
+    lastName: string | null;
+    phone: string | null;
+    email: string | null;
+  } | null;
+  items: { roomTypeName: string; ratePlanName: string; quantity: number }[];
+  payments: {
+    id: string;
+    paymentReference: string;
+    status: string;
+    amount: string | number;
+    paidAt: string | null;
+    refundRequired: boolean;
+  }[];
 };
 
 export type PropertyAddress = {

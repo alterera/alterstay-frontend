@@ -15,6 +15,7 @@ export type PropertyAmenityDetail = {
   id: string;
   name: string;
   category: string | null;
+  icon: string | null;
 };
 
 export type PropertyPolicyDetail = {

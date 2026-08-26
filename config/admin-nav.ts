@@ -3,6 +3,7 @@ import {
   Building2Icon,
   CalendarCheckIcon,
   LayoutDashboardIcon,
+  MapPinnedIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
@@ -18,6 +19,7 @@ export type AdminNavItem = {
 export const adminNav: AdminNavItem[] = [
   { href: ROUTES.admin.root, label: "Dashboard", icon: LayoutDashboardIcon },
   { href: ROUTES.admin.properties, label: "Properties", icon: Building2Icon },
+  { href: ROUTES.admin.cities, label: "Cities & areas", icon: MapPinnedIcon },
   { href: ROUTES.admin.bookings, label: "Bookings", icon: CalendarCheckIcon },
   { href: ROUTES.admin.users, label: "Users", icon: UsersIcon },
   { href: ROUTES.admin.settings, label: "Settings", icon: SettingsIcon },

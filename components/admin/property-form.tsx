@@ -168,13 +168,18 @@ export function PropertyForm({
             />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">About the hotel</Label>
             <textarea
               id="description"
-              className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm"
+              className="min-h-32 w-full rounded-md border bg-background px-3 py-2 text-sm"
               value={values.description}
               onChange={(e) => update("description", e.target.value)}
+              placeholder="A short description guests will see under the address on the property page."
             />
+            <p className="text-xs text-muted-foreground">
+              Shown on the listing Info section. Long text is collapsed behind
+              Read more.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="checkIn">Check-in time</Label>
