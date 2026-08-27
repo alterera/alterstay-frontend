@@ -18,6 +18,8 @@ type PropertyBookingPanelProps = {
   search: PropertySearchParams;
   selectedPlan: SelectedRoomPlan | null;
   currency: string;
+  quoteLoading?: boolean;
+  quoteAvailable?: boolean;
   onSearchUpdate: (search: PropertySearchParams) => void;
   onChooseRoom: () => void;
   onBookNow: () => void;
@@ -28,6 +30,8 @@ export function PropertyBookingPanel({
   search,
   selectedPlan,
   currency,
+  quoteLoading = false,
+  quoteAvailable = true,
   onSearchUpdate,
   onChooseRoom,
   onBookNow,
@@ -126,11 +130,15 @@ export function PropertyBookingPanel({
 
         <Button
           type="button"
-          disabled={!selectedPlan}
+          disabled={!selectedPlan || quoteLoading || !quoteAvailable}
           onClick={onBookNow}
           className="mt-5 w-full rounded-full bg-brand text-brand-foreground hover:bg-brand/90"
         >
-          Book Now
+          {quoteLoading
+            ? "Checking availability…"
+            : !quoteAvailable
+              ? "Unavailable"
+              : "Book Now"}
         </Button>
       </div>
     </aside>

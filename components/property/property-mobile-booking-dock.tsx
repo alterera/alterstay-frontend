@@ -9,6 +9,8 @@ type PropertyMobileBookingDockProps = {
   search: PropertySearchParams;
   selectedPlan: SelectedRoomPlan | null;
   currency: string;
+  quoteLoading?: boolean;
+  quoteAvailable?: boolean;
   onBookNow: () => void;
 };
 
@@ -16,6 +18,8 @@ export function PropertyMobileBookingDock({
   search,
   selectedPlan,
   currency,
+  quoteLoading = false,
+  quoteAvailable = true,
   onBookNow,
 }: PropertyMobileBookingDockProps) {
   const nights = getStayNights(search.dateRange);
@@ -56,11 +60,15 @@ export function PropertyMobileBookingDock({
 
           <Button
             type="button"
-            disabled={!selectedPlan}
+            disabled={!selectedPlan || quoteLoading || !quoteAvailable}
             onClick={onBookNow}
             className="h-11 shrink-0 rounded-full bg-brand px-7 text-sm font-semibold text-brand-foreground hover:bg-brand/90"
           >
-            Book Now
+            {quoteLoading
+              ? "Checking…"
+              : !quoteAvailable
+                ? "Unavailable"
+                : "Book Now"}
           </Button>
         </div>
       </div>

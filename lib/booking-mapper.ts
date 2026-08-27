@@ -3,7 +3,7 @@ import { normalizeBookingPhone } from "@/lib/format";
 import { formatDateParam } from "@/lib/search-params";
 import type { PropertySearchParams } from "@/types/search";
 import type { SelectedRoomPlan } from "@/types/property-detail";
-import type { CreateBookingRequest } from "@/types/booking";
+import type { CreateBookingPayload } from "@/types/booking";
 
 export type GuestFormFieldErrors = Partial<
   Record<
@@ -19,7 +19,7 @@ export type GuestFormFieldErrors = Partial<
 >;
 
 export type MapGuestFormResult =
-  | { ok: true; request: CreateBookingRequest }
+  | { ok: true; request: CreateBookingPayload }
   | { ok: false; errors: GuestFormFieldErrors };
 
 export function splitGuestName(guestName: string): {
@@ -77,7 +77,7 @@ export function mapGuestFormToCreateBooking(
   }
 
   const { firstName, lastName } = splitGuestName(form.guestName);
-  const request: CreateBookingRequest = {
+  const request: CreateBookingPayload = {
     propertySlug: slug,
     roomTypeId: plan.roomTypeId,
     ratePlanId: plan.ratePlanId,

@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { BookingApiError, fetchBooking } from "@/lib/booking-api";
 import {
-  clearCheckoutAttempt,
+  clearCheckoutSession,
   isTerminalBookingStatus,
-  type CheckoutSelection,
 } from "@/lib/booking-checkout-state";
+import { buildRebookUrl } from "@/lib/booking-format";
 import { retryPaymentForBooking } from "@/lib/booking-payment";
 import { setPostLoginRedirect } from "@/lib/booking-url";
 import { formatCurrency } from "@/lib/format";
@@ -72,21 +72,20 @@ export function BookingPaymentResultPage() {
 
   const clearCheckoutForBooking = useCallback(
     (next: BookingResponse) => {
-      if (!user?.id) return;
       if (!isTerminalBookingStatus(next.status)) return;
-      const selection: CheckoutSelection = {
-        slug: next.property.slug,
+      const item = next.items[0];
+      if (!item) return;
+      clearCheckoutSession({
+        propertySlug: next.property.slug,
+        roomTypeId: item.roomTypeId,
+        ratePlanId: item.ratePlanId,
         checkIn: next.checkIn,
         checkOut: next.checkOut,
-        roomTypeId: next.items[0]?.roomTypeId ?? "",
-        ratePlanId: next.items[0]?.ratePlanId ?? "",
-        userId: user.id,
-      };
-      if (selection.roomTypeId && selection.ratePlanId) {
-        clearCheckoutAttempt(selection);
-      }
+        rooms: item.quantity,
+        adults: next.guests.length || 1,
+      });
     },
-    [user],
+    [],
   );
 
   const applyBooking = useCallback(
@@ -357,13 +356,11 @@ export function BookingPaymentResultPage() {
             </p>
             <Button
               render={
-                <Link
-                  href={`/properties/${encodeURIComponent(booking.property.slug)}`}
-                />
+                <Link href={buildRebookUrl(booking)} />
               }
               className="mt-6"
             >
-              Search again
+              Book again
             </Button>
           </>
         ) : null}

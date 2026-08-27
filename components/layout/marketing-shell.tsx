@@ -11,7 +11,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isSearchPage = pathname.startsWith("/search");
   const isPropertyPage = pathname.startsWith("/properties/");
-  const isBookingFlow = /\/properties\/[^/]+\/book/.test(pathname);
+  const isBookingFlow = /\/properties\/[^/]+\/(book|checkout)/.test(pathname);
   const hideFooter =
     pathname.startsWith("/profile") ||
     pathname.startsWith("/search") ||

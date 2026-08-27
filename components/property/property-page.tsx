@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useAuth } from "@/components/auth/auth-provider";
@@ -20,9 +20,11 @@ import { useIsDesktop } from "@/hooks/use-is-desktop";
 import { useFavouriteProperty } from "@/hooks/use-favourite-property";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import {
-  buildBookingLoginUrl,
-  buildBookingSummaryUrl,
+  buildCheckoutLoginUrl,
+  buildCheckoutUrl,
 } from "@/lib/booking-url";
+import { fetchQuote } from "@/lib/quote-api";
+import { quoteToBill } from "@/lib/quote-utils";
 import { fetchPropertyDetail } from "@/lib/property-api";
 import { findLowestPricePlan, planToSelection } from "@/lib/property-booking";
 import {
@@ -31,7 +33,7 @@ import {
   splitAmenities,
 } from "@/lib/property-enrichment";
 import { buildPropertyUrl } from "@/lib/property-url";
-import { parseSearchParams } from "@/lib/search-params";
+import { parseSearchParams, formatDateParam } from "@/lib/search-params";
 import {
   PROPERTY_SECTIONS,
   type PropertyDetail,
@@ -39,6 +41,7 @@ import {
   type SelectedRoomPlan,
 } from "@/types/property-detail";
 import type { PropertySearchParams } from "@/types/search";
+import type { QuoteResponse } from "@/types/quote";
 
 type PropertyPageProps = {
   slug: string;
@@ -58,6 +61,8 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   const [selectedPlan, setSelectedPlan] = useState<SelectedRoomPlan | null>(
     null,
   );
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
 
   const { isFavourite, toggleFavourite } = useFavouriteProperty(slug);
   const sectionIds = PROPERTY_SECTIONS.map((section) => section.id);
@@ -96,6 +101,46 @@ export function PropertyPage({ slug }: PropertyPageProps) {
     setSearch(parsed);
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!selectedPlan || !search.dateRange.from || !search.dateRange.to) {
+      setQuote(null);
+      return;
+    }
+
+    const checkIn = formatDateParam(search.dateRange.from);
+    const checkOut = formatDateParam(search.dateRange.to);
+    if (!checkIn || !checkOut || checkIn >= checkOut) {
+      setQuote(null);
+      return;
+    }
+
+    let cancelled = false;
+    async function loadQuote() {
+      setQuoteLoading(true);
+      try {
+        const next = await fetchQuote({
+          propertySlug: slug,
+          roomTypeId: selectedPlan!.roomTypeId,
+          ratePlanId: selectedPlan!.ratePlanId,
+          checkIn,
+          checkOut,
+          rooms: search.guests.rooms,
+          adults: search.guests.adults,
+        });
+        if (!cancelled) setQuote(next);
+      } catch {
+        if (!cancelled) setQuote(null);
+      } finally {
+        if (!cancelled) setQuoteLoading(false);
+      }
+    }
+
+    void loadQuote();
+    return () => {
+      cancelled = true;
+    };
+  }, [search, selectedPlan, slug]);
+
   function handleSearchUpdate(nextSearch: PropertySearchParams) {
     setSearch(nextSearch);
     router.push(buildPropertyUrl(slug, nextSearch));
@@ -105,12 +150,23 @@ export function PropertyPage({ slug }: PropertyPageProps) {
     if (!selectedPlan || authLoading) return;
 
     if (!isAuthenticated && isDesktop === false) {
-      router.push(buildBookingLoginUrl(slug, search, selectedPlan));
+      router.push(buildCheckoutLoginUrl(slug, search, selectedPlan));
       return;
     }
 
-    router.push(buildBookingSummaryUrl(slug, search, selectedPlan));
+    router.push(buildCheckoutUrl(slug, search, selectedPlan));
   }
+
+  const displayPlan = useMemo(() => {
+    if (!selectedPlan || !quote) return selectedPlan;
+    const bill = quoteToBill(quote);
+    return {
+      ...selectedPlan,
+      totalPrice: bill.roomPrice,
+      estimatedTaxes: bill.tax,
+      currency: bill.currency,
+    };
+  }, [quote, selectedPlan]);
 
   if (loading) {
     return (
@@ -186,8 +242,10 @@ export function PropertyPage({ slug }: PropertyPageProps) {
 
           <PropertyBookingPanel
             search={search}
-            selectedPlan={selectedPlan}
+            selectedPlan={displayPlan}
             currency={property.currency}
+            quoteLoading={quoteLoading}
+            quoteAvailable={quote?.available ?? true}
             onSearchUpdate={handleSearchUpdate}
             onChooseRoom={() => scrollToSection("room-options")}
             onBookNow={handleBookNow}
@@ -197,8 +255,10 @@ export function PropertyPage({ slug }: PropertyPageProps) {
 
       <PropertyMobileBookingDock
         search={search}
-        selectedPlan={selectedPlan}
+        selectedPlan={displayPlan}
         currency={property.currency}
+        quoteLoading={quoteLoading}
+        quoteAvailable={quote?.available ?? true}
         onBookNow={handleBookNow}
       />
     </div>

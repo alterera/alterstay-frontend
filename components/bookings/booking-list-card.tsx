@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { createPaymentSession } from "@/lib/booking-api";
 import {
   bookingNeedsPayment,
+  buildRebookUrl,
+  canPayWithHoldRemaining,
   formatBookedOn,
+  formatHoldCountdown,
   formatPayableAmount,
   formatStayLine,
   getDirectionsUrl,
+  getHoldRemainingMs,
   getRefundStatusLabel,
 } from "@/lib/booking-format";
 import { cn } from "@/lib/utils";
@@ -29,6 +33,20 @@ type BookingListCardProps = {
 export function BookingListCard({ booking, tab, className }: BookingListCardProps) {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  const [holdRemainingMs, setHoldRemainingMs] = useState<number | null>(
+    () => getHoldRemainingMs(booking.holdExpiresAt),
+  );
+
+  useEffect(() => {
+    if (tab !== "pending" || !booking.holdExpiresAt) return undefined;
+
+    const tick = () => {
+      setHoldRemainingMs(getHoldRemainingMs(booking.holdExpiresAt));
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [booking.holdExpiresAt, tab]);
 
   const imageUrl = booking.property.imageUrl ?? FALLBACK_IMAGE;
   const cityLabel = booking.property.city ?? "—";
@@ -39,6 +57,14 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
     booking.nights,
   );
   const refundLabel = getRefundStatusLabel(booking);
+  const canPay =
+    tab === "pending" &&
+    bookingNeedsPayment(booking) &&
+    canPayWithHoldRemaining(booking.holdExpiresAt);
+  const holdExpired =
+    tab === "pending" &&
+    holdRemainingMs !== null &&
+    holdRemainingMs <= 0;
 
   async function handlePayNow() {
     setPayError(null);
@@ -71,9 +97,14 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
             {booking.property.name}
           </h3>
           <p className="text-sm text-muted-foreground">{stayLine}</p>
-          {tab === "upcoming" ? (
+          {tab === "pending" || tab === "upcoming" ? (
             <p className="text-sm font-medium text-foreground">
               Payable amount: {formatPayableAmount(booking)}
+            </p>
+          ) : null}
+          {tab === "pending" && holdRemainingMs !== null && holdRemainingMs > 0 ? (
+            <p className="text-sm font-medium text-amber-700">
+              Complete payment in {formatHoldCountdown(holdRemainingMs)}
             </p>
           ) : null}
         </div>
@@ -88,16 +119,13 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
         </div>
       </div>
 
-      {tab === "upcoming" ? (
+      {tab === "pending" ? (
         <div className="border-t px-4 py-3">
-          <p className="mb-3 text-base font-semibold">
-            {formatPayableAmount(booking)}
-          </p>
           {payError ? (
             <p className="mb-2 text-xs text-destructive">{payError}</p>
           ) : null}
           <div className="flex flex-col gap-2">
-            {bookingNeedsPayment(booking) ? (
+            {canPay ? (
               <Button
                 type="button"
                 className="w-full rounded-xl bg-brand text-brand-foreground hover:bg-brand/90"
@@ -107,22 +135,35 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
                 {paying ? "Redirecting..." : "Pay now"}
               </Button>
             ) : null}
-            <div className="grid grid-cols-2 gap-2">
-              <a
-                href={getDirectionsUrl(booking)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
-              >
-                Get Direction
-              </a>
+            {holdExpired || !canPayWithHoldRemaining(booking.holdExpiresAt) ? (
               <Link
-                href={ROUTES.help.contact}
-                className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+                href={buildRebookUrl(booking)}
+                className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
               >
-                Need Help?
+                Rebook
               </Link>
-            </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {tab === "upcoming" ? (
+        <div className="border-t px-4 py-3">
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={getDirectionsUrl(booking)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+            >
+              Get Direction
+            </a>
+            <Link
+              href={ROUTES.help.contact}
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+            >
+              Need Help?
+            </Link>
           </div>
         </div>
       ) : null}

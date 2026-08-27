@@ -12,20 +12,38 @@ export function buildBookingQueryString(
   return query.toString();
 }
 
+export function buildCheckoutUrl(
+  slug: string,
+  search: PropertySearchParams,
+  plan: SelectedRoomPlan,
+): string {
+  return `/properties/${slug}/checkout?${buildBookingQueryString(search, plan)}`;
+}
+
+/** @deprecated Use buildCheckoutUrl */
 export function buildBookingSummaryUrl(
   slug: string,
   search: PropertySearchParams,
   plan: SelectedRoomPlan,
 ): string {
-  return `/properties/${slug}/book?${buildBookingQueryString(search, plan)}`;
+  return buildCheckoutUrl(slug, search, plan);
 }
 
+export function buildCheckoutLoginUrl(
+  slug: string,
+  search: PropertySearchParams,
+  plan: SelectedRoomPlan,
+): string {
+  return `/properties/${slug}/checkout/login?${buildBookingQueryString(search, plan)}`;
+}
+
+/** @deprecated Use buildCheckoutLoginUrl */
 export function buildBookingLoginUrl(
   slug: string,
   search: PropertySearchParams,
   plan: SelectedRoomPlan,
 ): string {
-  return `/properties/${slug}/book/login?${buildBookingQueryString(search, plan)}`;
+  return buildCheckoutLoginUrl(slug, search, plan);
 }
 
 export const AUTH_POST_LOGIN_REDIRECT_KEY = "auth.postLoginRedirect";

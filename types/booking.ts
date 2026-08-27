@@ -29,6 +29,7 @@ export type BusinessBookingInput = {
 };
 
 export type CreateBookingRequest = {
+  quoteToken: string;
   propertySlug: string;
   roomTypeId: string;
   ratePlanId: string;
@@ -39,6 +40,9 @@ export type CreateBookingRequest = {
   guest: BookingGuestInput;
   businessBooking?: BusinessBookingInput;
 };
+
+/** Guest + stay payload before attaching a checkout quote token. */
+export type CreateBookingPayload = Omit<CreateBookingRequest, "quoteToken">;
 
 export type PaymentSummary = {
   status: PaymentStatus;
@@ -97,7 +101,11 @@ export type BookingResponse = {
   items: BookingItem[];
 };
 
-export type BookingListTab = "ongoing" | "upcoming" | "cancelled";
+export type BookingListTab =
+  | "pending"
+  | "upcoming"
+  | "ongoing"
+  | "cancelled";
 
 export type BookingListResponse = {
   results: BookingResponse[];

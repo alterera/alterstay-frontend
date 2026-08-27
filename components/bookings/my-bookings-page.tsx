@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { BookingListCard } from "@/components/bookings/booking-list-card";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -11,8 +11,9 @@ import { cn } from "@/lib/utils";
 import type { BookingListTab, BookingResponse } from "@/types/booking";
 
 const TABS: { id: BookingListTab; label: string }[] = [
-  { id: "ongoing", label: "Ongoing" },
+  { id: "pending", label: "Pending payment" },
   { id: "upcoming", label: "Upcoming" },
+  { id: "ongoing", label: "Ongoing" },
   { id: "cancelled", label: "Cancelled" },
 ];
 
@@ -22,6 +23,7 @@ export function MyBookingsPage() {
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const defaultTabSet = useRef(false);
 
   const loadBookings = useCallback(async (tab: BookingListTab) => {
     setLoadingBookings(true);
@@ -38,7 +40,24 @@ export function MyBookingsPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || defaultTabSet.current) return;
+
+    async function pickDefaultTab() {
+      try {
+        const pending = await fetchMyBookings("pending", 1, 1);
+        setActiveTab(pending.total > 0 ? "pending" : "upcoming");
+      } catch {
+        setActiveTab("upcoming");
+      } finally {
+        defaultTabSet.current = true;
+      }
+    }
+
+    void pickDefaultTab();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !defaultTabSet.current) return;
     void loadBookings(activeTab);
   }, [activeTab, isAuthenticated, loadBookings]);
 
@@ -67,7 +86,7 @@ export function MyBookingsPage() {
       <Container className="max-w-2xl">
         <h1 className="mb-5 text-2xl font-bold tracking-tight">My Bookings</h1>
 
-        <div className="mb-6 flex border-b">
+        <div className="mb-6 flex border-b overflow-x-auto">
           {TABS.map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -76,7 +95,7 @@ export function MyBookingsPage() {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex-1 border-b-2 px-2 py-3 text-sm font-medium transition-colors",
+                  "shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors sm:flex-1 sm:px-2",
                   active
                     ? "border-brand text-brand"
                     : "border-transparent text-muted-foreground hover:text-foreground",
@@ -104,7 +123,8 @@ export function MyBookingsPage() {
         ) : bookings.length === 0 ? (
           <div className="rounded-2xl border bg-muted/20 px-4 py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No {activeTab} bookings yet.
+              No {activeTab === "pending" ? "pending payment" : activeTab}{" "}
+              bookings yet.
             </p>
           </div>
         ) : (

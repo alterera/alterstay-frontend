@@ -2,54 +2,28 @@ import {
   BookingApiError,
   createBooking,
   createPaymentSession,
-  fetchBooking,
 } from "@/lib/booking-api";
 import { openCashfreeCheckout } from "@/lib/cashfree-checkout";
-import {
-  clearCheckoutAttempt,
-  getOrCreateIdempotencyKey,
-  isTerminalBookingStatus,
-  loadCheckoutAttempt,
-  persistReservationNumber,
-  type CheckoutSelection,
-} from "@/lib/booking-checkout-state";
-import type { CreateBookingRequest } from "@/types/booking";
+import type { CreateBookingPayload, CreateBookingRequest } from "@/types/booking";
 
-export type StartCheckoutInput = {
-  selection: CheckoutSelection;
-  request: CreateBookingRequest;
+export type StartCheckoutFromIntentInput = {
+  quoteToken: string;
+  request: CreateBookingPayload;
+  idempotencyKey: string;
 };
 
-export async function startCheckout({
-  selection,
+export async function startCheckoutFromIntent({
+  quoteToken,
   request,
-}: StartCheckoutInput): Promise<{ reservationNumber: string }> {
-  const idempotencyKey = getOrCreateIdempotencyKey(selection);
-  const stored = loadCheckoutAttempt(selection);
-  let reservationNumber = stored?.reservationNumber;
-
-  if (reservationNumber) {
-    const existing = await fetchBooking(reservationNumber);
-    if (isTerminalBookingStatus(existing.status)) {
-      clearCheckoutAttempt(selection);
-      reservationNumber = undefined;
-    } else if (existing.status === "PAYMENT_PENDING") {
-      reservationNumber = existing.reservationNumber;
-      persistReservationNumber(selection, reservationNumber);
-    } else {
-      reservationNumber = undefined;
-    }
-  }
-
-  if (!reservationNumber) {
-    const created = await createBooking(request, idempotencyKey);
-    reservationNumber = created.reservationNumber;
-    persistReservationNumber(selection, reservationNumber);
-  }
-
-  const session = await createPaymentSession(reservationNumber);
+  idempotencyKey,
+}: StartCheckoutFromIntentInput): Promise<{ reservationNumber: string }> {
+  const created = await createBooking(
+    { ...request, quoteToken },
+    idempotencyKey,
+  );
+  const session = await createPaymentSession(created.reservationNumber);
   await openCashfreeCheckout(session);
-  return { reservationNumber };
+  return { reservationNumber: created.reservationNumber };
 }
 
 export function mapCheckoutError(error: unknown): {
@@ -62,6 +36,8 @@ export function mapCheckoutError(error: unknown): {
       error.statusCode === 409 &&
       (error.message.includes("no longer") ||
         error.message.includes("search again") ||
+        error.message.includes("refresh") ||
+        error.message.includes("quote") ||
         error.message.includes("Only ") ||
         error.message.includes("No inventory"));
     return {

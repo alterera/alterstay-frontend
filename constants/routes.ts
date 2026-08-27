@@ -27,7 +27,11 @@ export const ROUTES = {
   },
   search: "/search",
   propertyDetail: (slug: string) => `/properties/${slug}`,
+  checkout: (slug: string) => `/properties/${slug}/checkout`,
+  checkoutLogin: (slug: string) => `/properties/${slug}/checkout/login`,
+  /** @deprecated redirects to checkout */
   bookingSummary: (slug: string) => `/properties/${slug}/book`,
+  /** @deprecated redirects to checkout login */
   bookingLogin: (slug: string) => `/properties/${slug}/book/login`,
   admin: {
     root: "/admin",

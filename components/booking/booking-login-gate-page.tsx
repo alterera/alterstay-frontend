@@ -9,7 +9,7 @@ import { Container } from "@/components/common/container";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
-import { buildBookingSummaryUrl } from "@/lib/booking-url";
+import { buildCheckoutUrl } from "@/lib/booking-url";
 import { buildPropertyUrl } from "@/lib/property-url";
 import { parseSearchParams } from "@/lib/search-params";
 import type { SelectedRoomPlan } from "@/types/property-detail";
@@ -43,8 +43,8 @@ export function BookingLoginGatePage({ slug }: BookingLoginGatePageProps) {
   }, [searchParams]);
 
   const summaryUrl = selectedPlan
-    ? buildBookingSummaryUrl(slug, search, selectedPlan)
-    : `/properties/${slug}/book?${searchParams.toString()}`;
+    ? buildCheckoutUrl(slug, search, selectedPlan)
+    : `/properties/${slug}/checkout?${searchParams.toString()}`;
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {

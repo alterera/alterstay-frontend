@@ -1,21 +1,34 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  clearCheckoutAttempt,
-  getOrCreateIdempotencyKey,
-  loadCheckoutAttempt,
-  persistReservationNumber,
-  saveCheckoutAttempt,
-  type CheckoutSelection,
+  clearCheckoutSession,
+  getOrCreateCheckoutIdempotencyKey,
+  loadCheckoutSession,
+  saveCheckoutSession,
 } from "@/lib/booking-checkout-state";
+import type { QuoteSelectionInput } from "@/types/quote";
 
-const selection: CheckoutSelection = {
-  slug: "hotel-alpha",
-  checkIn: "2026-11-17",
-  checkOut: "2026-11-19",
+const selection: QuoteSelectionInput = {
+  propertySlug: "hotel-alpha",
   roomTypeId: "room-1",
   ratePlanId: "rate-1",
-  userId: "user-1",
+  checkIn: "2026-11-17",
+  checkOut: "2026-11-19",
+  rooms: 1,
+  adults: 2,
+};
+
+const quote = {
+  subtotal: 10000,
+  taxAmount: 1800,
+  discountAmount: 0,
+  totalAmount: 11800,
+  currency: "INR",
+  nights: 2,
+  rooms: 1,
+  available: true,
+  remainingRooms: 2,
+  expiresAt: "2026-11-17T12:00:00.000Z",
 };
 
 describe("booking-checkout-state", () => {
@@ -29,41 +42,47 @@ describe("booking-checkout-state", () => {
     });
   });
 
+  it("stores and loads quote checkout sessions", () => {
+    saveCheckoutSession(selection, {
+      quoteToken: "quote-1",
+      expiresAt: "2026-11-17T12:00:00.000Z",
+      quote,
+    });
+    expect(loadCheckoutSession(selection)).toEqual({
+      quoteToken: "quote-1",
+      expiresAt: "2026-11-17T12:00:00.000Z",
+      quote,
+    });
+  });
+
   it("reuses the same idempotency key for the same selection", () => {
-    expect(getOrCreateIdempotencyKey(selection)).toBe("key-1");
-    expect(getOrCreateIdempotencyKey(selection)).toBe("key-1");
-  });
-
-  it("persists reservationNumber without clearing the idempotency key", () => {
-    getOrCreateIdempotencyKey(selection);
-    persistReservationNumber(selection, "ALTSTAY-1");
-    expect(loadCheckoutAttempt(selection)).toEqual({
+    saveCheckoutSession(selection, {
+      quoteToken: "quote-1",
+      expiresAt: "2026-11-17T12:00:00.000Z",
+      quote,
       idempotencyKey: "key-1",
-      reservationNumber: "ALTSTAY-1",
     });
-  });
-
-  it("does not clear state when simulating a redirect handoff", () => {
-    saveCheckoutAttempt(selection, {
-      idempotencyKey: "key-1",
-      reservationNumber: "ALTSTAY-1",
-    });
-    expect(loadCheckoutAttempt(selection)?.reservationNumber).toBe("ALTSTAY-1");
+    expect(getOrCreateCheckoutIdempotencyKey(selection)).toBe("key-1");
+    expect(getOrCreateCheckoutIdempotencyKey(selection)).toBe("key-1");
   });
 
   it("clears only when explicitly requested", () => {
-    persistReservationNumber(selection, "ALTSTAY-1");
-    clearCheckoutAttempt(selection);
-    expect(loadCheckoutAttempt(selection)).toBeNull();
+    saveCheckoutSession(selection, {
+      quoteToken: "quote-1",
+      expiresAt: "2026-11-17T12:00:00.000Z",
+      quote,
+    });
+    clearCheckoutSession(selection);
+    expect(loadCheckoutSession(selection)).toBeNull();
   });
 
   it("uses a different storage key for a different selection", () => {
-    const first = getOrCreateIdempotencyKey(selection);
-    const second = getOrCreateIdempotencyKey({
-      ...selection,
-      roomTypeId: "room-2",
+    saveCheckoutSession(selection, {
+      quoteToken: "quote-1",
+      expiresAt: "2026-11-17T12:00:00.000Z",
+      quote,
     });
-    expect(first).toBe("key-1");
-    expect(second).toBe("key-2");
+    const other = { ...selection, roomTypeId: "room-2" };
+    expect(loadCheckoutSession(other)).toBeNull();
   });
 });

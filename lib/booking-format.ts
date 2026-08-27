@@ -3,6 +3,9 @@ import { format, parseISO } from "date-fns";
 import { formatCurrency } from "@/lib/format";
 import type { BookingResponse } from "@/types/booking";
 
+/** Matches backend PAYMENT_SESSION_MIN_HOLD_REMAINING_SECONDS default (16 min). */
+export const PAYMENT_MIN_HOLD_REMAINING_MS = 16 * 60 * 1000;
+
 export function formatBookedOn(createdAt: string): string {
   return format(parseISO(createdAt), "dd-MM-yyyy");
 }
@@ -25,6 +28,38 @@ export function bookingNeedsPayment(booking: BookingResponse): boolean {
   return (
     booking.status === "PAYMENT_PENDING" || booking.status === "PENDING"
   );
+}
+
+export function getHoldRemainingMs(holdExpiresAt: string | null): number | null {
+  if (!holdExpiresAt) return null;
+  return new Date(holdExpiresAt).getTime() - Date.now();
+}
+
+export function formatHoldCountdown(remainingMs: number): string {
+  const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min}:${String(sec).padStart(2, "0")}`;
+}
+
+export function canPayWithHoldRemaining(holdExpiresAt: string | null): boolean {
+  const remaining = getHoldRemainingMs(holdExpiresAt);
+  return (
+    remaining !== null && remaining > PAYMENT_MIN_HOLD_REMAINING_MS
+  );
+}
+
+export function buildRebookUrl(booking: BookingResponse): string {
+  const item = booking.items[0];
+  const params = new URLSearchParams({
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+  });
+  if (item) {
+    params.set("roomTypeId", item.roomTypeId);
+    params.set("ratePlanId", item.ratePlanId);
+  }
+  return `/properties/${encodeURIComponent(booking.property.slug)}/checkout?${params.toString()}`;
 }
 
 export function getRefundStatusLabel(booking: BookingResponse): string | null {
