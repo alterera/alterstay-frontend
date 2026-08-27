@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authConfig } from "@/config/auth";
@@ -14,7 +13,6 @@ import { LegalAgreementText } from "./legal-agreement-text";
 export type PhoneLoginFormValues = {
   countryCode: string;
   phone: string;
-  sendWhatsappOtp: boolean;
 };
 
 type PhoneLoginFormProps = {
@@ -42,12 +40,10 @@ export function PhoneLoginForm({
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [sendWhatsappOtp, setSendWhatsappOtp] = useState(true);
 
   const values: PhoneLoginFormValues = {
     countryCode: authConfig.countryCode,
     phone,
-    sendWhatsappOtp,
   };
 
   const isValidPhone = phone.length === 10;
@@ -83,7 +79,7 @@ export function PhoneLoginForm({
           </h2>
           <p className="text-sm text-muted-foreground">
             {step === "otp"
-              ? `We sent a code to ${authConfig.countryCode} ${phone}`
+              ? `We sent a code on WhatsApp to ${authConfig.countryCode} ${phone}`
               : step === "password"
                 ? `Enter your password for ${authConfig.countryCode} ${phone}`
                 : authConfig.welcomeSubtitle}
@@ -117,25 +113,14 @@ export function PhoneLoginForm({
                     onChange={(event) =>
                       setPhone(sanitizePhone(event.target.value))
                     }
-                    className="h-11 flex-1 border-0 rounded-none text-base shadow-none focus-visible:ring-0 md:text-base"
+                    className="h-11 flex-1 rounded-none border-0 text-base shadow-none focus-visible:ring-0 md:text-base"
                   />
                 </div>
               </div>
 
-              <Label
-                htmlFor="auth-whatsapp-otp"
-                className="flex w-fit cursor-pointer items-center gap-2.5 text-sm text-foreground"
-              >
-                <Checkbox
-                  id="auth-whatsapp-otp"
-                  checked={sendWhatsappOtp}
-                  onCheckedChange={(checked) =>
-                    setSendWhatsappOtp(checked === true)
-                  }
-                  className="rounded-sm"
-                />
-                {authConfig.whatsappOtpLabel}
-              </Label>
+              <p className="text-xs text-muted-foreground">
+                {authConfig.whatsappOtpHint}
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -224,7 +209,7 @@ export function PhoneLoginForm({
                     onChange={(event) =>
                       setPhone(sanitizePhone(event.target.value))
                     }
-                    className="h-11 flex-1 border-0 rounded-none text-base shadow-none focus-visible:ring-0 md:text-base"
+                    className="h-11 flex-1 rounded-none border-0 text-base shadow-none focus-visible:ring-0 md:text-base"
                   />
                 </div>
               </div>

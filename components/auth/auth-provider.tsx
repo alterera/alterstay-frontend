@@ -34,7 +34,6 @@ type AuthContextValue = {
   requestPhoneOtp: (input: {
     phone: string;
     countryCode?: string;
-    sendWhatsappOtp?: boolean;
   }) => Promise<{ debugOtp?: string }>;
   verifyPhoneOtp: (input: {
     phone: string;

@@ -4,6 +4,7 @@ import type {
   AuthUser,
   RequestOtpResponse,
 } from "@/types/auth";
+import { authConfig } from "@/config/auth";
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth-storage";
 
 /** Refresh if the access token expires within this window. */
@@ -100,14 +101,12 @@ async function apiFetch<T>(
 export async function requestOtp(input: {
   phone: string;
   countryCode?: string;
-  sendWhatsappOtp?: boolean;
 }) {
   return apiFetch<RequestOtpResponse>("/auth/otp/request", {
     method: "POST",
     body: JSON.stringify({
       phone: input.phone,
-      countryCode: input.countryCode,
-      sendWhatsappOtp: input.sendWhatsappOtp,
+      countryCode: input.countryCode ?? authConfig.countryCode,
     }),
   });
 }
@@ -121,7 +120,7 @@ export async function verifyOtp(input: {
     method: "POST",
     body: JSON.stringify({
       phone: input.phone,
-      countryCode: input.countryCode,
+      countryCode: input.countryCode ?? authConfig.countryCode,
       otp: input.otp,
     }),
   });
@@ -138,7 +137,7 @@ export async function loginWithPassword(input: {
     method: "POST",
     body: JSON.stringify({
       phone: input.phone,
-      countryCode: input.countryCode,
+      countryCode: input.countryCode ?? authConfig.countryCode,
       password: input.password,
     }),
   });
@@ -215,6 +214,24 @@ export async function fetchCurrentUser(): Promise<AuthUser> {
   }
 
   return response.json() as Promise<AuthUser>;
+}
+
+export async function updateProfile(
+  data: Partial<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    gender: string;
+    dateOfBirth: string;
+    cityOfResidence: string;
+    password: string;
+  }>,
+): Promise<AuthUser> {
+  return apiFetch<AuthUser>("/auth/me", {
+    method: "PATCH",
+    auth: true,
+    body: JSON.stringify(data),
+  });
 }
 
 export { resolveApiBase as getApiBase };

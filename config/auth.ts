@@ -13,7 +13,8 @@ export const authConfig = {
   welcomeSubtitle: "Please enter your mobile number to login",
   getOtpLabel: "Get OTP",
   loginWithPasswordLabel: "Login with Password",
-  whatsappOtpLabel: "Send OTP on WhatsApp",
+  whatsappOtpLabel: "OTP will be sent using WhatsApp",
+  whatsappOtpHint: "OTP will be sent using WhatsApp",
   phonePlaceholder: "Enter mobile number",
   legalPrefix: "By Proceeding, you agree to our",
   benefitsPanel: {

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-import { ProfileSection } from "@/components/sections/profile";
+import { ProfileAccountPage } from "@/components/sections/profile";
 
 export const metadata: Metadata = {
   title: "My Profile",
-  description: "Manage your AlterStays account, support options, and legal settings.",
+  description: "Manage your AlterStays account and personal details.",
 };
 
 export default function ProfilePage() {
-  return <ProfileSection />;
+  return <ProfileAccountPage />;
 }

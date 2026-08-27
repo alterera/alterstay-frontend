@@ -6,6 +6,14 @@ export type AuthUser = {
   lastName: string | null;
   status: string;
   roles?: string[];
+  gender?: string | null;
+  dateOfBirth?: string | null;
+  cityOfResidence?: string | null;
+  referralCode?: string | null;
+  alterCashBalance?: number;
+  membershipTier?: string;
+  membershipExpiresAt?: string | null;
+  hasPassword?: boolean;
 };
 
 export type AuthTokens = {
