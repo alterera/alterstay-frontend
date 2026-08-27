@@ -1,6 +1,8 @@
 import { getAccessToken, getRefreshToken } from "@/lib/auth-storage";
 import { getApiBase, refreshSession } from "@/lib/auth-api";
 import type {
+  BookingListResponse,
+  BookingListTab,
   BookingResponse,
   CreateBookingRequest,
   PaymentSessionResponse,
@@ -87,4 +89,13 @@ export function fetchBooking(reference: string) {
   return bookingFetch<BookingResponse>(
     `/bookings/${encodeURIComponent(reference)}`,
   );
+}
+
+export function fetchMyBookings(tab: BookingListTab, page = 1, limit = 20) {
+  const params = new URLSearchParams({
+    tab,
+    page: String(page),
+    limit: String(limit),
+  });
+  return bookingFetch<BookingListResponse>(`/bookings/me?${params.toString()}`);
 }

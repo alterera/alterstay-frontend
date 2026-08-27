@@ -177,13 +177,6 @@ export const profileConfig = {
           href: ROUTES.blog,
           icon: BookOpenIcon,
         },
-        {
-          id: "logout",
-          label: "Logout",
-          icon: LogOutIcon,
-          tone: "danger",
-          action: "logout",
-        },
       ],
     },
   ] satisfies ProfileMenuGroup[],

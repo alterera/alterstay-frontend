@@ -13,7 +13,9 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
   const isPropertyPage = pathname.startsWith("/properties/");
   const isBookingFlow = /\/properties\/[^/]+\/book/.test(pathname);
   const hideFooter =
-    pathname.startsWith("/profile") || pathname.startsWith("/search");
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/search") ||
+    pathname.startsWith("/bookings");
   const hideMobileDock = isSearchPage || isPropertyPage || isBookingFlow;
 
   return (

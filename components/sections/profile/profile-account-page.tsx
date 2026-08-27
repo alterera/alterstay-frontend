@@ -141,7 +141,7 @@ function ProfileField({
 }
 
 export function ProfileAccountPage() {
-  const { user: sessionUser, isAuthenticated, isLoading, openLogin } = useAuth();
+  const { user: sessionUser, isAuthenticated, isLoading } = useAuth();
   const [profile, setProfile] = useState<AuthUser | null>(sessionUser);
   const [activeNav, setActiveNav] = useState<ProfileNavId>("profile");
   const [copied, setCopied] = useState(false);
@@ -151,6 +151,12 @@ export function ProfileAccountPage() {
     const data = await fetchCurrentUser();
     setProfile(data);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = "/";
+    }
+  }, [isAuthenticated, isLoading]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -174,26 +180,8 @@ export function ProfileAccountPage() {
     window.setTimeout(() => setCopied(false), 2000);
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-[50vh] bg-neutral-100" />
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <section className="bg-neutral-100 py-16">
-        <Container className="max-w-lg text-center">
-          <h1 className="text-2xl font-semibold">My Profile</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to manage your account details.
-          </p>
-          <Button className="mt-6" onClick={openLogin}>
-            Login
-          </Button>
-        </Container>
-      </section>
-    );
+  if (isLoading || !isAuthenticated) {
+    return <div className="min-h-[50vh] bg-neutral-100" />;
   }
 
   const fullName = displayName(profile);

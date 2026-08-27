@@ -1,7 +1,12 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
-import { ROUTES } from "@/constants/routes";
+import { ProfileAccountPage } from "@/components/sections/profile";
+
+export const metadata: Metadata = {
+  title: "Edit Profile",
+  description: "Update your AlterStays account details.",
+};
 
 export default function ProfileEditPage() {
-  redirect(ROUTES.profile);
+  return <ProfileAccountPage />;
 }

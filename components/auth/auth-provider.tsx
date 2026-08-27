@@ -127,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await logoutSession();
     clearTokens();
     setUser(null);
+    window.location.href = "/";
   }, []);
 
   const value = useMemo(

@@ -17,9 +17,8 @@ type ProfileSectionProps = {
   className?: string;
 };
 
-function displayName(firstName?: string | null, lastName?: string | null) {
-  const name = [firstName, lastName].filter(Boolean).join(" ").trim();
-  return name || profileConfig.guestNameFallback;
+function getSavedName(firstName?: string | null, lastName?: string | null) {
+  return [firstName, lastName].filter(Boolean).join(" ").trim();
 }
 
 function formatPhone(phone?: string | null) {
@@ -62,12 +61,20 @@ export function ProfileSection({ className }: ProfileSectionProps) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <p className="truncate text-base font-semibold sm:text-lg">
-                    Hi, {displayName(user?.firstName, user?.lastName)}
-                  </p>
-                  <p className="truncate text-sm text-white/80">
-                    {formatPhone(user?.phone)}
-                  </p>
+                  {getSavedName(user?.firstName, user?.lastName) ? (
+                    <>
+                      <p className="truncate text-base font-semibold sm:text-lg">
+                        {getSavedName(user?.firstName, user?.lastName)}
+                      </p>
+                      <p className="truncate text-sm text-white/80">
+                        {formatPhone(user?.phone)}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="truncate text-base font-semibold sm:text-lg">
+                      {formatPhone(user?.phone)}
+                    </p>
+                  )}
                 </div>
               </div>
               <Link
@@ -102,6 +109,16 @@ export function ProfileSection({ className }: ProfileSectionProps) {
             }
           }}
         />
+
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="mt-6 w-full rounded-xl border border-destructive/30 py-3 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/5"
+          >
+            Logout
+          </button>
+        ) : null}
       </Container>
     </section>
   );

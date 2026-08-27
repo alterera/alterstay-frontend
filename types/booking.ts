@@ -75,6 +75,10 @@ export type BookingResponse = {
   property: {
     name: string;
     slug: string;
+    city?: string | null;
+    imageUrl?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   };
   checkIn: string;
   checkOut: string;
@@ -91,6 +95,17 @@ export type BookingResponse = {
   businessBooking: BusinessBookingInput | null;
   guests: BookingGuest[];
   items: BookingItem[];
+};
+
+export type BookingListTab = "ongoing" | "upcoming" | "cancelled";
+
+export type BookingListResponse = {
+  results: BookingResponse[];
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+  tab: BookingListTab | null;
 };
 
 export type PaymentSessionResponse = {
