@@ -44,7 +44,7 @@ export function PropertyBookingPanel({
 
   return (
     <aside className={cn("hidden lg:block lg:self-stretch", className)}>
-      <div className="sticky top-36 rounded-2xl border bg-white p-5 shadow-sm">
+      <div className="sticky top-36 rounded-md border bg-white p-5 shadow-sm">
         <div className="space-y-1">
           {selectedPlan ? (
             <>
@@ -132,7 +132,7 @@ export function PropertyBookingPanel({
           type="button"
           disabled={!selectedPlan || quoteLoading || !quoteAvailable}
           onClick={onBookNow}
-          className="mt-5 w-full rounded-full bg-brand text-brand-foreground hover:bg-brand/90"
+          className="mt-5 w-full rounded-md bg-brand text-white hover:bg-brand/90 cursor-pointer"
         >
           {quoteLoading
             ? "Checking availability…"

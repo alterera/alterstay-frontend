@@ -171,10 +171,10 @@ export function HeroSearchForm({
                 : "h-12 w-full gap-2 rounded-full px-6 text-sm font-semibold sm:h-14 lg:ml-2 lg:w-auto lg:min-w-35",
           )}
         >
-          <SearchIcon className="size-4" />
+          <SearchIcon className="size-4 text-white" />
           <span
             className={cn(
-              "overflow-hidden text-sm font-semibold whitespace-nowrap",
+              "overflow-hidden text-sm text-white font-semibold whitespace-nowrap",
               morph && MORPH_TRANSITION,
               compact ? "max-w-0 opacity-0" : "max-w-24 opacity-100",
             )}

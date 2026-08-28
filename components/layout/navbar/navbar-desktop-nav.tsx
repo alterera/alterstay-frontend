@@ -7,6 +7,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { mainNavigation } from "@/config/navigation";
 import { profileConfig } from "@/config/profile";
 import { useAuth } from "@/components/auth/auth-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -22,18 +23,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import type { AuthUser } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
-/**
- * Overrides muted hover/open backgrounds from `navigationMenuTriggerStyle`
- * (`hover:bg-muted`, `data-open:hover:bg-muted`, `data-popup-open:hover:bg-muted`, etc.).
- * Plain `hover:bg-transparent` alone is not enough — those compound selectors win.
- */
 const navLinkClass =
-  "rounded-none bg-transparent text-sm text-black/70 hover:bg-transparent hover:text-black focus:bg-transparent focus:text-black data-open:bg-transparent data-open:text-black data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent";
+  "rounded-none bg-transparent text-sm text-black/70 transition-colors hover:bg-transparent hover:text-black focus:bg-transparent focus:text-black data-open:bg-transparent data-open:text-black data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent";
+
+const dropdownTriggerClass = cn(
+  navLinkClass,
+  "hover:text-brand data-open:text-brand data-popup-open:text-brand",
+);
 
 const dropdownItemClass =
-  "flex flex-col items-start gap-0.5 rounded-none p-3 text-left hover:bg-transparent focus:bg-transparent focus-visible:ring-0 data-active:bg-transparent data-active:hover:bg-transparent data-active:focus:bg-transparent";
+  "flex flex-col items-start gap-0.5 rounded-lg p-3 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus-visible:ring-0 data-active:bg-muted/60 data-active:hover:bg-muted/60";
+
+function getUserInitials(user: AuthUser): string {
+  const first = user.firstName?.trim()?.[0] ?? "";
+  const last = user.lastName?.trim()?.[0] ?? "";
+  if (first || last) return `${first}${last}`.toUpperCase();
+  return user.phone.replace(/\D/g, "").slice(-2) || "?";
+}
 
 export function NavbarDesktopNav() {
   return (
@@ -44,7 +53,11 @@ export function NavbarDesktopNav() {
             return (
               <NavigationMenuItem key={item.href}>
                 <NavigationMenuLink
-                  className={cn(navigationMenuTriggerStyle(), navLinkClass)}
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    navLinkClass,
+                    "hover:text-brand",
+                  )}
                   render={<Link href={item.href} />}
                 >
                   {item.label}
@@ -55,7 +68,7 @@ export function NavbarDesktopNav() {
 
           return (
             <NavigationMenuItem key={item.label}>
-              <NavigationMenuTrigger className={navLinkClass}>
+              <NavigationMenuTrigger className={dropdownTriggerClass}>
                 {item.label}
               </NavigationMenuTrigger>
               <NavigationMenuContent>
@@ -66,7 +79,7 @@ export function NavbarDesktopNav() {
                         className={dropdownItemClass}
                         render={<Link href={subItem.href} />}
                       >
-                        <span className="text-sm font-medium text-foreground">
+                        <span className="text-sm font-medium text-foreground transition-colors group-hover:text-brand">
                           {subItem.label}
                         </span>
                         {subItem.description ? (
@@ -87,8 +100,11 @@ export function NavbarDesktopNav() {
   );
 }
 
+const accountButtonClass =
+  "rounded-sm bg-[#ec1846] px-4 text-xs font-medium text-white hover:bg-brand/90";
+
 export function NavbarLoginButton({ className }: { className?: string }) {
-  const { isAuthenticated, isLoading, openLogin, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, openLogin, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
   if (isLoading) {
@@ -107,16 +123,16 @@ export function NavbarLoginButton({ className }: { className?: string }) {
       <Button
         type="button"
         size="lg"
+        variant="default"
         onClick={openLogin}
-        className={cn(
-          "rounded-sm bg-[#ec1846] px-4 text-xs text-white backdrop-blur-sm hover:bg-[#ec1846]/90",
-          className,
-        )}
+        className={cn(accountButtonClass, className)}
       >
         Login
       </Button>
     );
   }
+
+  const initials = user ? getUserInitials(user) : "?";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -125,11 +141,18 @@ export function NavbarLoginButton({ className }: { className?: string }) {
           <Button
             type="button"
             size="lg"
+            variant="outline"
             className={cn(
-              "rounded-sm bg-[#ec1846] px-4 text-xs text-white backdrop-blur-sm hover:bg-[#ec1846]/90",
+              accountButtonClass,
+              "gap-2",
               className,
             )}
           >
+            <Avatar size="sm" className="size-6">
+              <AvatarFallback className="bg-white/90 text-[10px] font-semibold text-brand">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
             My Account
             <ChevronDownIcon className="size-3.5 opacity-70" aria-hidden="true" />
           </Button>

@@ -22,9 +22,9 @@ const VISIBLE_AMENITIES = 6;
 function AmenityRow({ amenity }: { amenity: PropertyAmenityDetail }) {
   const Icon = amenityIcon(amenity.name, amenity.icon);
   return (
-    <div className="flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-sm shadow-sm">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-        <Icon className="size-4" strokeWidth={1.75} />
+    <div className="flex items-center gap-3 text-sm">
+      <span className="flex size-9 shrink-0 items-center justify-center text-brand">
+        <Icon className="size-4"/>
       </span>
       <span className="font-medium">{amenity.name}</span>
     </div>

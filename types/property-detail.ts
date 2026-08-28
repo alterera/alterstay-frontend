@@ -88,6 +88,15 @@ export type PropertyRatingBreakdown = {
   hotelSurroundings: number;
 };
 
+export type PropertyGuestReview = {
+  id: string;
+  authorName: string;
+  authorInitials: string;
+  rating: number;
+  date: string;
+  comment: string;
+};
+
 export type PropertyRestriction = {
   id: string;
   label: string;

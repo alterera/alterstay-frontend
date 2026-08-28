@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { authConfig } from "@/config/auth";
 
-import { LoginBenefitsPanel } from "./login-benefits-panel";
+import { LoginImagePanel } from "./login-image-panel";
 import { PhoneLoginForm, type PhoneLoginFormValues } from "./phone-login-form";
 
 type DesktopLoginDialogProps = {
@@ -75,16 +75,16 @@ export function DesktopLoginDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="max-h-[90vh] w-full max-w-[calc(100%-2rem)] overflow-hidden rounded-2xl p-0 sm:max-w-3xl lg:max-w-4xl"
+        className="max-h-[90vh] w-full max-w-[calc(100%-2rem)] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-3xl lg:max-w-5xl"
       >
         <DialogHeader className="sr-only">
           <DialogTitle>{authConfig.welcomeTitle}</DialogTitle>
           <DialogDescription>{authConfig.welcomeSubtitle}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid min-h-[480px] md:grid-cols-2">
-          <LoginBenefitsPanel className="hidden md:flex" />
-          <div className="flex flex-col p-6 sm:p-8">
+        <div className="grid min-h-[500px] md:grid-cols-[1.15fr_0.85fr]">
+          <LoginImagePanel />
+          <div className="flex flex-col justify-center bg-background p-6 sm:p-8">
             <PhoneLoginForm
               loading={loading}
               error={error}

@@ -99,7 +99,7 @@ export function PhoneLoginForm({
                 <Label htmlFor="auth-phone" className="text-sm text-foreground">
                   Mobile number
                 </Label>
-                <div className="flex overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50">
+                <div className="flex overflow-hidden rounded-md border border-input bg-background focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/50">
                   <span className="flex items-center border-r border-input bg-muted/40 px-3 text-sm font-medium text-foreground">
                     {authConfig.countryCode}
                   </span>
@@ -129,7 +129,7 @@ export function PhoneLoginForm({
                 size="lg"
                 disabled={!isValidPhone || loading}
                 onClick={() => void handleGetOtp()}
-                className="h-11 w-full rounded-xl bg-brand text-sm font-semibold text-brand-foreground hover:bg-brand/90"
+                className="h-11 w-full rounded-md bg-brand text-sm font-semibold text-white hover:bg-brand/90"
               >
                 {loading ? "Sending..." : authConfig.getOtpLabel}
               </Button>
@@ -161,7 +161,7 @@ export function PhoneLoginForm({
                 onChange={(event) =>
                   setOtp(event.target.value.replace(/\D/g, "").slice(0, 8))
                 }
-                className="h-11 rounded-xl text-base tracking-widest"
+                className="h-11 rounded-md text-base tracking-widest"
               />
             </div>
 
@@ -171,7 +171,7 @@ export function PhoneLoginForm({
                 size="lg"
                 disabled={!isValidOtp || loading}
                 onClick={() => void handleVerifyOtp()}
-                className="h-11 w-full rounded-xl bg-brand text-sm font-semibold text-brand-foreground hover:bg-brand/90"
+                className="h-11 w-full rounded-md bg-brand text-sm font-semibold text-white hover:bg-brand/90"
               >
                 {loading ? "Verifying..." : "Verify & Login"}
               </Button>

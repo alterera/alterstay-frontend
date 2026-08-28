@@ -1,5 +1,6 @@
 import type {
   PropertyDetail,
+  PropertyGuestReview,
   PropertyRatingBreakdown,
   PropertyRestriction,
 } from "@/types/property-detail";
@@ -69,6 +70,61 @@ export function buildRatingBreakdown(
     staffBehavior: clampRating(base + 0.4),
     hotelSurroundings: clampRating(base - 0.3),
   };
+}
+
+export function getRatingLabel(rating: number): string {
+  if (rating >= 4.5) return "Excellent";
+  if (rating >= 4.0) return "Very Good";
+  if (rating >= 3.5) return "Good";
+  if (rating >= 3.0) return "Average";
+  return "Below Average";
+}
+
+export function getMockReviewCount(guestRating: number | null): number {
+  const base = guestRating ?? 4;
+  return Math.round(380 + base * 48);
+}
+
+const MOCK_REVIEWS: Omit<PropertyGuestReview, "id" | "rating">[] = [
+  {
+    authorName: "Priya Sharma",
+    authorInitials: "PS",
+    date: "2026-07-14",
+    comment:
+      "Smooth check-in and a spotless room. Staff were attentive without being intrusive — exactly what we wanted for a weekend getaway.",
+  },
+  {
+    authorName: "Rahul Mehta",
+    authorInitials: "RM",
+    date: "2026-06-28",
+    comment:
+      "Great location and comfortable beds. Breakfast spread was better than expected. Would happily book again for business trips.",
+  },
+  {
+    authorName: "Ananya Iyer",
+    authorInitials: "AI",
+    date: "2026-06-02",
+    comment:
+      "Loved the ambience and the view from our room. Housekeeping was prompt and the front desk helped us with early luggage storage.",
+  },
+  {
+    authorName: "Vikram Singh",
+    authorInitials: "VS",
+    date: "2026-05-19",
+    comment:
+      "Solid value for money. Room was quiet, Wi‑Fi was reliable, and checkout was quick. Minor wait at the restaurant during peak hours.",
+  },
+];
+
+export function buildGuestReviews(
+  guestRating: number | null,
+): PropertyGuestReview[] {
+  const base = guestRating ?? 4;
+  return MOCK_REVIEWS.map((review, index) => ({
+    ...review,
+    id: `review-${index + 1}`,
+    rating: clampRating(base + (index % 2 === 0 ? 0.1 : -0.2)),
+  }));
 }
 
 export function getPropertyRestrictions(): PropertyRestriction[] {

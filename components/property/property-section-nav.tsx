@@ -104,7 +104,7 @@ export function PropertySectionNav({
 
       <div
         ref={scrollerRef}
-        className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-1 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {PROPERTY_SECTIONS.map((section) => {
           const isActive = activeId === section.id;
@@ -123,10 +123,10 @@ export function PropertySectionNav({
                 onNavigate(section.id);
               }}
               className={cn(
-                "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                "shrink-0 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-brand text-brand-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  ? "border-brand text-brand"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               {section.label}
