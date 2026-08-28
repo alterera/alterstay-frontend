@@ -90,7 +90,7 @@ function ProfileField({
   return (
     <div className="space-y-1.5">
       <Label className="text-xs text-muted-foreground">{label}</Label>
-      <div className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2.5">
+      <div className="flex items-center gap-2 rounded-md border bg-white px-3 py-2.5">
         {editing ? (
           <Input
             type={type}
@@ -181,14 +181,14 @@ export function ProfileAccountPage() {
   }
 
   if (isLoading || !isAuthenticated) {
-    return <div className="min-h-[50vh] bg-neutral-100" />;
+    return <div className="min-h-[50vh] bg-background" />;
   }
 
   const fullName = displayName(profile);
 
   return (
-    <section className="bg-neutral-100 pb-10 pt-0 lg:pt-4">
-      <div className="bg-linear-to-r from-[#4c1d95] via-[#6d28d9] to-[#7c3aed] px-4 py-5 text-white sm:px-6">
+    <section className="bg-background pb-10 pt-0">
+      <div className="bg-gradient-premium px-4 py-5 text-white sm:px-6">
         <Container className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/15">
@@ -216,11 +216,11 @@ export function ProfileAccountPage() {
 
           <Link
             href={ROUTES.alterCash}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#2e1065]/80 px-3 py-2 text-xs font-medium sm:text-sm"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-dark/80 px-3 py-2 text-xs font-medium sm:text-sm"
           >
-            <WalletIcon className="size-4 text-amber-300" />
+            <WalletIcon className="size-4 text-premium" />
             <span>
-              Alter Cash : {(profile?.alterCashBalance ?? 0).toLocaleString("en-IN")}
+              Coins : {(profile?.alterCashBalance ?? 0).toLocaleString("en-IN")}
             </span>
             <span aria-hidden>›</span>
           </Link>
@@ -234,7 +234,7 @@ export function ProfileAccountPage() {
 
         <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="space-y-4">
-            <div className="rounded-2xl border bg-white p-4 shadow-sm">
+            <div className="rounded-md border bg-white p-4">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <BadgeCheckIcon className="size-5" />
@@ -250,7 +250,7 @@ export function ProfileAccountPage() {
               </div>
             </div>
 
-            <nav className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+            <nav className="overflow-hidden rounded-md border bg-white">
               {NAV_ITEMS.map((item) => {
                 const active = activeNav === item.id;
                 const className = cn(
@@ -280,7 +280,7 @@ export function ProfileAccountPage() {
             </nav>
           </aside>
 
-          <div className="rounded-2xl border bg-white p-5 shadow-sm sm:p-6">
+          <div className="rounded-md border bg-white p-5 shadow-sm sm:p-6">
             {activeNav === "profile" ? (
               <div className="space-y-8">
                 <h2 className="text-xl font-semibold">My Profile</h2>

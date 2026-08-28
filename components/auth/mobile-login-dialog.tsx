@@ -86,7 +86,7 @@ export function MobileLoginDialog({
           <DialogDescription>{authConfig.welcomeSubtitle}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex h-[20%] min-h-28 items-center justify-center bg-brand px-6">
+        <div className="flex h-[20%] min-h-28 items-center justify-center bg-gradient-hero px-6">
           <Logo size="lg" />
         </div>
 

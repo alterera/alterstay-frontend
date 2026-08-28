@@ -50,7 +50,7 @@ export function BookingHotelCard({
           <div className="flex flex-wrap items-center gap-2">
             {property.guestRating ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-semibold text-foreground">
-                <StarIcon className="size-3 fill-amber-400 text-amber-400" />
+                <StarIcon className="size-3 fill-premium text-premium" />
                 {property.guestRating.toFixed(1)}
               </span>
             ) : null}

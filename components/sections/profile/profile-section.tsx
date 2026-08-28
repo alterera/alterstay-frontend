@@ -46,7 +46,7 @@ export function ProfileSection({ className }: ProfileSectionProps) {
           {title}
         </h1>
 
-        <div className="mb-8 rounded-2xl bg-linear-to-r from-[#4c1d95] via-[#6d28d9] to-[#7c3aed] p-4 text-white shadow-sm sm:p-5">
+        <div className="mb-8 rounded-2xl bg-gradient-premium p-4 text-white shadow-sm sm:p-5">
           {isLoading ? (
             <div className="h-12 animate-pulse rounded-xl bg-white/10" />
           ) : isAuthenticated ? (
@@ -93,7 +93,7 @@ export function ProfileSection({ className }: ProfileSectionProps) {
               <Button
                 type="button"
                 onClick={openLogin}
-                className="shrink-0 rounded-xl bg-white px-5 text-sm font-semibold text-[#4c1d95] hover:bg-white/90"
+                className="shrink-0 rounded-xl bg-white px-5 text-sm font-semibold text-brand-dark hover:bg-white/90"
               >
                 {welcomeBanner.loginLabel}
               </Button>

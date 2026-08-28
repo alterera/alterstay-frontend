@@ -22,7 +22,7 @@ export function FooterSection5({ className }: FooterSection5Props) {
   return (
     <footer
       className={cn(
-        "relative w-full overflow-hidden bg-background pb-20 antialiased lg:pb-0",
+        "relative w-full overflow-hidden bg-background pb-15 antialiased lg:pb-0",
         className
       )}
     >
@@ -46,7 +46,7 @@ export function FooterSection5({ className }: FooterSection5Props) {
       </div>
 
       {/* Primary panel */}
-      <div className="relative z-10 min-h-[380px] w-full bg-[#033CCE]">
+      <div className="relative z-10 min-h-[380px] w-full bg-gradient-premium">
         <div className="pointer-events-none absolute inset-0 z-0">
           <FlutedGlass
             size={0.89}

@@ -38,7 +38,7 @@ function ReviewStars({ rating }: { rating: number }) {
           className={cn(
             "size-3.5",
             index < Math.round(rating)
-              ? "fill-amber-400 text-amber-400"
+              ? "fill-premium text-premium"
               : "fill-muted text-muted",
           )}
         />
@@ -73,7 +73,7 @@ export function PropertyRatingsSection({
             <span className="text-4xl font-bold tracking-tight">
               {rating.toFixed(1)}
             </span>
-            <StarIcon className="size-7 fill-amber-400 text-amber-400" />
+            <StarIcon className="size-7 fill-premium text-premium" />
           </div>
           <p className="mt-1 text-lg font-semibold text-foreground">
             {getRatingLabel(rating)}

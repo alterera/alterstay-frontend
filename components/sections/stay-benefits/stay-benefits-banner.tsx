@@ -12,7 +12,7 @@ export function StayBenefitsBanner({ className }: StayBenefitsBannerProps) {
   return (
     <section className={cn("bg-background py-6 sm:py-8 lg:py-10", className)}>
       <Container>
-        <div className="rounded-3xl bg-[#e31c3d] px-5 py-6 text-white sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+        <div className="rounded-3xl bg-gradient-hero px-5 py-6 text-white sm:px-6 sm:py-7 lg:px-8 lg:py-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
             <div className="flex flex-col gap-2 items-center lg:items-start">
               <h2 className="max-w-xs shrink-0 text-center text-2xl leading-tight font-semibold tracking-tight sm:text-3xl lg:text-left">
@@ -23,7 +23,7 @@ export function StayBenefitsBanner({ className }: StayBenefitsBannerProps) {
                 Consectetur hic aut rem reiciendis repellat dignissimos.
               </p>
             </div>
-            <ul className="grid w-full grid-cols-2 overflow-hidden rounded-2xl bg-[#ec1846] lg:max-w-3xl lg:grid-cols-4">
+            <ul className="grid w-full grid-cols-2 overflow-hidden rounded-2xl bg-brand-dark/35 lg:max-w-3xl lg:grid-cols-4">
               {benefits.map((benefit) => {
                 const Icon = benefit.icon;
                 return (

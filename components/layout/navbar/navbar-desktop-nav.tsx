@@ -27,7 +27,7 @@ import type { AuthUser } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
 const navLinkClass =
-  "rounded-none bg-transparent text-sm text-black/70 transition-colors hover:bg-transparent hover:text-black focus:bg-transparent focus:text-black data-open:bg-transparent data-open:text-black data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent";
+  "rounded-none bg-transparent text-sm text-muted-foreground transition-colors hover:bg-transparent hover:text-foreground focus:bg-transparent focus:text-foreground data-open:bg-transparent data-open:text-foreground data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent";
 
 const dropdownTriggerClass = cn(
   navLinkClass,
@@ -101,7 +101,7 @@ export function NavbarDesktopNav() {
 }
 
 const accountButtonClass =
-  "rounded-sm bg-[#ec1846] px-4 text-xs font-medium text-white hover:bg-brand/90";
+  "rounded-sm border border-brand bg-transparent px-4 text-xs font-medium text-brand shadow-none hover:bg-brand/5 hover:text-brand";
 
 export function NavbarLoginButton({ className }: { className?: string }) {
   const { user, isAuthenticated, isLoading, openLogin, logout } = useAuth();
@@ -123,7 +123,7 @@ export function NavbarLoginButton({ className }: { className?: string }) {
       <Button
         type="button"
         size="lg"
-        variant="default"
+        variant="outline"
         onClick={openLogin}
         className={cn(accountButtonClass, className)}
       >

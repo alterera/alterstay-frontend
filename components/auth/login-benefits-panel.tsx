@@ -20,7 +20,7 @@ export function LoginBenefitsPanel({ className }: LoginBenefitsPanelProps) {
   return (
     <div
       className={cn(
-        "relative flex h-full flex-col justify-between overflow-hidden bg-linear-to-br from-[#4c1d95] via-[#6d28d9] to-[#7c3aed] p-6 text-white sm:p-8",
+        "relative flex h-full flex-col justify-between overflow-hidden bg-gradient-premium p-6 text-white sm:p-8",
         className
       )}
     >

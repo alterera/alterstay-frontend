@@ -12,7 +12,7 @@ export function LoginImagePanel({ className }: LoginImagePanelProps) {
   return (
     <div
       className={cn(
-        "relative hidden min-h-full overflow-hidden bg-[#1a1410] md:block",
+        "relative hidden min-h-full overflow-hidden bg-brand-dark md:block",
         className,
       )}
     >

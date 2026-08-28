@@ -25,7 +25,7 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
             {Array.from({ length: property.starRating }).map((_, index) => (
               <StarIcon
                 key={index}
-                className="size-3 fill-amber-500 text-amber-500"
+                className="size-3 fill-premium text-premium"
               />
             ))}
           </span>

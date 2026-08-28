@@ -103,7 +103,7 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
             </p>
           ) : null}
           {tab === "pending" && holdRemainingMs !== null && holdRemainingMs > 0 ? (
-            <p className="text-sm font-medium text-amber-700">
+            <p className="text-sm font-medium text-coral">
               Complete payment in {formatHoldCountdown(holdRemainingMs)}
             </p>
           ) : null}
