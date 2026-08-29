@@ -17,7 +17,7 @@ export function LoginImagePanel({ className }: LoginImagePanelProps) {
       )}
     >
       <Image
-        src="/auth-image.webp"
+        src="/auth-hero.webp"
         alt="Discover premium stays with Alterstay"
         fill
         priority

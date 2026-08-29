@@ -75,14 +75,14 @@ export function DesktopLoginDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="max-h-[90vh] w-full max-w-[calc(100%-2rem)] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-3xl lg:max-w-5xl"
+        className="max-h-[90vh] w-full max-w-[calc(100%-2rem)] overflow-hidden rounded-2xl border-0 p-0 shadow-2xl sm:max-w-3xl lg:max-w-4xl"
       >
         <DialogHeader className="sr-only">
           <DialogTitle>{authConfig.welcomeTitle}</DialogTitle>
           <DialogDescription>{authConfig.welcomeSubtitle}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid min-h-[500px] md:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid min-h-[500px] md:grid-cols-[1.2fr_1fr]">
           <LoginImagePanel />
           <div className="flex flex-col justify-center bg-background p-6 sm:p-8">
             <PhoneLoginForm

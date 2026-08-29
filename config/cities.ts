@@ -21,7 +21,7 @@ export const citiesConfig: CitiesConfig = {
   title: "Popular Cities",
   allCities: {
     name: "All Cities",
-    href: ROUTES.search,
+    href: ROUTES.cities,
   },
   items: [
     {

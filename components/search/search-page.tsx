@@ -195,7 +195,7 @@ export function SearchPage() {
     filters.businessHotels;
 
   return (
-    <div className="bg-background pb-6 lg:pb-10">
+    <div className="bg-muted/30 pb-6 lg:pb-10">
       {/* Desktop search bar. It is pinned right under the navbar and keeps a
           constant height in the flow, so the bar itself can shrink and travel
           up into the navbar without ever moving the page content. */}

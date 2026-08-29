@@ -10,7 +10,7 @@ export const colors = {
   blush: "#FF5C7A",
   coral: "#FF8A65",
   teal: "#22C1A1",
-  background: "#F3F4F6",
+  background: "#FFFFFF",
   surface: "#FFFFFF",
 } as const;
 
