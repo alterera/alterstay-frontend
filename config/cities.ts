@@ -29,7 +29,7 @@ export const citiesConfig: CitiesConfig = {
       name: "Mumbai",
       href: `${ROUTES.search}?city=Mumbai`,
       image:
-        "https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?q=80&w=400&auto=format&fit=crop",
+        "/cities/mumbai.webp",
       imageAlt: "Mumbai city skyline",
     },
     {
@@ -37,7 +37,7 @@ export const citiesConfig: CitiesConfig = {
       name: "Delhi",
       href: `${ROUTES.search}?city=Delhi`,
       image:
-        "https://images.unsplash.com/photo-1587474260584-136574528ed5?q=80&w=400&auto=format&fit=crop",
+        "/cities/delhi.webp",
       imageAlt: "India Gate in Delhi",
     },
     {
@@ -45,7 +45,7 @@ export const citiesConfig: CitiesConfig = {
       name: "Bangalore",
       href: `${ROUTES.search}?city=Bangalore`,
       image:
-        "https://images.unsplash.com/photo-1596176530525-0288a0fef743?q=80&w=400&auto=format&fit=crop",
+        "/cities/banglore.webp",
       imageAlt: "Bangalore city view",
     },
     {
@@ -53,15 +53,15 @@ export const citiesConfig: CitiesConfig = {
       name: "Hyderabad",
       href: `${ROUTES.search}?city=Hyderabad`,
       image:
-        "https://images.unsplash.com/photo-1551161242-b5af797f732b?q=80&w=400&auto=format&fit=crop",
+        "/cities/hydrabad.webp",
       imageAlt: "Charminar in Hyderabad",
     },
     {
       id: "kolkata",
-      name: "Kolkata",
+      name: "Kolkata", 
       href: `${ROUTES.search}?city=Kolkata`,
       image:
-        "https://images.unsplash.com/photo-1558431382-27e303142255?q=80&w=400&auto=format&fit=crop",
+        "/cities/kolkata.webp",
       imageAlt: "Victoria Memorial in Kolkata",
     },
     {
@@ -69,7 +69,7 @@ export const citiesConfig: CitiesConfig = {
       name: "Pune",
       href: `${ROUTES.search}?city=Pune`,
       image:
-        "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=400&auto=format&fit=crop",
+        "/cities/pune.webp",
       imageAlt: "Hills near Pune",
     },
     {
@@ -77,7 +77,7 @@ export const citiesConfig: CitiesConfig = {
       name: "Lucknow",
       href: `${ROUTES.search}?city=Lucknow`,
       image:
-        "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=400&auto=format&fit=crop",
+        "/cities/lucknow.webp",
       imageAlt: "Historic architecture in Lucknow",
     },
   ],

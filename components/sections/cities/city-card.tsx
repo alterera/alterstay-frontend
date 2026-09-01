@@ -19,7 +19,7 @@ export function CityCard({ city, className }: CityCardProps) {
         className
       )}
     >
-      <span className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-[1.03] group-active:scale-[0.98] sm:rounded-2xl lg:rounded-3xl">
+      <span className="relative aspect-square w-full overflow-hidden bg-muted shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:shadow-md group-active:shadow-sm rounded-lg">
         <Image
           src={city.image}
           alt={city.imageAlt}
@@ -50,7 +50,7 @@ export function AllCitiesCard({ name, href, className }: AllCitiesCardProps) {
         className
       )}
     >
-      <span className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-neutral-900 shadow-sm ring-1 ring-black/10 transition-transform duration-200 group-hover:scale-[1.03] group-active:scale-[0.98] sm:rounded-2xl lg:rounded-3xl">
+      <span className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-900 shadow-sm ring-1 ring-black/10 transition-transform duration-200 group-hover:scale-[1.03] group-active:scale-[0.98] sm:rounded-2xl lg:rounded-3xl">
         <Building2Icon
           className="size-5 text-white sm:size-6 lg:size-8"
           strokeWidth={1.5}

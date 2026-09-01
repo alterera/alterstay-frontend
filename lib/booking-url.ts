@@ -62,9 +62,17 @@ export function consumePostLoginRedirect(): string | null {
 
 export type BookingBill = {
   roomPrice: number;
+  discount: number;
+  coinsApplied?: number;
   tax: number;
   toPay: number;
   currency: string;
+  membershipDiscountLabel?: string;
+  coinEarnPreview?: {
+    planCode: string;
+    earnPercent: number;
+    earnableAmount: number;
+  };
 };
 
 /** Server-aligned estimate: subtotal + 18% tax, no mock discounts or fees. */
@@ -73,6 +81,7 @@ export function estimateBillFromPlan(plan: SelectedRoomPlan): BookingBill {
   const tax = plan.estimatedTaxes ?? Math.round(roomPrice * 0.18);
   return {
     roomPrice,
+    discount: 0,
     tax,
     toPay: roomPrice + tax,
     currency: plan.currency,

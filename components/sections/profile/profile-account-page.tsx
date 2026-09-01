@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ROUTES } from "@/constants/routes";
 import { fetchCurrentUser, updateProfile } from "@/lib/auth-api";
+import { fetchMyMembership } from "@/lib/membership-api";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 
@@ -143,13 +144,22 @@ function ProfileField({
 export function ProfileAccountPage() {
   const { user: sessionUser, isAuthenticated, isLoading } = useAuth();
   const [profile, setProfile] = useState<AuthUser | null>(sessionUser);
+  const [membershipTier, setMembershipTier] = useState("Free");
+  const [membershipExpiresAt, setMembershipExpiresAt] = useState<string | null>(null);
   const [activeNav, setActiveNav] = useState<ProfileNavId>("profile");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadProfile = useCallback(async () => {
-    const data = await fetchCurrentUser();
+    const [data, membership] = await Promise.all([
+      fetchCurrentUser(),
+      fetchMyMembership().catch(() => null),
+    ]);
     setProfile(data);
+    if (membership) {
+      setMembershipTier(membership.tier);
+      setMembershipExpiresAt(membership.active?.expiresAt ?? null);
+    }
   }, []);
 
   useEffect(() => {
@@ -215,7 +225,7 @@ export function ProfileAccountPage() {
           </div>
 
           <Link
-            href={ROUTES.alterCash}
+            href={ROUTES.wallet}
             className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-dark/80 px-3 py-2 text-xs font-medium sm:text-sm"
           >
             <WalletIcon className="size-4 text-premium" />
@@ -241,11 +251,19 @@ export function ProfileAccountPage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">
-                    {profile?.membershipTier ?? "Alterstay Member"}
+                    {membershipTier}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Expires {formatMembershipExpiry(profile?.membershipExpiresAt)}
+                    {membershipExpiresAt
+                      ? `Expires ${formatMembershipExpiry(membershipExpiresAt)}`
+                      : "No active membership"}
                   </p>
+                  <Link
+                    href={ROUTES.membership}
+                    className="mt-2 inline-block text-xs font-medium text-brand underline"
+                  >
+                    {membershipExpiresAt ? "Renew or upgrade" : "Get membership"}
+                  </Link>
                 </div>
               </div>
             </div>

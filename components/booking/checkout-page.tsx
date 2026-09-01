@@ -69,6 +69,7 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
   const [isPaying, setIsPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<GuestFormFieldErrors>({});
+  const [coinsToRedeem, setCoinsToRedeem] = useState(0);
 
   const selectedPlan = useMemo<SelectedRoomPlan | null>(() => {
     if (!property || !ratePlanId || !roomTypeId) return null;
@@ -130,7 +131,12 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
     const selection: QuoteSelectionInput = quoteSelection;
 
     const stored = loadCheckoutSession(selection);
-    if (stored && new Date(stored.expiresAt).getTime() > Date.now()) {
+    const storedCoins = stored?.quote?.coinsRedeemed ?? 0;
+    if (
+      stored &&
+      new Date(stored.expiresAt).getTime() > Date.now() &&
+      storedCoins === coinsToRedeem
+    ) {
       setIntent({
         quoteToken: stored.quoteToken,
         expiresAt: stored.expiresAt,
@@ -158,7 +164,10 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
       setIntentLoading(true);
       setIntentError(null);
       try {
-        const next = await createBookingIntent(selection);
+        const next = await createBookingIntent({
+          ...selection,
+          coinsToRedeem: coinsToRedeem > 0 ? coinsToRedeem : undefined,
+        });
         if (!cancelled) {
           setIntent(next);
           saveCheckoutSession(selection, {
@@ -189,6 +198,7 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
     property,
     slug,
     selectedPlan?.ratePlanName,
+    coinsToRedeem,
   ]);
 
   if (loading) {
@@ -338,7 +348,18 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
             )}
           </div>
 
-          <BookingBillSummary bill={bill} className="lg:sticky lg:top-24" />
+          <BookingBillSummary
+            bill={bill}
+            className="lg:sticky lg:top-24"
+            showMembershipUpsell={
+              isAuthenticated && !bill.coinEarnPreview?.earnableAmount
+            }
+            coinsBalance={intent?.coinsBalance}
+            maxCoinsRedeemable={intent?.maxCoinsRedeemable}
+            coinsToRedeem={coinsToRedeem}
+            onCoinsToRedeemChange={setCoinsToRedeem}
+            coinsInputDisabled={intentLoading || !intent}
+          />
         </div>
       </Container>
 

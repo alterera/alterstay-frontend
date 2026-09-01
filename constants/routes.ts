@@ -6,7 +6,11 @@ export const ROUTES = {
   bookingResult: "/bookings/result",
   profile: "/profile",
   profileEdit: "/profile/edit",
-  alterCash: "/alter-cash",
+  wallet: "/wallet",
+  /** @deprecated Use wallet */
+  alterCash: "/wallet",
+  membership: "/membership",
+  membershipResult: "/membership/result",
   about: "/about",
   terms: "/terms",
   blog: "/blog",

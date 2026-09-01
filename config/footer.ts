@@ -14,7 +14,7 @@ export type PaymentLogo = {
 export const footerConfig = {
   tagline: "Discover stunning stays.\nBook with confidence.",
   description:
-    "AlterStays helps you discover and book stunning resorts and elegant hotels across India. Enjoy seamless booking, trusted payments, and expert support for every stay.",
+    "AlterStay helps you discover and book stunning resorts and elegant hotels across India. Enjoy seamless booking, trusted payments, and expert support for every stay.",
   linksSectionTitle: "Quick Links",
   links: [
     { label: "About Us", href: ROUTES.about },
@@ -33,5 +33,5 @@ export const footerConfig = {
     { id: "paytm", name: "Paytm", src: "/payment-logo/paytm.svg" },
   ] satisfies PaymentLogo[],
   copyright: (year: number) =>
-    `© ${year} AlterStays. All rights reserved.`,
+    `© ${year} Alterstay Corporation. All rights reserved.`,
 } as const;

@@ -6,6 +6,7 @@ import {
   WalletIcon,
 } from "lucide-react";
 
+
 export type StayBenefit = {
   id: string;
   label: string;
@@ -17,7 +18,7 @@ export const stayBenefitsConfig = {
   benefits: [
     {
       id: "save",
-      label: "Save up to 30% instantly",
+      label: "Earn up to 10% back in coins",
       icon: HandCoinsIcon,
     },
     {

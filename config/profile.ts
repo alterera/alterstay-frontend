@@ -113,8 +113,8 @@ export const profileConfig = {
         },
         {
           id: "alter-cash",
-          label: "My Alter Cash",
-          href: ROUTES.alterCash,
+          label: "My Coins",
+          href: ROUTES.wallet,
           icon: WalletIcon,
         },
         {
@@ -195,8 +195,8 @@ export const profileConfig = {
     },
     {
       id: "alter-cash",
-      label: "My Altercash",
-      href: ROUTES.alterCash,
+      label: "My Coins",
+      href: ROUTES.wallet,
       icon: WalletIcon,
     },
     {

@@ -103,10 +103,10 @@ export function AllCitiesPage() {
   }
 
   return (
-    <section className="bg-background pb-12 pt-6 lg:pt-10">
+    <section className="bg-background pb-12 pt-2 lg:pt-4">
       <Container className="max-w-6xl">
         <Breadcrumb>
-          <BreadcrumbList className="text-xs sm:text-sm">
+          <BreadcrumbList className="text-[10px] sm:text-xs">
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link href={ROUTES.home} />}>
                 Home
