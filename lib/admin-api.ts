@@ -11,6 +11,7 @@ import type {
   PropertyListItem,
   PropertyType,
   RatePlan,
+  RatePrice,
   Room,
   RoomInventory,
   RoomType,
@@ -170,6 +171,17 @@ export function createRoomType(propertyId: string, data: Record<string, unknown>
   });
 }
 
+export function updateRoomType(
+  propertyId: string,
+  roomTypeId: string,
+  data: Record<string, unknown>,
+) {
+  return adminFetch<RoomType>(
+    `/admin/properties/${propertyId}/room-types/${roomTypeId}`,
+    { method: "PATCH", body: JSON.stringify(data) },
+  );
+}
+
 export function deleteRoomType(propertyId: string, roomTypeId: string) {
   return adminFetch<{ success: boolean }>(
     `/admin/properties/${propertyId}/room-types/${roomTypeId}`,
@@ -188,9 +200,17 @@ export function createRoom(propertyId: string, data: Record<string, unknown>) {
   });
 }
 
-export function fetchInventory(propertyId: string) {
+export function fetchInventory(
+  propertyId: string,
+  params?: { roomTypeId?: string; from?: string; to?: string },
+) {
+  const query = new URLSearchParams();
+  if (params?.roomTypeId) query.set("roomTypeId", params.roomTypeId);
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
   return adminFetch<RoomInventory[]>(
-    `/admin/properties/${propertyId}/inventory`,
+    `/admin/properties/${propertyId}/inventory${suffix}`,
   );
 }
 
@@ -201,9 +221,37 @@ export function upsertInventory(propertyId: string, data: Record<string, unknown
   );
 }
 
+export function updateInventoryRow(
+  propertyId: string,
+  inventoryId: string,
+  data: { totalRooms: number; blockedRooms: number },
+) {
+  return adminFetch<RoomInventory>(
+    `/admin/properties/${propertyId}/inventory/${inventoryId}`,
+    { method: "PATCH", body: JSON.stringify(data) },
+  );
+}
+
+export function deleteInventoryRange(
+  propertyId: string,
+  params: { roomTypeId: string; from: string; to: string },
+) {
+  const query = new URLSearchParams(params);
+  return adminFetch<{ deleted: number }>(
+    `/admin/properties/${propertyId}/inventory?${query.toString()}`,
+    { method: "DELETE" },
+  );
+}
+
 export function fetchRatePlans(propertyId: string) {
   return adminFetch<RatePlan[]>(
     `/admin/properties/${propertyId}/rate-plans`,
+  );
+}
+
+export function fetchRatePlan(propertyId: string, ratePlanId: string) {
+  return adminFetch<RatePlan>(
+    `/admin/properties/${propertyId}/rate-plans/${ratePlanId}`,
   );
 }
 
@@ -214,10 +262,58 @@ export function createRatePlan(propertyId: string, data: Record<string, unknown>
   });
 }
 
-export function upsertRatePrices(propertyId: string, data: Record<string, unknown>) {
-  return adminFetch<unknown[]>(
-    `/admin/properties/${propertyId}/rate-plans/prices`,
+export function updateRatePlan(
+  propertyId: string,
+  ratePlanId: string,
+  data: Record<string, unknown>,
+) {
+  return adminFetch<RatePlan>(
+    `/admin/properties/${propertyId}/rate-plans/${ratePlanId}`,
+    { method: "PATCH", body: JSON.stringify(data) },
+  );
+}
+
+export function deleteRatePlan(propertyId: string, ratePlanId: string) {
+  return adminFetch<{ success: boolean }>(
+    `/admin/properties/${propertyId}/rate-plans/${ratePlanId}`,
+    { method: "DELETE" },
+  );
+}
+
+export function fetchRatePrices(
+  propertyId: string,
+  ratePlanId: string,
+  params?: { from?: string; to?: string },
+) {
+  const query = new URLSearchParams();
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return adminFetch<RatePrice[]>(
+    `/admin/properties/${propertyId}/rate-plans/${ratePlanId}/prices${suffix}`,
+  );
+}
+
+export function upsertRatePrices(
+  propertyId: string,
+  ratePlanId: string,
+  data: Record<string, unknown>,
+) {
+  return adminFetch<RatePrice[]>(
+    `/admin/properties/${propertyId}/rate-plans/${ratePlanId}/prices`,
     { method: "POST", body: JSON.stringify(data) },
+  );
+}
+
+export function deleteRatePrices(
+  propertyId: string,
+  ratePlanId: string,
+  params: { from: string; to: string },
+) {
+  const query = new URLSearchParams(params);
+  return adminFetch<{ deleted: number }>(
+    `/admin/properties/${propertyId}/rate-plans/${ratePlanId}/prices?${query.toString()}`,
+    { method: "DELETE" },
   );
 }
 
@@ -284,10 +380,27 @@ export function deleteAdminArea(id: string) {
   });
 }
 
-export function fetchAdminBookings(params?: { page?: number; status?: string }) {
+export function fetchAdminBookings(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  propertyId?: string;
+  q?: string;
+  checkInFrom?: string;
+  checkInTo?: string;
+  refundRequired?: boolean;
+}) {
   const query = new URLSearchParams();
   if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
   if (params?.status) query.set("status", params.status);
+  if (params?.propertyId) query.set("propertyId", params.propertyId);
+  if (params?.q) query.set("q", params.q);
+  if (params?.checkInFrom) query.set("checkInFrom", params.checkInFrom);
+  if (params?.checkInTo) query.set("checkInTo", params.checkInTo);
+  if (params?.refundRequired !== undefined) {
+    query.set("refundRequired", String(params.refundRequired));
+  }
   const suffix = query.toString() ? `?${query.toString()}` : "";
   return adminFetch<{
     results: AdminBooking[];
@@ -298,6 +411,10 @@ export function fetchAdminBookings(params?: { page?: number; status?: string }) 
   }>(`/admin/bookings${suffix}`);
 }
 
+export function fetchAdminBooking(id: string) {
+  return adminFetch<AdminBooking>(`/admin/bookings/${id}`);
+}
+
 export function updateAdminBooking(
   id: string,
   data: {
@@ -305,6 +422,9 @@ export function updateAdminBooking(
     guestLastName?: string;
     guestPhone?: string;
     guestEmail?: string;
+    companyName?: string;
+    gstin?: string;
+    billingAddress?: string;
   },
 ) {
   return adminFetch<AdminBooking>(`/admin/bookings/${id}`, {
@@ -319,8 +439,38 @@ export function acceptAdminBooking(id: string) {
   });
 }
 
-export function cancelAdminBooking(id: string) {
+export function cancelAdminBooking(
+  id: string,
+  data?: { reason?: string; initiateRefund?: boolean },
+) {
   return adminFetch<AdminBooking>(`/admin/bookings/${id}/cancel`, {
+    method: "POST",
+    body: JSON.stringify(data ?? {}),
+  });
+}
+
+export function refundAdminBookingPayment(
+  id: string,
+  data: { paymentId: string; reason: string; amount?: number },
+) {
+  return adminFetch<{
+    booking: AdminBooking;
+    refundedAmount: number;
+    warning?: string;
+  }>(`/admin/bookings/${id}/refund`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function markAdminBookingNoShow(id: string) {
+  return adminFetch<AdminBooking>(`/admin/bookings/${id}/no-show`, {
+    method: "POST",
+  });
+}
+
+export function completeAdminBooking(id: string) {
+  return adminFetch<AdminBooking>(`/admin/bookings/${id}/complete`, {
     method: "POST",
   });
 }

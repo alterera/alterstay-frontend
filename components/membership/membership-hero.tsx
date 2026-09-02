@@ -26,7 +26,7 @@ export function MembershipHero({ status, loading }: MembershipHeroProps) {
           </div>
           <div className="min-w-0">
             <h1 className="text-xl font-semibold sm:text-2xl">
-              AlterStay Membership
+              Alterstay Membership
             </h1>
             <p className="mt-0.5 text-sm text-white/80">
               {loading

@@ -122,8 +122,8 @@ export function NavbarLoginButton({ className }: { className?: string }) {
     return (
       <Button
         type="button"
-        size="lg"
-        variant="outline"
+        size="default"
+        variant="default"
         onClick={openLogin}
         className={cn(accountButtonClass, className)}
       >

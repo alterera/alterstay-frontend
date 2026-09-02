@@ -28,15 +28,58 @@ export type AdminArea = {
   cityId?: string;
 };
 
+export type AdminBookingPayment = {
+  id: string;
+  paymentReference: string;
+  provider: string;
+  status: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string | null;
+  paidAt: string | null;
+  refundRequired: boolean;
+  refundReason: string | null;
+  failureReason: string | null;
+  refunds: {
+    id: string;
+    amount: number;
+    reason: string | null;
+    status: string;
+    providerRefundId: string | null;
+    createdAt: string;
+    processedAt: string | null;
+  }[];
+};
+
+export type AdminBookingStatusHistory = {
+  id: string;
+  fromStatus: string | null;
+  toStatus: string;
+  reason: string | null;
+  actor: string;
+  metadata: unknown;
+  createdAt: string;
+};
+
 export type AdminBooking = {
   id: string;
   reservationNumber: string;
   status: string;
   checkIn: string;
   checkOut: string;
+  subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
   totalAmount: number;
   currency: string;
+  coinsRedeemed: number;
+  coinsEarnable: number;
+  coinsEarnedAt: string | null;
+  companyName: string | null;
+  gstin: string | null;
+  billingAddress: string | null;
   createdAt: string;
+  updatedAt: string;
   holdExpiresAt: string | null;
   confirmedAt: string | null;
   property: { id: string; name: string; slug: string };
@@ -53,15 +96,22 @@ export type AdminBooking = {
     phone: string | null;
     email: string | null;
   } | null;
-  items: { roomTypeName: string; ratePlanName: string; quantity: number }[];
-  payments: {
+  items: {
     id: string;
-    paymentReference: string;
-    status: string;
-    amount: string | number;
-    paidAt: string | null;
-    refundRequired: boolean;
+    roomTypeName: string;
+    ratePlanName: string;
+    mealPlanName: string | null;
+    cancellationPolicyText: string | null;
+    quantity: number;
+    checkIn: string;
+    checkOut: string;
+    unitPrice: number;
+    subtotal: number;
+    taxAmount: number;
+    totalAmount: number;
   }[];
+  payments: AdminBookingPayment[];
+  statusHistory?: AdminBookingStatusHistory[];
 };
 
 export type PropertyAddress = {
@@ -120,7 +170,7 @@ export type RoomType = {
   bedType: string | null;
   sizeSqm: string | null;
   status: string;
-  _count?: { rooms: number; ratePlans: number };
+  _count?: { ratePlans: number; reservationItems?: number; rooms?: number };
 };
 
 export type Room = {
@@ -156,10 +206,19 @@ export type RatePlan = {
   id: string;
   name: string;
   description: string | null;
+  status: string;
   roomType: RoomType;
   mealPlan: MealPlan | null;
   cancellationPolicy: CancellationPolicy | null;
-  prices: { id: string; date: string; basePrice: string; currency: string }[];
+  _count?: { reservationItems: number; prices: number };
+  prices?: RatePrice[];
+};
+
+export type RatePrice = {
+  id: string;
+  date: string;
+  basePrice: string;
+  currency: string;
 };
 
 export type SearchResult = {

@@ -42,6 +42,7 @@ export const ROUTES = {
     root: "/admin",
     properties: "/admin/properties",
     bookings: "/admin/bookings",
+    booking: (id: string) => `/admin/bookings/${id}`,
     users: "/admin/users",
     settings: "/admin/settings",
     cities: "/admin/cities",
