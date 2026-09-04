@@ -46,8 +46,9 @@ export function PropertyResultCard({
   const propertyUrl = buildPropertyUrl(property.slug, search);
   const openInNewTab = isDesktop === true;
 
-  const images =
-    property.imageUrls.length > 0 ? property.imageUrls : [FALLBACK_IMAGE];
+  const images = (
+    property.imageUrls.length > 0 ? property.imageUrls : [FALLBACK_IMAGE]
+  ).slice(0, 5);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImage = images[activeIndex] ?? images[0];
 
@@ -83,10 +84,52 @@ export function PropertyResultCard({
     >
       <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-stretch">
         <div className="relative">
+          <div className="lg:hidden">
+            <div
+              className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              onScroll={(event) => {
+                const scroller = event.currentTarget;
+                const width = scroller.clientWidth;
+                if (!width) return;
+                const next = Math.round(scroller.scrollLeft / width);
+                if (next !== activeIndex) setActiveIndex(next);
+              }}
+            >
+              {images.map((src, index) => (
+                <Link
+                  key={`${src}-${index}`}
+                  href={propertyUrl}
+                  {...linkProps}
+                  className="relative h-40 w-full min-w-full shrink-0 snap-start overflow-hidden bg-neutral-200"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={src}
+                    alt=""
+                    className="absolute inset-0 size-full object-cover"
+                  />
+                </Link>
+              ))}
+            </div>
+            {images.length > 1 ? (
+              <div className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex justify-center gap-1">
+                {images.map((_, index) => (
+                  <span
+                    key={index}
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      index === activeIndex ? "bg-white" : "bg-white/50",
+                    )}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+
           <Link
             href={propertyUrl}
             {...linkProps}
-            className="relative block aspect-[4/3] overflow-hidden bg-neutral-200 lg:aspect-auto lg:h-full lg:min-h-[220px]"
+            className="relative hidden overflow-hidden bg-neutral-200 lg:block lg:h-full lg:min-h-[220px]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -127,7 +170,7 @@ export function PropertyResultCard({
                   event.stopPropagation();
                   shiftImage(-1);
                 }}
-                className="absolute top-1/2 left-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow"
+                className="absolute top-1/2 left-2 z-10 hidden size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow lg:flex"
               >
                 <ChevronLeft className="size-4" />
               </button>
@@ -139,7 +182,7 @@ export function PropertyResultCard({
                   event.stopPropagation();
                   shiftImage(1);
                 }}
-                className="absolute top-1/2 right-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow"
+                className="absolute top-1/2 right-2 z-10 hidden size-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow lg:flex"
               >
                 <ChevronRight className="size-4" />
               </button>

@@ -23,7 +23,7 @@ export function FaqAccordion({ items, className }: FaqAccordionProps) {
         <AccordionItem
           key={item.id}
           value={item.id}
-          className="border-b border-border/70 py-1 first:border-t first:border-border/70"
+          className="border-b border-border/70 first:border-t first:border-border/70"
         >
           <AccordionTrigger
             className={cn(

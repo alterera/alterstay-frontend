@@ -32,7 +32,7 @@ export type ProfileMenuGroup = {
 };
 
 export const profileConfig = {
-  title: "My profile",
+  title: "My Profile",
   welcomeBanner: {
     title: "Welcome to Alterstay",
     loginLabel: "Login",

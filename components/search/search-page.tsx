@@ -12,7 +12,11 @@ import { SearchFiltersSheet } from "@/components/search/search-filters-sheet";
 import { useSearchPageLayout } from "@/components/search/search-page-layout-context";
 import { SearchFiltersPanel } from "@/components/search/search-filters-panel";
 import { SearchSortBar } from "@/components/search/search-sort-bar";
-import { SearchSortSheet } from "@/components/search/search-sort-sheet";
+import {
+  MOBILE_PRICE_OPTIONS,
+  MOBILE_SORT_OPTIONS,
+  SearchChoiceSheet,
+} from "@/components/search/search-choice-sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -33,7 +37,7 @@ import {
   type SearchPropertyType,
 } from "@/types/search-results";
 
-type MobileSheet = "filters" | "sort" | null;
+type MobileSheet = "filters" | "sort" | "price" | null;
 
 /**
  * Scroll offsets that toggle the desktop morph. The header keeps a constant
@@ -243,15 +247,17 @@ export function SearchPage() {
         </Container>
       </div>
 
-      {/* Mobile sticky header */}
       <div className="sticky top-0 z-40 lg:hidden">
         <MobileSearchHeader
           search={search}
+          sortBy={filters.sortBy}
           onEdit={() => setMobileEditOpen(true)}
           onFilter={() => {
             setDraftFilters(filters);
             setMobileSheet("filters");
           }}
+          onSort={() => setMobileSheet("sort")}
+          onPrice={() => setMobileSheet("price")}
           filterActive={hasActiveFilters}
         />
       </div>
@@ -275,16 +281,19 @@ export function SearchPage() {
           </aside>
 
           <div className="space-y-3 lg:space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="hidden items-center justify-between gap-3 lg:flex">
               <h2 className="px-0.5 text-sm font-semibold text-neutral-900 lg:text-lg">
                 {count} {count === 1 ? "property" : "properties"} found
               </h2>
               <SearchSortBar
                 sortBy={filters.sortBy}
                 onChange={(sortBy) => handleFiltersChange({ ...filters, sortBy })}
-                onOpenMobileSort={() => setMobileSheet("sort")}
               />
             </div>
+
+            <h2 className="px-0.5 text-sm font-semibold text-neutral-900 lg:hidden">
+              {count} {count === 1 ? "property" : "properties"} found
+            </h2>
 
             {loading ? (
               <p className="text-sm text-muted-foreground">Searching properties…</p>
@@ -316,10 +325,23 @@ export function SearchPage() {
         onSearch={handleHeroSearch}
       />
 
-      <SearchSortSheet
+      <SearchChoiceSheet
         open={mobileSheet === "sort"}
         onOpenChange={(open) => !open && setMobileSheet(null)}
-        sortBy={filters.sortBy}
+        title="Sort"
+        description="Choose how search results are ordered"
+        value={filters.sortBy}
+        options={MOBILE_SORT_OPTIONS}
+        onChange={(sortBy) => handleFiltersChange({ ...filters, sortBy })}
+      />
+
+      <SearchChoiceSheet
+        open={mobileSheet === "price"}
+        onOpenChange={(open) => !open && setMobileSheet(null)}
+        title="Price"
+        description="Sort properties by price"
+        value={filters.sortBy}
+        options={MOBILE_PRICE_OPTIONS}
         onChange={(sortBy) => handleFiltersChange({ ...filters, sortBy })}
       />
 

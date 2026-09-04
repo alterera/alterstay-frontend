@@ -23,7 +23,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { AuthUser } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
 const navLinkClass =
@@ -36,13 +35,6 @@ const dropdownTriggerClass = cn(
 
 const dropdownItemClass =
   "flex flex-col items-start gap-0.5 rounded-lg p-3 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus-visible:ring-0 data-active:bg-muted/60 data-active:hover:bg-muted/60";
-
-function getUserInitials(user: AuthUser): string {
-  const first = user.firstName?.trim()?.[0] ?? "";
-  const last = user.lastName?.trim()?.[0] ?? "";
-  if (first || last) return `${first}${last}`.toUpperCase();
-  return user.phone.replace(/\D/g, "").slice(-2) || "?";
-}
 
 export function NavbarDesktopNav() {
   return (
@@ -101,17 +93,17 @@ export function NavbarDesktopNav() {
 }
 
 const accountButtonClass =
-  "rounded-sm border border-brand bg-transparent px-4 text-xs font-medium text-brand shadow-none hover:bg-brand/5 hover:text-brand";
+  "rounded-sm px-4 text-xs font-medium text-white shadow-none bg-brand hover:bg-brand/90 hover:text-white";
 
 export function NavbarLoginButton({ className }: { className?: string }) {
-  const { user, isAuthenticated, isLoading, openLogin, logout } = useAuth();
+  const { isAuthenticated, isLoading, openLogin, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
   if (isLoading) {
     return (
       <div
         className={cn(
-          "hidden h-10 w-28 animate-pulse rounded-sm bg-muted/60 lg:block",
+          "hidden h-10 w-28 animate-pulse rounded-sm lg:block",
           className,
         )}
       />
@@ -132,8 +124,6 @@ export function NavbarLoginButton({ className }: { className?: string }) {
     );
   }
 
-  const initials = user ? getUserInitials(user) : "?";
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
@@ -141,18 +131,13 @@ export function NavbarLoginButton({ className }: { className?: string }) {
           <Button
             type="button"
             size="lg"
-            variant="outline"
+            variant="default"
             className={cn(
               accountButtonClass,
-              "gap-2",
+              "gap-2 cursor-pointer",
               className,
             )}
           >
-            <Avatar size="sm" className="size-6">
-              <AvatarFallback className="bg-white/90 text-[10px] font-semibold text-brand">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
             My Account
             <ChevronDownIcon className="size-3.5 opacity-70" aria-hidden="true" />
           </Button>
@@ -161,7 +146,7 @@ export function NavbarLoginButton({ className }: { className?: string }) {
       <PopoverContent
         align="end"
         sideOffset={8}
-        className="w-56 rounded-xl p-1.5 shadow-lg"
+        className="w-56 rounded-md p-1.5 shadow-lg"
       >
         <ul className="flex flex-col">
           {profileConfig.desktopAccountMenu.map((item) => {

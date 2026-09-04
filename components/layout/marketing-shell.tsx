@@ -26,7 +26,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
           className={
             isSearchPage || isPropertyPage || isBookingFlow
               ? "flex-1"
-              : "flex-1 pb-16 lg:pb-0"
+              : "flex-1 pb-12 lg:pb-0"
           }
         >
           {children}

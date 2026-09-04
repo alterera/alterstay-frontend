@@ -77,13 +77,17 @@ export function resolveCashfreeCheckout(
 /**
  * Opens Cashfree hosted checkout via their JS SDK.
  *
- * Direct navigation to payments.cashfree.com/order/#session_... is not supported
- * for modern PG integrations — the session must be handed to cashfree.checkout().
+ * On mobile, checkout() often resolves before the `_self` redirect finishes.
+ * When that happens we force a full-page navigation with checkoutUrl.
+ *
+ * Callers must NOT navigate to a result page after this — Cashfree returnUrl
+ * is responsible for bringing the user back after payment.
  */
 export async function openCashfreeCheckout(
   session: CashfreeSessionInput,
 ): Promise<void> {
   const { paymentSessionId, mode } = resolveCashfreeCheckout(session);
+  const checkoutUrl = firstNonEmpty(session.checkoutUrl);
   const cashfree = await loadCashfree(mode);
 
   const result = await cashfree.checkout({
@@ -100,5 +104,16 @@ export async function openCashfreeCheckout(
         ? result.error.message
         : "Cashfree could not open checkout";
     throw new Error(message);
+  }
+
+  // SDK already started a redirect — leave the page alone.
+  if (result?.redirect) {
+    return;
+  }
+
+  // Mobile frequently returns without redirect=true and without leaving.
+  // Hard-navigate so SPA routers cannot steal the page to a result screen.
+  if (checkoutUrl && typeof window !== "undefined") {
+    window.location.assign(checkoutUrl);
   }
 }

@@ -10,9 +10,13 @@ export function startOfToday(): Date {
 }
 
 /**
- * Booking-style range picking: the first tap sets check-in and leaves check-out
- * empty, the next later day closes the range, and any tap on a finished range
- * starts a new one. Tapping check-in again or an earlier day moves check-in.
+ * Booking-style range picking:
+ * 1. First tap → check-in (check-out cleared)
+ * 2. Later day → check-out
+ * 3. Same day as check-in, or an earlier day → move check-in
+ * 4. Tap anywhere after a complete range → start a new check-in
+ *
+ * Check-out must be after check-in (minimum one night).
  */
 export function nextDateRangeForDay(current: DateRange, day: Date): DateRange {
   const rangeComplete = Boolean(current.from && current.to);
@@ -38,9 +42,9 @@ export function describeDateRange(range: DateRange): string {
   }
 
   if (!range.to) {
-    return `${formatNavDateRange(range)} — Select check-out`;
+    return `Check-in ${formatNavDateRange(range)} — now pick check-out`;
   }
 
   const nights = getStayNights(range);
-  return `${formatNavDateRange(range)}, ${nights} ${nights === 1 ? "night" : "nights"}`;
+  return `${formatNavDateRange(range)} · ${nights} ${nights === 1 ? "night" : "nights"}`;
 }

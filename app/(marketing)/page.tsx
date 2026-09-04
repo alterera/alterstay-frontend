@@ -1,6 +1,7 @@
 import { CitiesSection } from "@/components/sections/cities";
 import { FaqsSection } from "@/components/sections/faqs";
 import { HeroSection } from "@/components/sections/hero";
+import { MembershipAdSection } from "@/components/sections/membership-ad";
 import { StayBenefitsBanner } from "@/components/sections/stay-benefits";
 
 export default function HomePage() {
@@ -9,6 +10,7 @@ export default function HomePage() {
       <HeroSection />
       <CitiesSection />
       <StayBenefitsBanner />
+      <MembershipAdSection />
       <FaqsSection />
     </>
   );

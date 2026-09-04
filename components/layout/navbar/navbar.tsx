@@ -18,20 +18,25 @@ export function Navbar({ className }: NavbarProps) {
   const scrollHidden = useNavbarScrollHidden();
   /** The search bar morphs into this row, so the links step aside for it. */
   const linksHidden = isSearchPage && Boolean(layout?.navCollapsed);
+  /**
+   * On the search page the bar stays pinned so the compact search can sit in
+   * the nav-links slot. Elsewhere, hide the whole header while scrolling down.
+   */
+  const hideBar = !isSearchPage && scrollHidden;
 
   return (
     <header
       className={cn(
         // Small screens use the bottom dock; this bar is desktop-only.
         "z-50 hidden w-full transition-transform duration-300 ease-in-out will-change-transform lg:block",
-        scrollHidden ? "-translate-y-full" : "translate-y-0",
+        hideBar ? "-translate-y-full" : "translate-y-0",
         isSearchPage
           ? cn(
               "lg:sticky lg:top-0 lg:bg-white",
               "transition-shadow duration-500 ease-in-out",
               linksHidden ? "shadow-md shadow-black/5" : "shadow-none",
             )
-          : "lg:sticky lg:top-0 lg:border-b lg:border-brand/20 lg:bg-white/80 lg:backdrop-blur-xl",
+          : "lg:sticky lg:top-0 lg:border-b lg:border-brand/20 lg:bg-white",
         className,
       )}
     >

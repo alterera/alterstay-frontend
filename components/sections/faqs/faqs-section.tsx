@@ -14,7 +14,7 @@ export function FaqsSection({ className }: FaqsSectionProps) {
   const { eyebrow, title, description, supportLink, items } = faqsConfig;
 
   return (
-    <section className={cn("bg-background py-12 sm:py-16 lg:py-20", className)}>
+    <section className={cn("bg-background py-6 sm:py-16 lg:py-20", className)}>
       <Container size="narrow">
         <div className="mb-8 max-w-2xl sm:mb-10">
           <p className="mb-2 text-sm font-medium text-brand sm:text-base">

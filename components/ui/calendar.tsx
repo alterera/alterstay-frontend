@@ -103,23 +103,24 @@ function Calendar({
           defaultClassNames.week_number
         ),
         day: cn(
-          "group/day relative aspect-square h-full w-full rounded-(--cell-radius) p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-(--cell-radius)",
-          props.showWeekNumber
-            ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-(--cell-radius)"
-            : "[&:first-child[data-selected=true]_button]:rounded-l-(--cell-radius)",
+          "group/day relative aspect-square h-full w-full p-0 text-center select-none",
           defaultClassNames.day
         ),
+        // Soft brand ribbon across the stay; ends clip to a rounded capsule.
         range_start: cn(
-          "relative isolate z-0 rounded-l-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:right-0 after:w-4 after:bg-muted",
+          "rounded-l-full bg-brand/15",
           defaultClassNames.range_start
         ),
-        range_middle: cn("rounded-none", defaultClassNames.range_middle),
+        range_middle: cn(
+          "rounded-none bg-brand/15",
+          defaultClassNames.range_middle
+        ),
         range_end: cn(
-          "relative isolate z-0 rounded-r-(--cell-radius) bg-muted after:absolute after:inset-y-0 after:left-0 after:w-4 after:bg-muted",
+          "rounded-r-full bg-brand/15",
           defaultClassNames.range_end
         ),
         today: cn(
-          "rounded-(--cell-radius) bg-muted text-foreground data-[selected=true]:rounded-none",
+          "rounded-full bg-muted text-foreground data-[selected=true]:bg-transparent",
           defaultClassNames.today
         ),
         outside: cn(
@@ -209,7 +210,14 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
+        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50",
+        // Check-in / check-out: solid brand circles. Middles stay transparent so
+        // the cell-level brand/15 ribbon shows through as the range shade.
+        "data-[range-start=true]:rounded-full data-[range-start=true]:bg-brand data-[range-start=true]:text-brand-foreground data-[range-start=true]:hover:bg-brand data-[range-start=true]:hover:text-brand-foreground",
+        "data-[range-end=true]:rounded-full data-[range-end=true]:bg-brand data-[range-end=true]:text-brand-foreground data-[range-end=true]:hover:bg-brand data-[range-end=true]:hover:text-brand-foreground",
+        "data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-transparent data-[range-middle=true]:text-foreground",
+        "data-[selected-single=true]:rounded-full data-[selected-single=true]:bg-brand data-[selected-single=true]:text-brand-foreground data-[selected-single=true]:hover:bg-brand data-[selected-single=true]:hover:text-brand-foreground",
+        "dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
         className
       )}

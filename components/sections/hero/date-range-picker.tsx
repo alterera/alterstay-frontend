@@ -88,6 +88,11 @@ function CombinedDateRangePicker({
           disabled={{ before: today }}
           className="p-3 md:[--cell-size:--spacing(9)]"
         />
+        <div className="border-t border-border/60 px-4 py-2.5">
+          <p className="text-center text-xs font-medium text-muted-foreground">
+            {describeDateRange(value)}
+          </p>
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -220,10 +225,12 @@ function MobileDateRangePicker({
   onChange,
   className,
   compact,
+  layout,
   sheetVariant = "sheet",
 }: DateRangePickerProps) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DateRange>(value);
+  const combined = layout === "combined";
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
@@ -241,8 +248,10 @@ function MobileDateRangePicker({
     <>
       <SearchFieldTrigger
         icon={<CalendarIcon className="size-4" />}
-        label="Dates"
-        value={formatDateRange(value)}
+        label={combined ? "Check-in & check-out" : "Dates"}
+        value={
+          combined ? formatNavDateRange(value) : formatDateRange(value)
+        }
         compact={compact}
         className={cn("min-w-0", className)}
         onClick={() => handleOpenChange(true)}
@@ -253,7 +262,7 @@ function MobileDateRangePicker({
         onOpenChange={handleOpenChange}
         variant={sheetVariant}
         title="Check-in & check-out dates"
-        description="Tap a day to set check-in, then tap another to set check-out"
+        description="Tap check-in, then tap a later day for check-out. Tap again to start over."
         stickyContent={<DateRangeWeekdayHeader />}
         footer={
           <div className="space-y-2.5">
@@ -301,11 +310,11 @@ export function DateRangePicker(props: DateRangePickerProps) {
     );
   }
 
-  if (combined) {
-    return <CombinedDateRangePicker {...props} />;
-  }
-
+  // Desktop: popover. Mobile: bottom sheet (same as search edit flow).
   if (isDesktop) {
+    if (combined) {
+      return <CombinedDateRangePicker {...props} />;
+    }
     return <SplitDateRangePicker {...props} />;
   }
 

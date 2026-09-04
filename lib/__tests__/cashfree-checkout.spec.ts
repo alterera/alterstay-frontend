@@ -69,7 +69,12 @@ describe("openCashfreeCheckout", () => {
     });
   });
 
-  it("opens checkout from checkoutUrl when paymentSessionId is missing", async () => {
+  it("hard-navigates to checkoutUrl when SDK returns without redirecting", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("window", {
+      location: { assign },
+    });
+
     await openCashfreeCheckout({
       checkoutUrl: "https://payments.cashfree.com/order/#session_from_url",
     });
@@ -78,6 +83,28 @@ describe("openCashfreeCheckout", () => {
       paymentSessionId: "session_from_url",
       redirectTarget: "_self",
     });
+    expect(assign).toHaveBeenCalledWith(
+      "https://payments.cashfree.com/order/#session_from_url",
+    );
+
+    vi.unstubAllGlobals();
+  });
+
+  it("does not hard-navigate when SDK reports redirect in progress", async () => {
+    checkoutMock.mockResolvedValue({ redirect: true });
+    const assign = vi.fn();
+    vi.stubGlobal("window", {
+      location: { assign },
+    });
+
+    await openCashfreeCheckout({
+      paymentSessionId: "session_live",
+      checkoutUrl: "https://payments.cashfree.com/order/#session_live",
+      cashfreeMode: "production",
+    });
+
+    expect(assign).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 
   it("surfaces Cashfree checkout errors", async () => {

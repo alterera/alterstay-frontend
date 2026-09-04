@@ -1,12 +1,10 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { CheckIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/constants/routes";
 import { formatCurrency } from "@/lib/format";
 import { createMembershipPurchase } from "@/lib/membership-api";
 import { openCashfreeCheckout } from "@/lib/cashfree-checkout";
@@ -30,7 +28,6 @@ export function MembershipPlansSection({
   onPurchasingChange,
   onError,
 }: MembershipPlansSectionProps) {
-  const router = useRouter();
   const { isAuthenticated, openLogin } = useAuth();
 
   const handlePurchase = useCallback(
@@ -44,21 +41,21 @@ export function MembershipPlansSection({
       onError(null);
       try {
         const session = await createMembershipPurchase(planCode);
+        // Cashfree returnUrl lands on /membership/result — do not SPA-navigate
+        // here or mobile will race the payment redirect and skip checkout.
         await openCashfreeCheckout({
           paymentSessionId: session.paymentSessionId,
           checkoutUrl: session.checkoutUrl,
           cashfreeMode: session.cashfreeMode,
         });
-        router.push(`${ROUTES.membershipResult}?ref=${session.purchaseId}`);
       } catch (err) {
         onError(
           err instanceof Error ? err.message : "Could not start checkout",
         );
-      } finally {
         onPurchasingChange(null);
       }
     },
-    [isAuthenticated, onError, onPurchasingChange, openLogin, router],
+    [isAuthenticated, onError, onPurchasingChange, openLogin],
   );
 
   return (
