@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { BriefcaseIcon, Loader2Icon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BriefcaseIcon, Loader2Icon, UserRoundIcon } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDisplayPhone } from "@/lib/format";
 import type { GuestFormFieldErrors } from "@/lib/booking-mapper";
+import { fetchSavedGuests, type SavedGuest } from "@/lib/guests-api";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 
@@ -59,12 +60,47 @@ export function BookingGuestForm({
   fieldErrors,
 }: BookingGuestFormProps) {
   const [form, setForm] = useState<GuestFormState>(() => getGuestDefaults(user));
+  const [savedGuests, setSavedGuests] = useState<SavedGuest[]>([]);
+  const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
+  const [guestsLoading, setGuestsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    setGuestsLoading(true);
+    fetchSavedGuests()
+      .then((items) => {
+        if (!cancelled) setSavedGuests(items);
+      })
+      .catch(() => {
+        if (!cancelled) setSavedGuests([]);
+      })
+      .finally(() => {
+        if (!cancelled) setGuestsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   function updateField<K extends keyof GuestFormState>(
     key: K,
     value: GuestFormState[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    if (key === "guestName" || key === "email" || key === "mobile") {
+      setSelectedGuestId(null);
+    }
+  }
+
+  function applySavedGuest(guest: SavedGuest) {
+    setSelectedGuestId(guest.id);
+    setForm((prev) => ({
+      ...prev,
+      guestName: guest.name,
+      email: guest.email ?? prev.email,
+      mobile: formatDisplayPhone(guest.phone),
+    }));
   }
 
   function handleSubmit(event: React.FormEvent) {
@@ -83,6 +119,49 @@ export function BookingGuestForm({
     >
       <div>
         <h2 className="text-lg font-semibold">Guest Information</h2>
+
+        {user ? (
+          <div className="mt-4 space-y-2">
+            <Label className="text-sm font-medium text-foreground">
+              Select saved guest
+            </Label>
+            {guestsLoading ? (
+              <p className="text-xs text-muted-foreground">Loading guests…</p>
+            ) : savedGuests.length === 0 ? (
+              <p className="rounded-lg border border-dashed px-3 py-2.5 text-xs text-muted-foreground">
+                No saved guests yet. Add them from Profile → Guest Details.
+              </p>
+            ) : (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {savedGuests.map((guest) => {
+                  const selected = selectedGuestId === guest.id;
+                  return (
+                    <button
+                      key={guest.id}
+                      type="button"
+                      disabled={inputsDisabled}
+                      onClick={() => applySavedGuest(guest)}
+                      className={cn(
+                        "flex min-w-[9.5rem] shrink-0 flex-col rounded-xl border px-3 py-2.5 text-left transition-colors",
+                        selected
+                          ? "border-brand bg-brand/5"
+                          : "border-border bg-white hover:bg-muted/40",
+                      )}
+                    >
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+                        <UserRoundIcon className="size-3.5 text-muted-foreground" />
+                        <span className="truncate">{guest.name}</span>
+                      </span>
+                      <span className="mt-1 truncate text-[11px] text-muted-foreground">
+                        {formatDisplayPhone(guest.phone)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <div className="mt-4 space-y-4">
           <div className="space-y-1.5">

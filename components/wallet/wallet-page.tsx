@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
@@ -23,6 +25,7 @@ function displayHolderName(user: AuthUser | null) {
 }
 
 export function WalletPage() {
+  const router = useRouter();
   const { isAuthenticated, isLoading: authLoading, openLogin, user } = useAuth();
   const [profile, setProfile] = useState<AuthUser | null>(user);
   const [balance, setBalance] = useState(0);
@@ -87,16 +90,28 @@ export function WalletPage() {
   }
 
   return (
-    <Container className="max-w-6xl py-8 sm:py-10">
+    <Container className="max-w-6xl py-4 sm:py-10">
+      <div className="mb-4 flex items-center gap-3 lg:hidden">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-sm"
+          className="rounded-lg"
+          onClick={() => router.back()}
+          aria-label="Go back"
+        >
+          <ArrowLeftIcon className="size-4" />
+        </Button>
+        <h1 className="text-lg font-semibold">My Coins</h1>
+      </div>
+
       {error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              <WalletCreditCard
-                holderName={displayHolderName(profile)}
-              />
+              <WalletCreditCard holderName={displayHolderName(profile)} />
               <WalletBalanceCard balance={balance} />
             </div>
 

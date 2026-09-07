@@ -53,11 +53,11 @@ export const profileConfig = {
     },
     {
       id: "settings",
-      title: "Settings and Legal",
+      title: "Settings",
       items: [
         {
           id: "about",
-          label: "About Alterstay",
+          label: "About Us",
           href: ROUTES.about,
           icon: InfoIcon,
         },
@@ -139,11 +139,11 @@ export const profileConfig = {
     },
     {
       id: "settings",
-      title: "Settings & Legal",
+      title: "Settings",
       items: [
         {
           id: "about",
-          label: "About Alterstay",
+          label: "About Us",
           href: ROUTES.about,
           icon: InfoIcon,
         },
@@ -176,6 +176,13 @@ export const profileConfig = {
           label: "Blog",
           href: ROUTES.blog,
           icon: BookOpenIcon,
+        },
+        {
+          id: "logout",
+          label: "Logout",
+          icon: LogOutIcon,
+          tone: "danger" as const,
+          action: "logout" as const,
         },
       ],
     },

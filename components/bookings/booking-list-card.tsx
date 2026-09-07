@@ -179,9 +179,9 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
         </div>
       ) : null}
 
-      {tab === "cancelled" ? (
+      {tab === "cancelled" || tab === "previous" ? (
         <div className="border-t px-4 py-3">
-          {refundLabel ? (
+          {tab === "cancelled" && refundLabel ? (
             <p className="mb-3 text-sm font-medium text-muted-foreground">
               Refund status: {refundLabel}
             </p>

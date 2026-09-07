@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 
 import {
   Accordion,
@@ -18,26 +18,29 @@ type FaqAccordionProps = {
 
 export function FaqAccordion({ items, className }: FaqAccordionProps) {
   return (
-    <Accordion className={cn("w-full", className)}>
+    <Accordion
+      className={cn(
+        "grid w-full gap-x-10 gap-y-0 lg:grid-cols-2 lg:items-start",
+        className,
+      )}
+    >
       {items.map((item) => (
         <AccordionItem
           key={item.id}
           value={item.id}
-          className="border-b border-border/70 first:border-t first:border-border/70"
+          className="border-b border-border/70"
         >
           <AccordionTrigger
             className={cn(
-              "gap-4 py-4 text-sm font-semibold text-foreground hover:no-underline sm:py-2 sm:text-base",
-              "**:data-[slot=accordion-trigger-icon]:hidden"
+              "gap-4 py-4 text-left text-sm font-semibold text-foreground hover:no-underline sm:py-5 sm:text-base",
+              "**:data-[slot=accordion-trigger-icon]:hidden",
             )}
           >
             <span className="pr-2">{item.question}</span>
-            <span
+            <ChevronDownIcon
               aria-hidden="true"
-              className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors group-aria-expanded/accordion-trigger:border-foreground/20 group-aria-expanded/accordion-trigger:bg-muted group-aria-expanded/accordion-trigger:text-foreground sm:size-9"
-            >
-              <PlusIcon className="size-4 transition-transform duration-200 group-aria-expanded/accordion-trigger:rotate-45" />
-            </span>
+              className="ml-auto size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-aria-expanded/accordion-trigger:rotate-180"
+            />
           </AccordionTrigger>
           <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground sm:pb-6 sm:text-[15px]">
             <p>{item.answer}</p>

@@ -11,7 +11,15 @@ import {
 import { Container } from "@/components/common/container";
 import { ROUTES } from "@/constants/routes";
 
-export function MembershipBreadcrumb() {
+type MembershipBreadcrumbProps = {
+  current?: string;
+};
+
+export function MembershipBreadcrumb({
+  current = "Membership",
+}: MembershipBreadcrumbProps) {
+  const isPlans = current !== "Membership";
+
   return (
     <Container className="py-3">
       <Breadcrumb>
@@ -28,9 +36,23 @@ export function MembershipBreadcrumb() {
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Membership</BreadcrumbPage>
-          </BreadcrumbItem>
+          {isPlans ? (
+            <>
+              <BreadcrumbItem>
+                <BreadcrumbLink render={<Link href={ROUTES.membership} />}>
+                  Membership
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{current}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          ) : (
+            <BreadcrumbItem>
+              <BreadcrumbPage>{current}</BreadcrumbPage>
+            </BreadcrumbItem>
+          )}
         </BreadcrumbList>
       </Breadcrumb>
     </Container>

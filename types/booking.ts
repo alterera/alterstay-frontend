@@ -105,6 +105,7 @@ export type BookingListTab =
   | "pending"
   | "upcoming"
   | "ongoing"
+  | "previous"
   | "cancelled";
 
 export type BookingListResponse = {

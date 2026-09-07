@@ -23,9 +23,6 @@ const fadeInVariants = {
 export interface WalletCreditCardProps {
   className?: string;
   holderName: string;
-  referralCode?: string | null;
-  onCopyReferral?: () => void;
-  copied?: boolean;
 }
 
 const WalletCreditCard = React.forwardRef<HTMLDivElement, WalletCreditCardProps>(

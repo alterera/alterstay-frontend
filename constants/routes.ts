@@ -6,10 +6,12 @@ export const ROUTES = {
   bookingResult: "/bookings/result",
   profile: "/profile",
   profileEdit: "/profile/edit",
+  profileGuests: "/profile/guests",
   wallet: "/wallet",
   /** @deprecated Use wallet */
   alterCash: "/wallet",
   membership: "/membership",
+  membershipPlans: "/membership/plans",
   membershipResult: "/membership/result",
   about: "/about",
   terms: "/terms",

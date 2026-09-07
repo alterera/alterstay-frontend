@@ -11,6 +11,7 @@ import {
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { mobileDockNavigation } from "@/config/navigation";
+import { useNavbarScrollHidden } from "@/hooks/use-navbar-scroll-hidden";
 import { cn } from "@/lib/utils";
 
 const dockIcons = {
@@ -28,11 +29,17 @@ function isDockItemActive(pathname: string, href: string) {
 export function MobileDock() {
   const pathname = usePathname();
   const { isAuthenticated, openLogin } = useAuth();
+  const scrollHidden = useNavbarScrollHidden(12);
 
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-in-out will-change-transform lg:hidden",
+        scrollHidden
+          ? "pointer-events-none translate-y-full"
+          : "translate-y-0",
+      )}
     >
       <ul className="mx-auto grid h-16 max-w-lg grid-cols-4">
         {mobileDockNavigation.map((item) => {

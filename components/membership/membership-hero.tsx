@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { BadgeCheckIcon } from "lucide-react";
+import { UserRoundIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import type { MembershipStatus } from "@/types/membership";
@@ -18,16 +19,20 @@ export function MembershipHero({ status, loading }: MembershipHeroProps) {
   const { isAuthenticated, openLogin } = useAuth();
 
   return (
-    <div className="bg-gradient-premium px-4 py-6 text-white sm:px-6 sm:py-8">
-      <Container className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/15">
-            <BadgeCheckIcon className="size-6" />
-          </div>
+    <div className="bg-brand px-4 py-6 text-white sm:px-6 sm:py-8">
+      <Container className="flex justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+          <Avatar
+            size="lg"
+            className="size-16 border border-white/20 after:border-white/20 sm:size-20"
+          >
+            <AvatarImage src="/avatar.webp" alt="Membership avatar" />
+            <AvatarFallback className="bg-white/15 text-white">
+              <UserRoundIcon className="size-7 sm:size-8" />
+            </AvatarFallback>
+          </Avatar>
           <div className="min-w-0">
-            <h1 className="text-xl font-semibold sm:text-2xl">
-              Alterstay Membership
-            </h1>
+            <h1 className="text-xl font-semibold sm:text-2xl">Membership</h1>
             <p className="mt-0.5 text-sm text-white/80">
               {loading
                 ? "Loading…"

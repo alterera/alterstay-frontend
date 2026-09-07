@@ -35,3 +35,9 @@ export function fetchSearchResults(
   const query = buildSearchQueryString(search, filters);
   return publicFetch<SearchPropertiesResponse>(`/search/properties?${query}`);
 }
+
+export function fetchFeaturedProperties(limit = 8) {
+  return publicFetch<import("@/types/search-results").FeaturedProperty[]>(
+    `/search/featured?limit=${limit}`,
+  );
+}

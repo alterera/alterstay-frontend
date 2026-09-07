@@ -22,7 +22,7 @@ export function FooterSection5({ className }: FooterSection5Props) {
   return (
     <footer
       className={cn(
-        "relative w-full overflow-hidden bg-background pb-15 antialiased lg:pb-0",
+        "relative w-full overflow-hidden bg-background antialiased lg:pb-0",
         className
       )}
     >

@@ -9,32 +9,21 @@ import { MembershipBreadcrumb } from "@/components/membership/membership-breadcr
 import { MembershipHero } from "@/components/membership/membership-hero";
 import { MembershipHistoryTable } from "@/components/membership/membership-history-table";
 import { MembershipOverview } from "@/components/membership/membership-overview";
-import { MembershipPlansSection } from "@/components/membership/membership-plans-section";
+import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
-import {
-  fetchMembershipPlans,
-  fetchMyMembership,
-  fetchUpgradePreview,
-} from "@/lib/membership-api";
-import type { MembershipPlan, MembershipStatus } from "@/types/membership";
+import { fetchMyMembership } from "@/lib/membership-api";
+import type { MembershipStatus } from "@/types/membership";
 
 export function MembershipPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [status, setStatus] = useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [upgradePreview, setUpgradePreview] = useState<Record<string, string>>(
-    {},
-  );
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const planList = await fetchMembershipPlans();
-        if (!cancelled) setPlans(planList);
         if (isAuthenticated) {
           const membership = await fetchMyMembership();
           if (!cancelled) setStatus(membership);
@@ -42,7 +31,7 @@ export function MembershipPage() {
           setStatus(null);
         }
       } catch {
-        if (!cancelled) setError("Could not load membership plans.");
+        if (!cancelled) setError("Could not load membership details.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -52,21 +41,6 @@ export function MembershipPage() {
       cancelled = true;
     };
   }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !status?.active) return;
-    const corporate = plans.find((p) => p.code === "CORPORATE");
-    if (!corporate || status.active.planCode === "CORPORATE") return;
-
-    void fetchUpgradePreview("CORPORATE")
-      .then((preview) => {
-        setUpgradePreview((prev) => ({
-          ...prev,
-          CORPORATE: `Your remaining value converts to ~${preview.bonusDays} bonus days. Total: ${preview.totalDays} days.`,
-        }));
-      })
-      .catch(() => undefined);
-  }, [isAuthenticated, status, plans]);
 
   const showAuthenticatedSections = isAuthenticated && !authLoading;
 
@@ -96,21 +70,6 @@ export function MembershipPage() {
             to see your membership overview and history.
           </p>
         ) : null}
-
-        {loading ? (
-          <p className="text-center text-sm text-muted-foreground">
-            Loading plans…
-          </p>
-        ) : (
-          <MembershipPlansSection
-            plans={plans}
-            status={status}
-            upgradePreview={upgradePreview}
-            purchasing={purchasing}
-            onPurchasingChange={setPurchasing}
-            onError={setError}
-          />
-        )}
 
         <p className="text-center text-xs text-muted-foreground">
           See{" "}

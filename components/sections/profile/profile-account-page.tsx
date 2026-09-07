@@ -1,33 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import {
-  BadgeCheckIcon,
-  CheckIcon,
-  CopyIcon,
-  UserRoundIcon,
-  WalletIcon,
-} from "lucide-react";
+import { CheckIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { Container } from "@/components/common/container";
+import { ProfileEditShell } from "@/components/sections/profile/profile-edit-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROUTES } from "@/constants/routes";
 import { fetchCurrentUser, updateProfile } from "@/lib/auth-api";
-import { fetchMyMembership } from "@/lib/membership-api";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 
-type ProfileNavId = "profile" | "travellers" | "gstin";
-
-const NAV_ITEMS: { id: ProfileNavId; label: string; href?: string }[] = [
-  { id: "profile", label: "My Profile" },
-  { id: "travellers", label: "Travellers List", href: "#" },
-  { id: "gstin", label: "GSTIN", href: "#" },
-];
+const GENDER_OPTIONS = [
+  { value: "", label: "Prefer not to say" },
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+  { value: "Other", label: "Other" },
+] as const;
 
 function displayName(user: AuthUser | null) {
   const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
@@ -41,15 +31,6 @@ function formatPhone(phone?: string | null) {
     return `+91 ${digits.slice(2)}`;
   }
   return phone;
-}
-
-function formatMembershipExpiry(value?: string | null) {
-  if (!value) return "No expiry";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 type ProfileFieldProps = {
@@ -141,32 +122,63 @@ function ProfileField({
   );
 }
 
+function GenderField({
+  value,
+  onSave,
+}: {
+  value: string;
+  onSave: (value: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  async function handleChange(next: string) {
+    setDraft(next);
+    setSaving(true);
+    try {
+      await onSave(next);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor="profile-gender" className="text-xs text-muted-foreground">
+        Gender
+      </Label>
+      <div className="rounded-md border bg-white px-3 py-2">
+        <select
+          id="profile-gender"
+          value={draft}
+          disabled={saving}
+          onChange={(event) => void handleChange(event.target.value)}
+          className="h-8 w-full bg-transparent text-sm outline-none"
+        >
+          {GENDER_OPTIONS.map((option) => (
+            <option key={option.value || "none"} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 export function ProfileAccountPage() {
-  const { user: sessionUser, isAuthenticated, isLoading } = useAuth();
-  const [profile, setProfile] = useState<AuthUser | null>(sessionUser);
-  const [membershipTier, setMembershipTier] = useState("Free");
-  const [membershipExpiresAt, setMembershipExpiresAt] = useState<string | null>(null);
-  const [activeNav, setActiveNav] = useState<ProfileNavId>("profile");
-  const [copied, setCopied] = useState(false);
+  const { isAuthenticated, isLoading } = useAuth();
+  const [profile, setProfile] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const loadProfile = useCallback(async () => {
-    const [data, membership] = await Promise.all([
-      fetchCurrentUser(),
-      fetchMyMembership().catch(() => null),
-    ]);
+    const data = await fetchCurrentUser();
     setProfile(data);
-    if (membership) {
-      setMembershipTier(membership.tier);
-      setMembershipExpiresAt(membership.active?.expiresAt ?? null);
-    }
   }, []);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      window.location.href = "/";
-    }
-  }, [isAuthenticated, isLoading]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -175,19 +187,10 @@ export function ProfileAccountPage() {
     );
   }, [isAuthenticated, loadProfile]);
 
-  async function saveField(
-    patch: Parameters<typeof updateProfile>[0],
-  ) {
+  async function saveField(patch: Parameters<typeof updateProfile>[0]) {
     setError(null);
     const updated = await updateProfile(patch);
     setProfile(updated);
-  }
-
-  async function copyReferralCode() {
-    if (!profile?.referralCode) return;
-    await navigator.clipboard.writeText(profile.referralCode);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
   }
 
   if (isLoading || !isAuthenticated) {
@@ -197,193 +200,81 @@ export function ProfileAccountPage() {
   const fullName = displayName(profile);
 
   return (
-    <section className="bg-background pb-10 pt-0">
-      <div className="bg-gradient-premium px-4 py-5 text-white sm:px-6">
-        <Container className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/15">
-              <UserRoundIcon className="size-6" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-lg font-semibold sm:text-xl">
-                {fullName}
-              </h1>
-              {profile?.referralCode ? (
-                <button
-                  type="button"
-                  onClick={() => void copyReferralCode()}
-                  className="mt-1 inline-flex max-w-full items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs text-white/90"
-                >
-                  <span className="truncate">
-                    Referral Code : {profile.referralCode}
-                  </span>
-                  <CopyIcon className="size-3 shrink-0" />
-                  {copied ? <span className="text-[10px]">Copied</span> : null}
-                </button>
-              ) : null}
-            </div>
-          </div>
+    <ProfileEditShell activeNav="profile">
+      <div className="space-y-8">
+        <h2 className="text-xl font-semibold">My Profile</h2>
 
-          <Link
-            href={ROUTES.wallet}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-dark/80 px-3 py-2 text-xs font-medium sm:text-sm"
-          >
-            <WalletIcon className="size-4 text-premium" />
-            <span>
-              Coins : {(profile?.alterCashBalance ?? 0).toLocaleString("en-IN")}
-            </span>
-            <span aria-hidden>›</span>
-          </Link>
-        </Container>
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Personal Information
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ProfileField
+              label="Name"
+              value={fullName === "Guest" ? "" : fullName}
+              placeholder="Add name"
+              onSave={async (value) => {
+                const parts = value.trim().split(/\s+/);
+                const firstName = parts[0] ?? "";
+                const lastName = parts.slice(1).join(" ");
+                await saveField({ firstName, lastName });
+              }}
+            />
+            <ProfileField
+              label="Email"
+              value={profile?.email ?? ""}
+              placeholder="Add email"
+              type="email"
+              onSave={(value) => saveField({ email: value })}
+            />
+            <GenderField
+              value={profile?.gender ?? ""}
+              onSave={(value) => saveField({ gender: value })}
+            />
+            <ProfileField
+              label="Date of Birth"
+              value={profile?.dateOfBirth ?? ""}
+              placeholder="DD/MM/YYYY"
+              type="date"
+              onSave={(value) => saveField({ dateOfBirth: value })}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Login Information
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ProfileField
+              label="Phone"
+              value={formatPhone(profile?.phone)}
+              verified
+            />
+            <ProfileField
+              label="Password"
+              value={profile?.hasPassword ? "••••••••" : ""}
+              placeholder="Set password"
+              type="password"
+              onSave={(value) => saveField({ password: value })}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Location Information
+          </h3>
+          <ProfileField
+            label="City of Residence"
+            value={profile?.cityOfResidence ?? ""}
+            placeholder="Pick city"
+            onSave={(value) => saveField({ cityOfResidence: value })}
+          />
+        </section>
       </div>
-
-      <Container className="mt-4 max-w-6xl">
-        {error ? (
-          <p className="mb-4 text-sm text-destructive">{error}</p>
-        ) : null}
-
-        <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside className="space-y-4">
-            <div className="rounded-md border bg-white p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
-                  <BadgeCheckIcon className="size-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">
-                    {membershipTier}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {membershipExpiresAt
-                      ? `Expires ${formatMembershipExpiry(membershipExpiresAt)}`
-                      : "No active membership"}
-                  </p>
-                  <Link
-                    href={ROUTES.membership}
-                    className="mt-2 inline-block text-xs font-medium text-brand underline"
-                  >
-                    {membershipExpiresAt ? "Renew or upgrade" : "Get membership"}
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            <nav className="overflow-hidden rounded-md border bg-white">
-              {NAV_ITEMS.map((item) => {
-                const active = activeNav === item.id;
-                const className = cn(
-                  "block w-full border-b px-4 py-3.5 text-left text-sm font-medium last:border-b-0",
-                  active
-                    ? "bg-brand/5 text-brand"
-                    : "text-foreground hover:bg-muted/40",
-                );
-                if (item.href && item.id !== "profile") {
-                  return (
-                    <Link key={item.id} href={item.href} className={className}>
-                      {item.label}
-                    </Link>
-                  );
-                }
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActiveNav(item.id)}
-                    className={className}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
-
-          <div className="rounded-md border bg-white p-5 shadow-sm sm:p-6">
-            {activeNav === "profile" ? (
-              <div className="space-y-8">
-                <h2 className="text-xl font-semibold">My Profile</h2>
-
-                <section className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">
-                    Personal Information
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <ProfileField
-                      label="Name"
-                      value={fullName === "Guest" ? "" : fullName}
-                      placeholder="Add name"
-                      onSave={async (value) => {
-                        const parts = value.trim().split(/\s+/);
-                        const firstName = parts[0] ?? "";
-                        const lastName = parts.slice(1).join(" ");
-                        await saveField({ firstName, lastName });
-                      }}
-                    />
-                    <ProfileField
-                      label="Email"
-                      value={profile?.email ?? ""}
-                      placeholder="Add email"
-                      type="email"
-                      onSave={(value) => saveField({ email: value })}
-                    />
-                    <ProfileField
-                      label="Gender"
-                      value={profile?.gender ?? ""}
-                      placeholder="Pick gender"
-                      onSave={(value) => saveField({ gender: value })}
-                    />
-                    <ProfileField
-                      label="Date of Birth"
-                      value={profile?.dateOfBirth ?? ""}
-                      placeholder="DD/MM/YYYY"
-                      type="date"
-                      onSave={(value) => saveField({ dateOfBirth: value })}
-                    />
-                  </div>
-                </section>
-
-                <section className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">
-                    Login Information
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <ProfileField
-                      label="Phone"
-                      value={formatPhone(profile?.phone)}
-                      verified
-                    />
-                    <ProfileField
-                      label="Password"
-                      value={profile?.hasPassword ? "••••••••" : ""}
-                      placeholder="Set password"
-                      type="password"
-                      onSave={(value) => saveField({ password: value })}
-                    />
-                  </div>
-                </section>
-
-                <section className="space-y-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground">
-                    Location Information
-                  </h3>
-                  <ProfileField
-                    label="City of Residence"
-                    value={profile?.cityOfResidence ?? ""}
-                    placeholder="Pick city"
-                    onSave={(value) => saveField({ cityOfResidence: value })}
-                  />
-                </section>
-              </div>
-            ) : (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                {activeNav === "travellers"
-                  ? "Travellers list is coming soon."
-                  : "GSTIN management is coming soon."}
-              </div>
-            )}
-          </div>
-        </div>
-      </Container>
-    </section>
+    </ProfileEditShell>
   );
 }

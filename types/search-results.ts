@@ -68,6 +68,19 @@ export type SearchPropertiesResponse = {
   count: number;
 };
 
+export type FeaturedProperty = {
+  id: string;
+  name: string;
+  slug: string;
+  city: string | null;
+  area: string | null;
+  imageUrl: string | null;
+  guestRating: number | null;
+  reviewCount: number;
+  startsFrom: number | null;
+  currency: string;
+};
+
 export const PRICE_FILTER_OPTIONS = [
   { id: "500-1000", label: "₹500 - ₹1000" },
   { id: "1000-1500", label: "₹1000 - ₹1500" },

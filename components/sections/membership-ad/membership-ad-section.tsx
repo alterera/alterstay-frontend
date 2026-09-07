@@ -35,7 +35,7 @@ export function MembershipAdSection({ className }: MembershipAdSectionProps) {
             </div>
 
             <Button
-              render={<Link href={ROUTES.membership} />}
+              render={<Link href={ROUTES.membershipPlans} />}
               className="h-11 shrink-0 rounded-full bg-white px-6 font-semibold text-brand hover:bg-white/90"
             >
               Get membership

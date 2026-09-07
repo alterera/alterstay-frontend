@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "*.s3.us-east-1.amazonaws.com",
+        hostname: "*.s3.ap-south-2.amazonaws.com",
       },
       {
         protocol: "https",
@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ['172.20.10.3', '192.168.1.9', '192.168.0.110', '192.168.1.17']
+  allowedDevOrigins: ['192.168.1.18']
 };
 
 export default nextConfig;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { BookingListCard } from "@/components/bookings/booking-list-card";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -10,10 +10,9 @@ import { fetchMyBookings } from "@/lib/booking-api";
 import { cn } from "@/lib/utils";
 import type { BookingListTab, BookingResponse } from "@/types/booking";
 
-const TABS: { id: BookingListTab; label: string }[] = [
-  { id: "pending", label: "Pending payment" },
+const ALWAYS_TABS: { id: BookingListTab; label: string }[] = [
   { id: "upcoming", label: "Upcoming" },
-  { id: "ongoing", label: "Ongoing" },
+  { id: "previous", label: "Previous" },
   { id: "cancelled", label: "Cancelled" },
 ];
 
@@ -23,7 +22,17 @@ export function MyBookingsPage() {
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const defaultTabSet = useRef(false);
+  const [hasPending, setHasPending] = useState(false);
+  const [hasOngoing, setHasOngoing] = useState(false);
+  const [tabsReady, setTabsReady] = useState(false);
+
+  const visibleTabs = useMemo(() => {
+    const tabs: { id: BookingListTab; label: string }[] = [];
+    if (hasPending) tabs.push({ id: "pending", label: "Pending payment" });
+    if (hasOngoing) tabs.push({ id: "ongoing", label: "Ongoing" });
+    tabs.push(...ALWAYS_TABS);
+    return tabs;
+  }, [hasOngoing, hasPending]);
 
   const loadBookings = useCallback(async (tab: BookingListTab) => {
     setLoadingBookings(true);
@@ -40,26 +49,35 @@ export function MyBookingsPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || defaultTabSet.current) return;
+    if (!isAuthenticated || tabsReady) return;
 
     async function pickDefaultTab() {
       try {
-        const pending = await fetchMyBookings("pending", 1, 1);
-        setActiveTab(pending.total > 0 ? "pending" : "upcoming");
+        const [pending, ongoing] = await Promise.all([
+          fetchMyBookings("pending", 1, 1),
+          fetchMyBookings("ongoing", 1, 1),
+        ]);
+        const pendingExists = pending.total > 0;
+        const ongoingExists = ongoing.total > 0;
+        setHasPending(pendingExists);
+        setHasOngoing(ongoingExists);
+        setActiveTab(
+          pendingExists ? "pending" : ongoingExists ? "ongoing" : "upcoming",
+        );
       } catch {
         setActiveTab("upcoming");
       } finally {
-        defaultTabSet.current = true;
+        setTabsReady(true);
       }
     }
 
     void pickDefaultTab();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, tabsReady]);
 
   useEffect(() => {
-    if (!isAuthenticated || !defaultTabSet.current) return;
+    if (!isAuthenticated || !tabsReady) return;
     void loadBookings(activeTab);
-  }, [activeTab, isAuthenticated, loadBookings]);
+  }, [activeTab, isAuthenticated, loadBookings, tabsReady]);
 
   if (isLoading) {
     return <div className="min-h-[40vh] bg-background" />;
@@ -82,12 +100,12 @@ export function MyBookingsPage() {
   }
 
   return (
-    <section className="bg-background pb-8 pt-6 lg:pt-24">
-      <Container className="max-w-2xl">
+    <section className="bg-background pb-8 pt-6 lg:pt-10">
+      <Container>
         <h1 className="mb-5 text-2xl font-bold tracking-tight">My Bookings</h1>
 
         <div className="mb-6 flex border-b overflow-x-auto">
-          {TABS.map((tab) => {
+          {visibleTabs.map((tab) => {
             const active = activeTab === tab.id;
             return (
               <button
@@ -95,7 +113,7 @@ export function MyBookingsPage() {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors sm:flex-1 sm:px-2",
+                  "shrink-0 border-b-2 px-4 py-3 text-sm font-medium transition-colors sm:px-5",
                   active
                     ? "border-brand text-brand"
                     : "border-transparent text-muted-foreground hover:text-foreground",
@@ -112,7 +130,7 @@ export function MyBookingsPage() {
         ) : null}
 
         {loadingBookings ? (
-          <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
               <div
                 key={index}
@@ -123,12 +141,17 @@ export function MyBookingsPage() {
         ) : bookings.length === 0 ? (
           <div className="rounded-2xl border bg-muted/20 px-4 py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No {activeTab === "pending" ? "pending payment" : activeTab}{" "}
+              No{" "}
+              {activeTab === "pending"
+                ? "pending payment"
+                : activeTab === "previous"
+                  ? "previous"
+                  : activeTab}{" "}
               bookings yet.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {bookings.map((booking) => (
               <BookingListCard
                 key={booking.reservationNumber}

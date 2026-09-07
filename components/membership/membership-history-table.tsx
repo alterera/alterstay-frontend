@@ -15,14 +15,14 @@ export function MembershipHistoryTable({
 }: MembershipHistoryTableProps) {
   if (loading) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="rounded-md border bg-white p-6 shadow-sm">
         <div className="h-32 animate-pulse rounded-lg bg-muted" />
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-md border bg-white p-6">
       <h2 className="text-lg font-semibold">Membership history</h2>
 
       {periods.length === 0 ? (
@@ -31,7 +31,7 @@ export function MembershipHistoryTable({
             No membership periods yet.
           </p>
           <Button
-            render={<Link href="#membership-plans" />}
+            render={<Link href={ROUTES.membershipPlans} />}
             className="mt-4"
             size="sm"
           >
@@ -98,7 +98,7 @@ export function MembershipHistoryTable({
       <p className="mt-4 text-xs text-muted-foreground">
         View full coin history on{" "}
         <Link href={ROUTES.wallet} className="underline">
-          Alter Cash
+          Wallet
         </Link>
         .
       </p>

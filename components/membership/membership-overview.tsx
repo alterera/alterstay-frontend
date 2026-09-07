@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/constants/routes";
 import type { MembershipStatus } from "@/types/membership";
 
 type MembershipOverviewProps = {
@@ -25,9 +26,9 @@ export function MembershipOverview({ status, loading }: MembershipOverviewProps)
   const hasActive = Boolean(status?.active);
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold">Membership overview</h2>
-      <div className="mt-4 grid gap-6 sm:grid-cols-2">
+    <div className="rounded-md border bg-white p-6">
+      <h2 className="text-lg font-semibold">Overview</h2>
+      <div className="mt-4 grid gap-6 grid-cols-2">
         <div>
           <p className="text-sm text-muted-foreground">You completed</p>
           <p className="mt-1 text-2xl font-bold">{completed}</p>
@@ -39,7 +40,7 @@ export function MembershipOverview({ status, loading }: MembershipOverviewProps)
             <p className="text-2xl font-bold">{tier}</p>
             {!hasActive ? (
               <Button
-                render={<Link href="#membership-plans" />}
+                render={<Link href={ROUTES.membershipPlans} />}
                 size="sm"
                 className="h-8"
               >

@@ -9,7 +9,6 @@ export type AuthUser = {
   gender?: string | null;
   dateOfBirth?: string | null;
   cityOfResidence?: string | null;
-  referralCode?: string | null;
   alterCashBalance?: number;
   membershipTier?: string;
   membershipExpiresAt?: string | null;
