@@ -14,8 +14,10 @@ import { BookingHotelCard } from "@/components/booking/booking-hotel-card";
 import { BookingLoginPrompt } from "@/components/booking/booking-login-prompt";
 import { BookingMobilePayDock } from "@/components/booking/booking-mobile-pay-dock";
 import { Container } from "@/components/common/container";
+import { CheckoutPageSkeleton } from "@/components/skeletons";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
 import { fetchPropertyDetail } from "@/lib/property-api";
 import { planToSelection } from "@/lib/property-booking";
@@ -202,11 +204,7 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
   ]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
-        Loading checkout…
-      </div>
-    );
+    return <CheckoutPageSkeleton />;
   }
 
   if (error || !property || !selectedPlan || !quoteSelection) {
@@ -307,8 +305,9 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
                 />
 
                 {intentLoading ? (
-                  <div className="rounded-2xl border bg-white p-6 text-sm text-muted-foreground">
-                    Preparing your checkout price…
+                  <div className="rounded-2xl border bg-white p-6">
+                    <Skeleton className="h-4 w-48 rounded-md" />
+                    <Skeleton className="mt-4 h-24 w-full rounded-xl" />
                   </div>
                 ) : null}
 

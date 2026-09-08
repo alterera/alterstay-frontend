@@ -20,6 +20,17 @@ export function formatStayLine(
   return `From ${from} [${nights}N] ${to}`;
 }
 
+/** Help page stay line: Thu, 27 Aug [1N] Fri, 28 Aug */
+export function formatHelpStayLine(
+  checkIn: string,
+  checkOut: string,
+  nights: number,
+): string {
+  const from = format(parseISO(checkIn), "EEE, d MMM");
+  const to = format(parseISO(checkOut), "EEE, d MMM");
+  return `${from} [${nights}N] ${to}`;
+}
+
 export function formatPayableAmount(booking: BookingResponse): string {
   return formatCurrency(booking.totalAmount, booking.currency);
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { StarIcon } from "lucide-react";
 
 import { Container } from "@/components/common/container";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import { fetchFeaturedProperties } from "@/lib/search-api";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,11 @@ import type { FeaturedProperty } from "@/types/search-results";
 
 type FeaturedPropertiesSectionProps = {
   className?: string;
+  city?: string;
+  excludeSlug?: string;
+  limit?: number;
+  title?: string;
+  subtitle?: string;
 };
 
 const FALLBACK =
@@ -82,13 +88,18 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
 
 export function FeaturedPropertiesSection({
   className,
+  city,
+  excludeSlug,
+  limit = 8,
+  title = "Book stays across pan India",
+  subtitle = "Featured properties travellers love right now",
 }: FeaturedPropertiesSectionProps) {
   const [properties, setProperties] = useState<FeaturedProperty[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetchFeaturedProperties(8)
+    fetchFeaturedProperties({ limit, city, excludeSlug })
       .then((items) => {
         if (!cancelled) setProperties(items);
       })
@@ -101,7 +112,7 @@ export function FeaturedPropertiesSection({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [city, excludeSlug, limit]);
 
   if (!loading && properties.length === 0) {
     return null;
@@ -113,11 +124,9 @@ export function FeaturedPropertiesSection({
         <div className="mb-5 flex items-end justify-between gap-3 sm:mb-6">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Book stays across pan India
+              {title}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Featured properties travellers love right now
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </div>
           <Link
             href={ROUTES.search}
@@ -131,18 +140,20 @@ export function FeaturedPropertiesSection({
           <>
             <div className="-mx-4 flex gap-3 overflow-hidden px-4 sm:mx-0 sm:hidden sm:px-0">
               {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-44 w-[46vw] max-w-[11.5rem] shrink-0 animate-pulse rounded-md bg-muted"
-                />
+                <div key={index} className="w-[46vw] max-w-46 shrink-0 space-y-2">
+                  <Skeleton className="aspect-[4/3] rounded-md" />
+                  <Skeleton className="h-4 w-3/4 rounded-md" />
+                  <Skeleton className="h-3 w-1/2 rounded-md" />
+                </div>
               ))}
             </div>
             <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-64 animate-pulse rounded-md bg-muted"
-                />
+                <div key={index} className="space-y-2">
+                  <Skeleton className="aspect-[4/3] rounded-md" />
+                  <Skeleton className="h-4 w-3/4 rounded-md" />
+                  <Skeleton className="h-3 w-1/2 rounded-md" />
+                </div>
               ))}
             </div>
           </>

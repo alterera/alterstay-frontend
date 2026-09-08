@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import type { MembershipStatus } from "@/types/membership";
 
@@ -34,11 +35,13 @@ export function MembershipHero({ status, loading }: MembershipHeroProps) {
           <div className="min-w-0">
             <h1 className="text-xl font-semibold sm:text-2xl">Membership</h1>
             <p className="mt-0.5 text-sm text-white/80">
-              {loading
-                ? "Loading…"
-                : isAuthenticated
-                  ? `${status?.tier ?? "Free"} (current tier)`
-                  : "Sign in to view your membership"}
+              {loading ? (
+                <Skeleton className="inline-block h-4 w-36 rounded-md bg-white/20" />
+              ) : isAuthenticated ? (
+                `${status?.tier ?? "Free"} (current tier)`
+              ) : (
+                "Sign in to view your membership"
+              )}
             </p>
           </div>
         </div>

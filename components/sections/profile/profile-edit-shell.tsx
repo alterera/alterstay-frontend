@@ -101,11 +101,11 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
             </Button>
             <Avatar
               size="lg"
-              className="size-12 border border-white/20 after:border-white/20"
+              className="size-32 shrink-0 border border-white/20 after:border-white/20 sm:size-36"
             >
               <AvatarImage src="/avatar.webp" alt="Profile avatar" />
               <AvatarFallback className="bg-white/15 text-white">
-                <UserRoundIcon className="size-6" />
+                <UserRoundIcon className="size-12 sm:size-14" />
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">

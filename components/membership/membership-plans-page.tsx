@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Building2Icon, UserIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { MembershipPlansSkeleton } from "@/components/skeletons";
 import Pricing from "@/components/ui/pricing";
 import type { PricingColumnProps } from "@/components/ui/pricing-utils/pricing-column";
 import { openCashfreeCheckout } from "@/lib/cashfree-checkout";
@@ -174,9 +175,7 @@ export function MembershipPlansPage() {
         <p className="px-4 pt-2 text-center text-sm text-destructive">{error}</p>
       ) : null}
       {loading ? (
-        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
-          Loading plans…
-        </div>
+        <MembershipPlansSkeleton />
       ) : (
         <Pricing
           title="Available Plans"

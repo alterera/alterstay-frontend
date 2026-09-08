@@ -16,7 +16,6 @@ function MarketingShellInner({ children }: { children: React.ReactNode }) {
   const isBookingFlow = /\/properties\/[^/]+\/(book|checkout)/.test(pathname);
   const hideFooter =
     pathname.startsWith("/profile") ||
-    pathname.startsWith("/search") ||
     pathname.startsWith("/bookings");
   const hideMobileDock = isSearchPage || isPropertyPage || isBookingFlow;
   const dockHidden = useNavbarScrollHidden(12);

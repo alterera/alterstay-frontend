@@ -36,8 +36,16 @@ export function fetchSearchResults(
   return publicFetch<SearchPropertiesResponse>(`/search/properties?${query}`);
 }
 
-export function fetchFeaturedProperties(limit = 8) {
+export function fetchFeaturedProperties(options?: {
+  limit?: number;
+  city?: string;
+  excludeSlug?: string;
+}) {
+  const params = new URLSearchParams();
+  params.set("limit", String(options?.limit ?? 8));
+  if (options?.city) params.set("city", options.city);
+  if (options?.excludeSlug) params.set("exclude", options.excludeSlug);
   return publicFetch<import("@/types/search-results").FeaturedProperty[]>(
-    `/search/featured?limit=${limit}`,
+    `/search/featured?${params.toString()}`,
   );
 }

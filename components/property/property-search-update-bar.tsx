@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { HeroSearchForm } from "@/components/sections/hero/hero-search-form";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,6 +15,10 @@ import {
 } from "@/lib/format";
 import type { PropertySearchParams } from "@/types/search";
 
+import {
+  StayDatesPicker,
+  StayGuestsPicker,
+} from "./stay-picker-content";
 import {
   StayDatesPopover,
   StayGuestsPopover,
@@ -31,7 +34,8 @@ export function PropertySearchUpdateBar({
   onUpdate,
 }: PropertySearchUpdateBarProps) {
   const [draft, setDraft] = useState(search);
-  const [editorOpen, setEditorOpen] = useState(false);
+  const [datesOpen, setDatesOpen] = useState(false);
+  const [guestsOpen, setGuestsOpen] = useState(false);
 
   useEffect(() => {
     setDraft(search);
@@ -45,18 +49,10 @@ export function PropertySearchUpdateBar({
     setDraft((current) => ({ ...current, ...patch }));
   }
 
-  function handleEditorSearch(next: PropertySearchParams) {
-    const normalized = { ...next, guests: { ...next.guests, children: 0 } };
-    setDraft(normalized);
-    onUpdate(normalized);
-    setEditorOpen(false);
-  }
-
   return (
     <>
       <div className="overflow-hidden rounded-xl border bg-white">
         <div className="grid sm:grid-cols-[1fr_1fr_auto]">
-          {/* Desktop: open only the relevant picker */}
           <div className="hidden lg:contents">
             <StayDatesPopover
               dateRange={draft.dateRange}
@@ -95,10 +91,9 @@ export function PropertySearchUpdateBar({
             />
           </div>
 
-          {/* Mobile / tablet: full search editor sheet */}
           <button
             type="button"
-            onClick={() => setEditorOpen(true)}
+            onClick={() => setDatesOpen(true)}
             className="border-b px-4 py-3 text-left lg:hidden sm:border-b-0 sm:border-r"
           >
             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -110,7 +105,7 @@ export function PropertySearchUpdateBar({
           </button>
           <button
             type="button"
-            onClick={() => setEditorOpen(true)}
+            onClick={() => setGuestsOpen(true)}
             className="border-b px-4 py-3 text-left lg:hidden sm:border-b-0 sm:border-r"
           >
             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -133,20 +128,38 @@ export function PropertySearchUpdateBar({
         </div>
       </div>
 
-      <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
+      <Sheet open={datesOpen} onOpenChange={setDatesOpen}>
         <SheetContent
           side="bottom"
           className="max-h-[92dvh] overflow-y-auto rounded-t-3xl lg:hidden"
         >
           <SheetHeader className="border-b pb-4 text-left">
-            <SheetTitle>Update search</SheetTitle>
+            <SheetTitle>Select dates</SheetTitle>
           </SheetHeader>
           <div className="py-4">
-            <HeroSearchForm
-              defaultValues={draft}
-              syncWithDefaults
-              onSearch={handleEditorSearch}
-              className="shadow-lg"
+            <StayDatesPicker
+              dateRange={draft.dateRange}
+              onChange={(dateRange) => patchDraft({ dateRange })}
+              onComplete={() => setDatesOpen(false)}
+              className="mx-auto p-3 [--cell-size:--spacing(10)]"
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={guestsOpen} onOpenChange={setGuestsOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[92dvh] overflow-y-auto rounded-t-3xl lg:hidden"
+        >
+          <SheetHeader className="border-b pb-4 text-left">
+            <SheetTitle>Select guests</SheetTitle>
+          </SheetHeader>
+          <div className="py-4">
+            <StayGuestsPicker
+              guests={draft.guests}
+              onChange={(guests) => patchDraft({ guests })}
+              onComplete={() => setGuestsOpen(false)}
             />
           </div>
         </SheetContent>

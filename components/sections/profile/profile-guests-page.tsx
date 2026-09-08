@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2Icon, PlusIcon, Trash2Icon, UserRoundIcon } from "lucide-react";
+import { PlusIcon, Trash2Icon, UserRoundIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { ProfileEditShell } from "@/components/sections/profile/profile-edit-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   createSavedGuest,
   deleteSavedGuest,
@@ -106,8 +107,10 @@ export function ProfileGuestsPage() {
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} className="h-20 rounded-xl" />
+            ))}
           </div>
         ) : guests.length === 0 ? (
           <div className="rounded-xl border border-dashed px-4 py-12 text-center">

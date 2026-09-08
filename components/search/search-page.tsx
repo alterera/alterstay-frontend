@@ -18,6 +18,7 @@ import {
   SearchChoiceSheet,
 } from "@/components/search/search-choice-sheet";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   fetchSearchAreas,
@@ -296,7 +297,22 @@ export function SearchPage() {
             </h2>
 
             {loading ? (
-              <p className="text-sm text-muted-foreground">Searching properties…</p>
+              <div className="space-y-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-4 rounded-xl border bg-white p-3 sm:p-4"
+                  >
+                    <Skeleton className="size-28 shrink-0 rounded-lg sm:size-36" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4 rounded-md" />
+                      <Skeleton className="h-4 w-1/2 rounded-md" />
+                      <Skeleton className="h-4 w-2/3 rounded-md" />
+                      <Skeleton className="mt-2 h-6 w-24 rounded-md" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : error ? (
               <p className="text-sm text-destructive">{error}</p>
             ) : results.length === 0 ? (

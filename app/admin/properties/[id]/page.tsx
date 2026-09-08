@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { PropertyForm } from "@/components/admin/property-form";
 import { PropertyCatalogPanels } from "@/components/admin/property-catalog-panels";
+import { PropertyContentPanel } from "@/components/admin/property/property-content-panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
@@ -14,14 +15,14 @@ import {
   fetchAmenities,
   fetchProperty,
   fetchPropertyTypes,
+  fetchRestrictions,
   updateProperty,
-  updatePropertyAmenities,
   updatePropertyStatus,
   uploadPropertyImage,
 } from "@/lib/admin-api";
-import type { Amenity, Property, PropertyType } from "@/types/admin";
+import type { Amenity, Property, PropertyType, Restriction } from "@/types/admin";
 
-type Tab = "details" | "rooms" | "inventory" | "pricing";
+type Tab = "details" | "content" | "rooms" | "inventory" | "pricing";
 
 export default function EditPropertyPage() {
   const params = useParams<{ id: string }>();
@@ -29,18 +30,23 @@ export default function EditPropertyPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [types, setTypes] = useState<PropertyType[]>([]);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
+  const [restrictionsCatalog, setRestrictionsCatalog] = useState<Restriction[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [p, t, a] = await Promise.all([
+    const [p, t, a, r] = await Promise.all([
       fetchProperty(params.id),
       fetchPropertyTypes(),
       fetchAmenities(),
+      fetchRestrictions(),
     ]);
     setProperty(p);
     setTypes(t);
     setAmenities(a);
+    setRestrictionsCatalog(r);
   }, [params.id]);
 
   useEffect(() => {
@@ -65,6 +71,7 @@ export default function EditPropertyPage() {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "details", label: "Details" },
+    { id: "content", label: "Content" },
     { id: "rooms", label: "Room catalog" },
     { id: "inventory", label: "Inventory" },
     { id: "pricing", label: "Pricing" },
@@ -152,7 +159,6 @@ export default function EditPropertyPage() {
         <PropertyForm
           property={property}
           propertyTypes={types}
-          amenities={amenities}
           loading={loading}
           onSubmit={async (values) => {
             setLoading(true);
@@ -165,10 +171,6 @@ export default function EditPropertyPage() {
             } finally {
               setLoading(false);
             }
-          }}
-          onAmenitiesChange={async (amenityIds) => {
-            const updated = await updatePropertyAmenities(property.id, amenityIds);
-            setProperty(updated);
           }}
           onImagesSelected={async (files) => {
             setLoading(true);
@@ -187,6 +189,13 @@ export default function EditPropertyPage() {
             await deletePropertyImage(property.id, imageId);
             await load();
           }}
+        />
+      ) : tab === "content" ? (
+        <PropertyContentPanel
+          property={property}
+          amenities={amenities}
+          restrictions={restrictionsCatalog}
+          onSaved={(updated) => setProperty(updated)}
         />
       ) : (
         <PropertyCatalogPanels propertyId={property.id} tab={tab} />

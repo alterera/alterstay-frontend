@@ -11,6 +11,7 @@ import { WalletCreditCard } from "@/components/ui/credit-card";
 import { WalletBalanceCard } from "@/components/wallet/wallet-balance-card";
 import { WalletSidebar } from "@/components/wallet/wallet-sidebar";
 import { WalletTransactionHistory } from "@/components/wallet/wallet-transaction-history";
+import { WalletPageSkeleton } from "@/components/skeletons";
 import { fetchCurrentUser } from "@/lib/auth-api";
 import {
   fetchAlterCashHistory,
@@ -71,11 +72,7 @@ export function WalletPage() {
 
 
   if (authLoading || loading) {
-    return (
-      <Container className="py-16 text-center text-sm text-muted-foreground">
-        Loading wallet…
-      </Container>
-    );
+    return <WalletPageSkeleton />;
   }
 
   if (!isAuthenticated) {

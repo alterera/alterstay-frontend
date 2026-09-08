@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import type { MembershipPeriod } from "@/types/membership";
 
@@ -15,8 +16,9 @@ export function MembershipHistoryTable({
 }: MembershipHistoryTableProps) {
   if (loading) {
     return (
-      <div className="rounded-md border bg-white p-6 shadow-sm">
-        <div className="h-32 animate-pulse rounded-lg bg-muted" />
+      <div className="rounded-md border bg-white p-6">
+        <Skeleton className="h-6 w-40 rounded-md" />
+        <Skeleton className="mt-4 h-32 w-full rounded-lg" />
       </div>
     );
   }

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   BedDoubleIcon,
-  ImagesIcon,
   RulerIcon,
   TagIcon,
   UsersIcon,
@@ -30,9 +29,6 @@ type PropertyRoomOptionsSectionProps = {
   onSearchUpdate: (search: PropertySearchParams) => void;
   onSelectPlan: (plan: SelectedRoomPlan) => void;
 };
-
-const FALLBACK_ROOM_IMAGE =
-  "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800";
 
 function mockOriginalPrice(pricePerNight: number): number {
   return Math.round(pricePerNight * 1.18);
@@ -111,8 +107,6 @@ function RoomTypeCard({
   selectedRatePlanId,
   onSelectPlan,
 }: RoomTypeCardProps) {
-  const imageUrl = roomType.imageUrls[0] ?? FALLBACK_ROOM_IMAGE;
-  const extraImages = Math.max(0, roomType.imageUrls.length - 1);
   const sizeLabel = roomType.sizeSqm
     ? `${Math.round(roomType.sizeSqm * 10.7639)}sq ft`
     : null;
@@ -121,64 +115,43 @@ function RoomTypeCard({
     <article className="overflow-hidden rounded-2xl border bg-white shadow-sm">
       <div className="border-b px-4 py-3">
         <h4 className="text-lg font-semibold">{roomType.name}</h4>
-      </div>
-
-      <div className="grid gap-4 p-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <div className="space-y-3">
-          <div className="relative overflow-hidden rounded-xl bg-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl}
-              alt={roomType.name}
-              className="aspect-[4/3] w-full object-cover"
-            />
-            {extraImages > 0 ? (
-              <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 text-xs font-medium shadow">
-                <ImagesIcon className="size-3.5" />
-                {extraImages} more
-              </span>
-            ) : null}
-          </div>
-
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <UsersIcon className="size-3.5" />
+            Max {roomType.maxOccupancy}
+          </span>
+          {roomType.bedType ? (
             <span className="inline-flex items-center gap-1">
-              <UsersIcon className="size-3.5" />
-              Max {roomType.maxOccupancy}
+              <BedDoubleIcon className="size-3.5" />
+              {roomType.bedType}
             </span>
-            {roomType.bedType ? (
-              <span className="inline-flex items-center gap-1">
-                <BedDoubleIcon className="size-3.5" />
-                {roomType.bedType}
-              </span>
-            ) : null}
-            {sizeLabel ? (
-              <span className="inline-flex items-center gap-1">
-                <RulerIcon className="size-3.5" />
-                {sizeLabel}
-              </span>
-            ) : null}
-          </div>
-
-          {roomType.amenities.length > 0 ? (
-            <button
-              type="button"
-              onClick={onToggleAmenities}
-              className="text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
-            >
-              View Room Amenities
-            </button>
           ) : null}
-
-          {amenitiesExpanded ? (
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              {roomType.amenities.map((amenity) => (
-                <li key={amenity}>• {amenity}</li>
-              ))}
-            </ul>
+          {sizeLabel ? (
+            <span className="inline-flex items-center gap-1">
+              <RulerIcon className="size-3.5" />
+              {sizeLabel}
+            </span>
           ) : null}
         </div>
+        {roomType.amenities.length > 0 ? (
+          <button
+            type="button"
+            onClick={onToggleAmenities}
+            className="mt-2 text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
+          >
+            View Room Amenities
+          </button>
+        ) : null}
+        {amenitiesExpanded ? (
+          <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+            {roomType.amenities.map((amenity) => (
+              <li key={amenity}>• {amenity}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
 
-        <div className="space-y-3">
+      <div className="space-y-3 p-4">
           {roomType.ratePlans.map((plan, index) => {
             const isSelected = selectedRatePlanId === plan.id;
             const pricePerNight = plan.pricePerNight ?? 0;
@@ -246,7 +219,6 @@ function RoomTypeCard({
               </div>
             );
           })}
-        </div>
       </div>
     </article>
   );

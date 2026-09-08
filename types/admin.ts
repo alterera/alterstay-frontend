@@ -140,6 +140,17 @@ export type PropertyPolicy = {
   description: string | null;
 };
 
+export type Restriction = {
+  id: string;
+  label: string;
+  icon: string | null;
+  status: string;
+};
+
+export type PropertyRestriction = {
+  restriction: Restriction;
+};
+
 export type PropertyListItem = {
   id: string;
   name: string;
@@ -158,6 +169,7 @@ export type Property = PropertyListItem & {
   checkOutTime: string | null;
   amenities: { amenity: Amenity }[];
   policies: PropertyPolicy[];
+  restrictions?: PropertyRestriction[];
 };
 
 export type RoomType = {

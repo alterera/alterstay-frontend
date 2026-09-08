@@ -3,10 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Loader2Icon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  Clock3Icon,
+  Loader2Icon,
+  RefreshCwIcon,
+  TriangleAlertIcon,
+  XCircleIcon,
+} from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { Container } from "@/components/common/container";
+import { PaymentResultShell } from "@/components/payment/payment-result-shell";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { BookingApiError, fetchBooking } from "@/lib/booking-api";
@@ -14,7 +21,7 @@ import {
   clearCheckoutSession,
   isTerminalBookingStatus,
 } from "@/lib/booking-checkout-state";
-import { buildRebookUrl } from "@/lib/booking-format";
+import { buildRebookUrl, formatHelpStayLine } from "@/lib/booking-format";
 import { retryPaymentForBooking } from "@/lib/booking-payment";
 import { setPostLoginRedirect } from "@/lib/booking-url";
 import { formatCurrency } from "@/lib/format";
@@ -40,10 +47,36 @@ type ResultPhase =
   | "refund"
   | "expired";
 
+function BookingSummaryCard({ booking }: { booking: BookingResponse }) {
+  return (
+    <div className="rounded-2xl border bg-muted/20 p-4 text-left">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        Booking summary
+      </p>
+      <p className="mt-2 text-sm font-semibold text-foreground">
+        {booking.property.name}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {booking.property.city ? `${booking.property.city} · ` : ""}
+        {booking.reservationNumber}
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {formatHelpStayLine(booking.checkIn, booking.checkOut, booking.nights)}
+      </p>
+      <div className="mt-3 flex items-center justify-between border-t pt-3 text-sm">
+        <span className="text-muted-foreground">Amount</span>
+        <span className="font-semibold">
+          {formatCurrency(booking.totalAmount, booking.currency)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function BookingPaymentResultPage() {
   const searchParams = useSearchParams();
   const reference = searchParams.get("ref");
-  const { isAuthenticated, isLoading: authLoading, openLogin, user } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, openLogin } = useAuth();
 
   const [booking, setBooking] = useState<BookingResponse | null>(null);
   const [phase, setPhase] = useState<ResultPhase>("loading");
@@ -70,23 +103,20 @@ export function BookingPaymentResultPage() {
     return "processing";
   }, []);
 
-  const clearCheckoutForBooking = useCallback(
-    (next: BookingResponse) => {
-      if (!isTerminalBookingStatus(next.status)) return;
-      const item = next.items[0];
-      if (!item) return;
-      clearCheckoutSession({
-        propertySlug: next.property.slug,
-        roomTypeId: item.roomTypeId,
-        ratePlanId: item.ratePlanId,
-        checkIn: next.checkIn,
-        checkOut: next.checkOut,
-        rooms: item.quantity,
-        adults: next.guests.length || 1,
-      });
-    },
-    [],
-  );
+  const clearCheckoutForBooking = useCallback((next: BookingResponse) => {
+    if (!isTerminalBookingStatus(next.status)) return;
+    const item = next.items[0];
+    if (!item) return;
+    clearCheckoutSession({
+      propertySlug: next.property.slug,
+      roomTypeId: item.roomTypeId,
+      ratePlanId: item.ratePlanId,
+      checkIn: next.checkIn,
+      checkOut: next.checkOut,
+      rooms: item.quantity,
+      adults: next.guests.length || 1,
+    });
+  }, []);
 
   const applyBooking = useCallback(
     (next: BookingResponse) => {
@@ -125,7 +155,6 @@ export function BookingPaymentResultPage() {
   const startPolling = useCallback(() => {
     stopPolling();
     pollStartedAt.current = Date.now();
-
     void loadBooking();
 
     pollTimer.current = window.setInterval(() => {
@@ -196,179 +225,226 @@ export function BookingPaymentResultPage() {
 
   if (!reference) {
     return (
-      <Container className="py-16">
-        <div className="mx-auto max-w-lg rounded-2xl border bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-semibold">Invalid booking link</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This payment result link is not valid.
-          </p>
-          <Button render={<Link href={ROUTES.home} />} className="mt-6">
+      <PaymentResultShell
+        tone="neutral"
+        icon={<TriangleAlertIcon className="size-8" />}
+        title="Invalid booking link"
+        description="This payment result link is missing a booking reference."
+        actions={
+          <Button render={<Link href={ROUTES.home} />} className="rounded-xl">
             Go home
           </Button>
-        </div>
-      </Container>
+        }
+      />
     );
   }
 
   if (!authLoading && !isAuthenticated) {
     return (
-      <Container className="py-16">
-        <div className="mx-auto max-w-lg rounded-2xl border bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-semibold">Sign in to view your booking</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Complete sign-in to check your payment status. We&apos;ll bring you
-            back here automatically.
-          </p>
-          <Button type="button" className="mt-6" onClick={openLogin}>
+      <PaymentResultShell
+        tone="info"
+        icon={<Clock3Icon className="size-8" />}
+        title="Sign in to view your booking"
+        description="Complete sign-in to check your payment status. We'll bring you back here automatically."
+        actions={
+          <Button type="button" className="rounded-xl" onClick={openLogin}>
             Sign in
           </Button>
-        </div>
-      </Container>
+        }
+      />
     );
   }
 
   if (errorMessage && !booking) {
     return (
-      <Container className="py-16">
-        <div className="mx-auto max-w-lg rounded-2xl border bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-semibold">Invalid booking link</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{errorMessage}</p>
-          <Button render={<Link href={ROUTES.home} />} className="mt-6">
-            Go home
+      <PaymentResultShell
+        tone="danger"
+        icon={<XCircleIcon className="size-8" />}
+        title="We couldn't find this booking"
+        description={errorMessage}
+        actions={
+          <Button render={<Link href={ROUTES.bookings} />} className="rounded-xl">
+            My bookings
           </Button>
-        </div>
-      </Container>
+        }
+      />
     );
   }
 
   if ((phase === "loading" || phase === "processing") && !booking) {
     return (
-      <Container className="flex min-h-[50vh] items-center justify-center py-16">
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Loader2Icon className="size-4 animate-spin" />
-          Processing your payment…
-        </div>
-      </Container>
+      <PaymentResultShell
+        tone="info"
+        icon={<Loader2Icon className="size-8 animate-spin" />}
+        title="Processing your payment"
+        description="Hang tight — we're confirming your payment with the hotel."
+      />
     );
   }
 
-  return (
-    <Container className="py-16">
-      <div className="mx-auto max-w-lg rounded-2xl border bg-white p-8 shadow-sm">
-        {phase === "success" && booking ? (
+  if (phase === "success" && booking) {
+    return (
+      <PaymentResultShell
+        tone="success"
+        icon={<CheckCircle2Icon className="size-8" />}
+        title="You're all set"
+        description="Your stay is confirmed. A confirmation has been sent to your registered contact details."
+        actions={
           <>
-            <h1 className="text-2xl font-semibold text-emerald-700">
-              Booking confirmed
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Reference {booking.reservationNumber}
-            </p>
-            <dl className="mt-6 space-y-2 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Property</dt>
-                <dd className="font-medium">{booking.property.name}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Stay</dt>
-                <dd className="font-medium">
-                  {booking.checkIn} → {booking.checkOut}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Total paid</dt>
-                <dd className="font-medium">
-                  {formatCurrency(booking.totalAmount, booking.currency)}
-                </dd>
-              </div>
-            </dl>
-          </>
-        ) : null}
-
-        {phase === "processing" || phase === "still_processing" ? (
-          <>
-            <h1 className="text-xl font-semibold">
-              {phase === "still_processing"
-                ? "Payment still processing"
-                : "Processing payment"}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {phase === "still_processing"
-                ? "This is taking longer than usual. Your payment may still be on its way — refresh to check the latest status."
-                : "Please wait while we confirm your payment with the hotel."}
-            </p>
-            {phase === "processing" ? (
-              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2Icon className="size-4 animate-spin" />
-                Checking status…
-              </div>
-            ) : null}
             <Button
-              type="button"
-              variant="outline"
-              className="mt-6"
-              disabled={isRefreshing}
-              onClick={() => void handleRefresh()}
+              render={<Link href={ROUTES.bookings} />}
+              className="rounded-xl sm:min-w-36"
             >
-              {isRefreshing ? "Refreshing…" : "Refresh status"}
+              View booking
+            </Button>
+            <Button
+              variant="outline"
+              render={<Link href={ROUTES.home} />}
+              className="rounded-xl sm:min-w-36"
+            >
+              Back home
             </Button>
           </>
-        ) : null}
+        }
+      >
+        <BookingSummaryCard booking={booking} />
+      </PaymentResultShell>
+    );
+  }
 
-        {phase === "failed" && booking ? (
+  if (phase === "processing" || phase === "still_processing") {
+    return (
+      <PaymentResultShell
+        tone="info"
+        icon={
+          phase === "still_processing" ? (
+            <Clock3Icon className="size-8" />
+          ) : (
+            <Loader2Icon className="size-8 animate-spin" />
+          )
+        }
+        title={
+          phase === "still_processing"
+            ? "Still confirming your payment"
+            : "Processing payment"
+        }
+        description={
+          phase === "still_processing"
+            ? "This is taking a little longer than usual. Your payment may still be on its way — refresh anytime for the latest status."
+            : "Please wait while we confirm your payment with the hotel. You can leave this page open."
+        }
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            disabled={isRefreshing}
+            onClick={() => void handleRefresh()}
+          >
+            <RefreshCwIcon className="size-4" />
+            {isRefreshing ? "Refreshing…" : "Refresh status"}
+          </Button>
+        }
+      >
+        {booking ? <BookingSummaryCard booking={booking} /> : null}
+      </PaymentResultShell>
+    );
+  }
+
+  if (phase === "failed" && booking) {
+    return (
+      <PaymentResultShell
+        tone="danger"
+        icon={<XCircleIcon className="size-8" />}
+        title="Payment didn't go through"
+        description={toCustomerPaymentFailureMessage(
+          booking.payment?.failureReason,
+        )}
+        actions={
           <>
-            <h1 className="text-xl font-semibold">Payment failed</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {toCustomerPaymentFailureMessage(booking.payment?.failureReason)}
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Booking reference {booking.reservationNumber}
-            </p>
             <Button
               type="button"
-              className="mt-6"
+              className="rounded-xl sm:min-w-40"
               disabled={isRetrying}
               onClick={() => void handleRetryPayment()}
             >
               {isRetrying ? "Starting checkout…" : "Try payment again"}
             </Button>
-          </>
-        ) : null}
-
-        {phase === "refund" && booking ? (
-          <>
-            <h1 className="text-xl font-semibold">Refund in progress</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              We received your payment but could not confirm this booking. A
-              refund is being processed.
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Reference {booking.reservationNumber}
-            </p>
-          </>
-        ) : null}
-
-        {phase === "expired" && booking ? (
-          <>
-            <h1 className="text-xl font-semibold">Hold expired</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This booking is no longer holding the rooms. Please search again
-              to book your stay.
-            </p>
             <Button
-              render={
-                <Link href={buildRebookUrl(booking)} />
-              }
-              className="mt-6"
+              variant="outline"
+              render={<Link href={ROUTES.help.root} />}
+              className="rounded-xl"
+            >
+              Need help?
+            </Button>
+          </>
+        }
+      >
+        <BookingSummaryCard booking={booking} />
+        {errorMessage ? (
+          <p className="mt-3 text-center text-sm text-destructive">{errorMessage}</p>
+        ) : null}
+      </PaymentResultShell>
+    );
+  }
+
+  if (phase === "refund" && booking) {
+    return (
+      <PaymentResultShell
+        tone="warning"
+        icon={<RefreshCwIcon className="size-8" />}
+        title="Refund in progress"
+        description="We received your payment but could not confirm this booking. A refund is being processed to your original payment method."
+        actions={
+          <Button
+            render={<Link href={ROUTES.help.root} />}
+            className="rounded-xl"
+          >
+            Talk to support
+          </Button>
+        }
+      >
+        <BookingSummaryCard booking={booking} />
+      </PaymentResultShell>
+    );
+  }
+
+  if (phase === "expired" && booking) {
+    return (
+      <PaymentResultShell
+        tone="warning"
+        icon={<Clock3Icon className="size-8" />}
+        title="This hold has expired"
+        description="The rooms are no longer reserved for this booking. Search again to lock in your next stay."
+        actions={
+          <>
+            <Button
+              render={<Link href={buildRebookUrl(booking)} />}
+              className="rounded-xl sm:min-w-36"
             >
               Book again
             </Button>
+            <Button
+              variant="outline"
+              render={<Link href={ROUTES.search} />}
+              className="rounded-xl"
+            >
+              Browse stays
+            </Button>
           </>
-        ) : null}
+        }
+      >
+        <BookingSummaryCard booking={booking} />
+      </PaymentResultShell>
+    );
+  }
 
-        {errorMessage ? (
-          <p className="mt-4 text-sm text-destructive">{errorMessage}</p>
-        ) : null}
-      </div>
-    </Container>
+  return (
+    <PaymentResultShell
+      tone="info"
+      icon={<Loader2Icon className="size-8 animate-spin" />}
+      title="Checking payment status"
+      description="One moment while we fetch the latest update."
+    />
   );
 }

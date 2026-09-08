@@ -8,6 +8,7 @@ import { Container } from "@/components/common/container";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { profileConfig } from "@/config/profile";
 import { ROUTES } from "@/constants/routes";
 import { fetchMyMembership } from "@/lib/membership-api";
@@ -95,17 +96,23 @@ export function ProfileSection({ className }: ProfileSectionProps) {
 
         <div className="mb-4 rounded-md bg-brand p-4 text-white shadow-sm sm:p-5">
           {isLoading ? (
-            <div className="h-12 animate-pulse rounded-xl bg-white/10" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-32 rounded-full sm:size-36" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-5 w-32 rounded-md bg-white/20" />
+                <Skeleton className="h-4 w-24 rounded-md bg-white/20" />
+              </div>
+            </div>
           ) : isAuthenticated ? (
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <Avatar
                   size="lg"
-                  className="size-28 border border-white/20 after:border-white/20 sm:size-32"
+                  className="size-32 border border-white/20 after:border-white/20 sm:size-36"
                 >
                   <AvatarImage src="/avatar.webp" alt="Profile avatar" />
                   <AvatarFallback className="bg-white/15 text-white">
-                    <UserRoundIcon className="size-10 sm:size-12" aria-hidden="true" />
+                    <UserRoundIcon className="size-12 sm:size-14" aria-hidden="true" />
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">

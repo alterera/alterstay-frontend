@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import type { MembershipStatus } from "@/types/membership";
 
@@ -12,10 +13,11 @@ type MembershipOverviewProps = {
 export function MembershipOverview({ status, loading }: MembershipOverviewProps) {
   if (loading) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="h-16 animate-pulse rounded-lg bg-muted" />
-          <div className="h-16 animate-pulse rounded-lg bg-muted" />
+      <div className="rounded-md border bg-white p-6">
+        <Skeleton className="h-6 w-32 rounded-md" />
+        <div className="mt-4 grid grid-cols-2 gap-6">
+          <Skeleton className="h-16 rounded-lg" />
+          <Skeleton className="h-16 rounded-lg" />
         </div>
       </div>
     );

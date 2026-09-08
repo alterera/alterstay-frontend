@@ -159,7 +159,7 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
               Get Direction
             </a>
             <Link
-              href={ROUTES.help.contact}
+              href={ROUTES.help.root}
               className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
             >
               Need Help?

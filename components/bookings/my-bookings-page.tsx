@@ -5,7 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { BookingListCard } from "@/components/bookings/booking-list-card";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
+import { BookingsListSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { fetchMyBookings } from "@/lib/booking-api";
 import { cn } from "@/lib/utils";
 import type { BookingListTab, BookingResponse } from "@/types/booking";
@@ -80,7 +82,11 @@ export function MyBookingsPage() {
   }, [activeTab, isAuthenticated, loadBookings, tabsReady]);
 
   if (isLoading) {
-    return <div className="min-h-[40vh] bg-background" />;
+    return (
+      <section className="bg-background pb-8 pt-6 lg:pt-10">
+        <BookingsListSkeleton />
+      </section>
+    );
   }
 
   if (!isAuthenticated) {
@@ -132,10 +138,7 @@ export function MyBookingsPage() {
         {loadingBookings ? (
           <div className="grid gap-4 lg:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-44 animate-pulse rounded-2xl bg-muted"
-              />
+              <Skeleton key={index} className="h-44 rounded-2xl" />
             ))}
           </div>
         ) : bookings.length === 0 ? (

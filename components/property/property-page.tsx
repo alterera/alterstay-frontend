@@ -26,12 +26,10 @@ import {
 import { fetchQuote } from "@/lib/quote-api";
 import { quoteToBill } from "@/lib/quote-utils";
 import { fetchPropertyDetail } from "@/lib/property-api";
+import { PropertyPageSkeleton } from "@/components/skeletons";
 import { findLowestPricePlan, planToSelection } from "@/lib/property-booking";
-import {
-  buildRatingBreakdown,
-  getPropertyRestrictions,
-  splitAmenities,
-} from "@/lib/property-enrichment";
+import { FeaturedPropertiesSection } from "@/components/sections/featured-properties";
+import { splitAmenities } from "@/lib/property-enrichment";
 import { buildPropertyUrl } from "@/lib/property-url";
 import { parseSearchParams, formatDateParam } from "@/lib/search-params";
 import {
@@ -169,11 +167,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   }, [quote, selectedPlan]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
-        Loading property…
-      </div>
-    );
+    return <PropertyPageSkeleton />;
   }
 
   if (error || !property) {
@@ -189,8 +183,6 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   }
 
   const { perks, amenities } = splitAmenities(property);
-  const ratingBreakdown = buildRatingBreakdown(property.guestRating);
-  const restrictions = getPropertyRestrictions();
 
   return (
     <div className="bg-muted/20 pb-24 lg:pb-12">
@@ -220,13 +212,13 @@ export function PropertyPage({ slug }: PropertyPageProps) {
             <PropertyLocationSection property={property} />
 
             <PropertyRatingsSection
-              guestRating={property.guestRating}
-              breakdown={ratingBreakdown}
+              reviewSummary={property.reviewSummary}
+              reviews={property.reviews}
             />
 
             <PropertyPoliciesSection
               policies={property.policies}
-              restrictions={restrictions}
+              restrictions={property.restrictions}
               checkInTime={property.checkInTime}
               checkOutTime={property.checkOutTime}
             />
@@ -261,6 +253,15 @@ export function PropertyPage({ slug }: PropertyPageProps) {
         quoteAvailable={quote?.available ?? true}
         onBookNow={handleBookNow}
       />
+
+      {property.city ? (
+        <FeaturedPropertiesSection
+          city={property.city}
+          excludeSlug={property.slug}
+          title={`More stays in ${property.city}`}
+          subtitle="Other hotels travellers are booking in this city"
+        />
+      ) : null}
     </div>
   );
 }

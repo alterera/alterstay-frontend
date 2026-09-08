@@ -46,7 +46,7 @@ export const profileConfig = {
         {
           id: "customer-service",
           label: "Contact Customer Service",
-          href: ROUTES.help.contact,
+          href: ROUTES.help.root,
           icon: HeadsetIcon,
         },
       ],
@@ -132,7 +132,7 @@ export const profileConfig = {
         {
           id: "customer-service",
           label: "Contact Customer Services",
-          href: ROUTES.help.contact,
+          href: ROUTES.help.root,
           icon: HeadsetIcon,
         },
       ],

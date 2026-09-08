@@ -12,6 +12,7 @@ import type {
   PropertyType,
   RatePlan,
   RatePrice,
+  Restriction,
   Room,
   RoomInventory,
   RoomType,
@@ -88,6 +89,17 @@ export function fetchAmenities() {
   return adminFetch<Amenity[]>("/admin/amenities");
 }
 
+export function fetchRestrictions() {
+  return adminFetch<Restriction[]>("/admin/restrictions");
+}
+
+export function createRestriction(data: { label: string; icon?: string }) {
+  return adminFetch<Restriction>("/admin/restrictions", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export function fetchMealPlans() {
   return adminFetch<MealPlan[]>("/admin/meal-plans");
 }
@@ -139,6 +151,13 @@ export function updatePropertyPolicies(
   return adminFetch<Property>(`/admin/properties/${id}/policies`, {
     method: "PUT",
     body: JSON.stringify({ policies }),
+  });
+}
+
+export function updatePropertyRestrictions(id: string, restrictionIds: string[]) {
+  return adminFetch<Property>(`/admin/properties/${id}/restrictions`, {
+    method: "PUT",
+    body: JSON.stringify({ restrictionIds }),
   });
 }
 

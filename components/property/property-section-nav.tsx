@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { ArrowLeftIcon, HeartIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useNavbarScrollHidden } from "@/hooks/use-navbar-scroll-hidden";
 import { cn } from "@/lib/utils";
 import {
   PROPERTY_SECTIONS,
@@ -48,6 +49,7 @@ export function PropertySectionNav({
   onToggleFavourite,
   className,
 }: PropertySectionNavProps) {
+  const navHidden = useNavbarScrollHidden();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef(new Map<string, HTMLButtonElement>());
 
@@ -62,7 +64,8 @@ export function PropertySectionNav({
     <nav
       aria-label="Property sections"
       className={cn(
-        "sticky top-0 z-40 border-b bg-white/95 backdrop-blur-xl lg:top-14",
+        "sticky top-0 z-40 border-b bg-white/95 backdrop-blur-xl transition-[top] duration-300 ease-in-out",
+        navHidden ? "lg:top-0" : "lg:top-14",
         className,
       )}
     >

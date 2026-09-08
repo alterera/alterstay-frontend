@@ -30,12 +30,11 @@ type PropertyFormValues = {
 type PropertyFormProps = {
   property?: Property;
   propertyTypes: PropertyType[];
-  amenities: Amenity[];
+  amenities?: Amenity[];
   loading?: boolean;
   onSubmit: (values: Record<string, unknown>) => Promise<void>;
-  onAmenitiesChange?: (amenityIds: string[]) => Promise<void>;
   onImagesSelected?: (files: FileList) => Promise<void>;
-  onDeleteImage?: (imageId: string) => Promise<void>;
+  onDeleteImage?: (imageId: string) => void;
 };
 
 function valuesFromProperty(property?: Property): PropertyFormValues {
@@ -62,10 +61,9 @@ function valuesFromProperty(property?: Property): PropertyFormValues {
 export function PropertyForm({
   property,
   propertyTypes,
-  amenities,
+  amenities = [],
   loading,
   onSubmit,
-  onAmenitiesChange,
   onImagesSelected,
   onDeleteImage,
 }: PropertyFormProps) {
@@ -90,7 +88,6 @@ export function PropertyForm({
       const amenityIds = exists
         ? prev.amenityIds.filter((x) => x !== id)
         : [...prev.amenityIds, id];
-      void onAmenitiesChange?.(amenityIds);
       return { ...prev, amenityIds };
     });
   }
@@ -274,9 +271,13 @@ export function PropertyForm({
         </div>
       </section>
 
-      {amenities.length ? (
+      {!property && amenities.length ? (
         <section className="space-y-4 rounded-lg border bg-background p-6">
           <h2 className="font-medium">Amenities</h2>
+          <p className="text-sm text-muted-foreground">
+            Optional on create. Perks, amenities, policies, and restrictions can
+            be managed in the Content tab after saving.
+          </p>
           <div className="flex flex-wrap gap-2">
             {amenities.map((amenity) => {
               const selected = values.amenityIds.includes(amenity.id);

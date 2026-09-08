@@ -1,11 +1,12 @@
+import { formatPropertyTime } from "@/lib/format";
 import type {
   PropertyPolicyDetail,
-  PropertyRestriction,
+  PropertyRestrictionDetail,
 } from "@/types/property-detail";
 
 type PropertyPoliciesSectionProps = {
   policies: PropertyPolicyDetail[];
-  restrictions: PropertyRestriction[];
+  restrictions: PropertyRestrictionDetail[];
   checkInTime: string | null;
   checkOutTime: string | null;
 };
@@ -26,8 +27,12 @@ export function PropertyPoliciesSection({
   );
 
   const defaultBullets = [
-    checkInTime ? `Check-in from ${checkInTime}` : null,
-    checkOutTime ? `Check-out until ${checkOutTime}` : null,
+    checkInTime
+      ? `Check-in from ${formatPropertyTime(checkInTime)}`
+      : null,
+    checkOutTime
+      ? `Check-out until ${formatPropertyTime(checkOutTime)}`
+      : null,
     "Valid government ID required at check-in",
     "Primary guest must be at least 18 years of age",
   ].filter(Boolean) as string[];

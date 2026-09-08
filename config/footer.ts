@@ -19,10 +19,12 @@ export const footerConfig = {
   links: [
     { label: "About Us", href: ROUTES.about },
     { label: "Terms & Conditions", href: ROUTES.terms },
-    { label: "Blog", href: ROUTES.blog },
     { label: "Privacy Policy", href: ROUTES.privacy },
+    { label: "Cancellation Policy", href: ROUTES.cancellationPolicy },
+    { label: "Blog", href: ROUTES.blog },
     { label: "Contact Us", href: ROUTES.contact },
     { label: "Careers", href: ROUTES.careers },
+    { label: "Help", href: ROUTES.help.root },
     { label: "FAQs", href: ROUTES.help.faq },
   ] satisfies FooterLink[],
   paymentLogos: [

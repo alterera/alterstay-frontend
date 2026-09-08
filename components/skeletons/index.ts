@@ -1,0 +1,11 @@
+export { BookingsListSkeleton } from "./bookings-list-skeleton";
+export { CheckoutPageSkeleton } from "./checkout-page-skeleton";
+export { CitiesPageSkeleton } from "./cities-page-skeleton";
+export { HelpBookingsSkeleton } from "./help-bookings-skeleton";
+export { HomeFeaturedSkeleton } from "./home-featured-skeleton";
+export { LegalPageSkeleton } from "./legal-page-skeleton";
+export { MembershipPlansSkeleton } from "./membership-plans-skeleton";
+export { PropertyPageSkeleton } from "./property-page-skeleton";
+export { SearchResultsSkeleton } from "./search-results-skeleton";
+export { StaticPageSkeleton } from "./static-page-skeleton";
+export { WalletPageSkeleton } from "./wallet-page-skeleton";

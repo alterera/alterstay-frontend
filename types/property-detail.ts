@@ -25,6 +25,39 @@ export type PropertyPolicyDetail = {
   description: string | null;
 };
 
+export type PropertyRestrictionDetail = {
+  id: string;
+  label: string;
+  icon: string | null;
+};
+
+export type PropertyReviewBreakdown = {
+  smoothCheckIn: number;
+  roomQuality: number;
+  staffBehavior: number;
+  hotelSurroundings: number;
+};
+
+export type PropertyReviewSummary = {
+  guestRating: number | null;
+  reviewCount: number;
+  breakdown: PropertyReviewBreakdown;
+};
+
+export type PropertyGuestReviewDetail = {
+  id: string;
+  authorName: string;
+  authorInitials: string;
+  rating: number;
+  date: string;
+  comment: string;
+  breakdown: PropertyReviewBreakdown;
+};
+
+export type PropertyRatingBreakdown = PropertyReviewBreakdown;
+export type PropertyGuestReview = PropertyGuestReviewDetail;
+export type PropertyRestriction = PropertyRestrictionDetail;
+
 export type PropertyRatePlanDetail = {
   id: string;
   name: string;
@@ -72,34 +105,15 @@ export type PropertyDetail = {
   tags: { code: string; name: string }[];
   amenities: PropertyAmenityDetail[];
   policies: PropertyPolicyDetail[];
+  restrictions: PropertyRestrictionDetail[];
+  reviewSummary: PropertyReviewSummary;
+  reviews: PropertyGuestReviewDetail[];
   roomTypes: PropertyRoomTypeDetail[];
   minTotalPrice: number | null;
   minPricePerNight: number | null;
   estimatedTaxes: number | null;
   currency: string;
   nights: number;
-};
-
-/** Frontend-only enrichments until backend support is added. */
-export type PropertyRatingBreakdown = {
-  smoothCheckIn: number;
-  roomQuality: number;
-  staffBehavior: number;
-  hotelSurroundings: number;
-};
-
-export type PropertyGuestReview = {
-  id: string;
-  authorName: string;
-  authorInitials: string;
-  rating: number;
-  date: string;
-  comment: string;
-};
-
-export type PropertyRestriction = {
-  id: string;
-  label: string;
 };
 
 export const PROPERTY_SECTIONS = [

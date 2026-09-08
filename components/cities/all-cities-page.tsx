@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Container } from "@/components/common/container";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -169,10 +170,7 @@ export function AllCitiesPage() {
         {loading ? (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-28 animate-pulse rounded-xl bg-muted"
-              />
+              <Skeleton key={index} className="h-28 rounded-xl" />
             ))}
           </div>
         ) : null}
