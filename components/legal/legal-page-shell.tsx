@@ -31,7 +31,7 @@ export function LegalPageShell({
 }: LegalPageShellProps) {
   return (
     <>
-      <SubpageHeader title={title} backHref={ROUTES.home} />
+      <SubpageHeader title={title} backHref={ROUTES.home} mobileOnly />
       <section className={cn("bg-background pb-16 pt-6 sm:pt-8", className)}>
         <Container className="max-w-3xl">
           <p className="text-xs font-medium uppercase tracking-wide text-brand">

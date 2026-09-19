@@ -27,7 +27,7 @@ export function PropertyLocationSection({
         <h2 className="mt-1 text-xl font-semibold">Where you&apos;ll stay</h2>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-muted">
+      <div className="overflow-hidden rounded-md border bg-muted">
         {mapUrl ? (
           <iframe
             title={`Map for ${property.name}`}
@@ -43,7 +43,7 @@ export function PropertyLocationSection({
         )}
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-md border bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-3">
           <MapPinIcon className="mt-0.5 size-5 shrink-0 text-brand" />
           <p className="text-sm leading-relaxed text-muted-foreground">
@@ -55,7 +55,7 @@ export function PropertyLocationSection({
           href={directionsUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium transition-colors hover:bg-muted"
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium transition-colors hover:bg-brand/10"
         >
           <NavigationIcon className="size-4" />
           Get Direction

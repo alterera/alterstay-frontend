@@ -14,11 +14,13 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import { fetchCurrentUser } from "@/lib/auth-api";
 import { fetchMyMembership } from "@/lib/membership-api";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
+import Image from "next/image";
 
 export type ProfileShellNavId = "profile" | "guests";
 
@@ -50,21 +52,27 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
   const router = useRouter();
   const { user: sessionUser, isAuthenticated, isLoading } = useAuth();
   const [profile, setProfile] = useState<AuthUser | null>(sessionUser);
-  const [membershipTier, setMembershipTier] = useState("Free");
+  const [membershipTier, setMembershipTier] = useState<string | null>(null);
   const [membershipExpiresAt, setMembershipExpiresAt] = useState<string | null>(
     null,
   );
+  const [membershipLoading, setMembershipLoading] = useState(true);
 
   const loadHeader = useCallback(async () => {
+    setMembershipLoading(true);
     const [data, membership] = await Promise.all([
       fetchCurrentUser(),
       fetchMyMembership().catch(() => null),
     ]);
     setProfile(data);
     if (membership) {
-      setMembershipTier(membership.tier);
+      setMembershipTier(membership.active?.planName ?? membership.tier ?? "Free");
       setMembershipExpiresAt(membership.active?.expiresAt ?? null);
+    } else {
+      setMembershipTier("Free");
+      setMembershipExpiresAt(null);
     }
+    setMembershipLoading(false);
   }, []);
 
   useEffect(() => {
@@ -86,28 +94,28 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
 
   return (
     <section className="bg-background pb-10 pt-0">
-      <div className="bg-brand px-4 py-5 text-white sm:px-6">
+      <div className="bg-brand py-5 text-white">
         <Container className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="shrink-0 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              className="shrink-0 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white lg:hidden"
               onClick={() => router.push(ROUTES.profile)}
               aria-label="Back to profile"
             >
               <ArrowLeftIcon className="size-4" />
             </Button>
-            <Avatar
+            {/* <Avatar
               size="lg"
-              className="size-32 shrink-0 border border-white/20 after:border-white/20 sm:size-36"
-            >
-              <AvatarImage src="/avatar.webp" alt="Profile avatar" />
-              <AvatarFallback className="bg-white/15 text-white">
-                <UserRoundIcon className="size-12 sm:size-14" />
+              className="size-36 shrink-0 border-2 border-white/25 after:border-white/25 sm:size-40"
+            > */}
+              <Image src="/avatar.webp" alt="Profile avatar" width={60} height={60} />
+              {/* <AvatarFallback className="bg-white/15 text-white">
+                <UserRoundIcon className="size-14 sm:size-16" />
               </AvatarFallback>
-            </Avatar>
+            </Avatar> */}
             <div className="min-w-0">
               <h1 className="truncate text-lg font-semibold sm:text-xl">
                 {fullName}
@@ -141,19 +149,31 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
                 <div className="flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <BadgeCheckIcon className="size-5" />
                 </div>
-                <div>
-                  <p className="text-sm font-semibold">{membershipTier}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {membershipExpiresAt
-                      ? `Expires ${formatMembershipExpiry(membershipExpiresAt)}`
-                      : "No active membership"}
-                  </p>
-                  <Link
-                    href={ROUTES.membership}
-                    className="mt-2 inline-block text-xs font-medium text-brand underline"
-                  >
-                    {membershipExpiresAt ? "Renew or upgrade" : "Get membership"}
-                  </Link>
+                <div className="min-w-0 flex-1">
+                  {membershipLoading ? (
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24 rounded-md" />
+                      <Skeleton className="h-3 w-32 rounded-md" />
+                      <Skeleton className="h-3 w-28 rounded-md" />
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm font-semibold">{membershipTier}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {membershipExpiresAt
+                          ? `Expires ${formatMembershipExpiry(membershipExpiresAt)}`
+                          : "No active membership"}
+                      </p>
+                      <Link
+                        href={ROUTES.membership}
+                        className="mt-2 inline-block text-xs font-medium text-brand underline"
+                      >
+                        {membershipExpiresAt
+                          ? "Renew or upgrade"
+                          : "Get membership"}
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

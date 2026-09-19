@@ -8,7 +8,7 @@ import { ROUTES } from "@/constants/routes";
 export function BlogPage() {
   return (
     <>
-      <SubpageHeader title="Blog" backHref={ROUTES.home} />
+      <SubpageHeader title="Blog" backHref={ROUTES.home} mobileOnly />
       <section className="bg-background pb-16 pt-6 sm:pt-8">
         <Container className="max-w-3xl">
           <p className="text-sm leading-relaxed text-muted-foreground">

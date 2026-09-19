@@ -37,22 +37,14 @@ export const mainNavigation: NavItem[] = [
       {
         label: "Help Center",
         href: ROUTES.help.root,
-        description: "Browse guides and resources for your stay.",
       },
       {
-        label: "FAQ",
+        label: "FAQs",
         href: ROUTES.help.faq,
-        description: "Find answers to commonly asked questions.",
       },
       {
-        label: "Contact Support",
-        href: ROUTES.help.contact,
-        description: "Reach our team for booking assistance.",
-      },
-      {
-        label: "Live Support",
-        href: ROUTES.help.support,
-        description: "Chat with us for real-time help.",
+        label: "Contact Us",
+        href: ROUTES.contact,
       },
     ],
   },

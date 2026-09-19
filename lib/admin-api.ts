@@ -177,6 +177,12 @@ export function deletePropertyImage(propertyId: string, imageId: string) {
   );
 }
 
+export function setPropertyThumbnail(propertyId: string, imageId: string) {
+  return adminFetch<Property>(`/admin/properties/${propertyId}/images/${imageId}/thumbnail`, {
+    method: "PATCH",
+  });
+}
+
 export function fetchRoomTypes(propertyId: string) {
   return adminFetch<RoomType[]>(
     `/admin/properties/${propertyId}/room-types`,

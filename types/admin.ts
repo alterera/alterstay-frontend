@@ -162,11 +162,25 @@ export type PropertyListItem = {
   images?: PropertyImage[];
 };
 
+export type PropertyArea = {
+  id: string;
+  name: string;
+  slug: string;
+  cityId: string;
+  city?: {
+    id: string;
+    name: string;
+    state: string | null;
+    country: string;
+  };
+};
+
 export type Property = PropertyListItem & {
   images: PropertyImage[];
   description: string | null;
   checkInTime: string | null;
   checkOutTime: string | null;
+  area?: PropertyArea | null;
   amenities: { amenity: Amenity }[];
   policies: PropertyPolicy[];
   restrictions?: PropertyRestriction[];

@@ -5,7 +5,6 @@ import {
   FileTextIcon,
   GiftIcon,
   HeadsetIcon,
-  HeartIcon,
   InfoIcon,
   LogOutIcon,
   ShieldCheckIcon,
@@ -46,7 +45,7 @@ export const profileConfig = {
         {
           id: "customer-service",
           label: "Contact Customer Service",
-          href: ROUTES.help.root,
+          href: ROUTES.contact,
           icon: HeadsetIcon,
         },
       ],
@@ -205,12 +204,6 @@ export const profileConfig = {
       label: "My Coins",
       href: ROUTES.wallet,
       icon: WalletIcon,
-    },
-    {
-      id: "favourites",
-      label: "Favourites",
-      href: ROUTES.favourites,
-      icon: HeartIcon,
     },
     {
       id: "logout",

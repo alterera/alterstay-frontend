@@ -72,7 +72,7 @@ export function formatCurrency(
   }).format(amount);
 }
 
-/** Property check-in/out time, e.g. "14:00" → "02 PM". */
+/** Property check-in/out time, e.g. "14:00" → "2:00 PM". */
 export function formatPropertyTime(time: string | null | undefined): string {
   if (!time) return "";
   const [hourPart, minutePart] = time.split(":");
@@ -82,13 +82,11 @@ export function formatPropertyTime(time: string | null | undefined): string {
 
   const period = hour >= 12 ? "PM" : "AM";
   const hour12 = hour % 12 || 12;
-  const minuteLabel =
-    minute > 0 ? `:${String(minute).padStart(2, "0")}` : "";
 
-  return `${String(hour12).padStart(2, "0")}${minuteLabel} ${period}`;
+  return `${hour12}:${String(minute).padStart(2, "0")} ${period}`;
 }
 
-/** Booking summary date + time, e.g. "20 Aug 26, 02 PM". */
+/** Booking summary date + time, e.g. "20 Aug 26, 2:00 PM". */
 export function formatBookingDateTime(
   date: Date | undefined,
   time: string | null | undefined,

@@ -12,15 +12,21 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import {
   deletePropertyImage,
+  setPropertyThumbnail,
+  fetchAdminCities,
   fetchAmenities,
   fetchProperty,
   fetchPropertyTypes,
-  fetchRestrictions,
   updateProperty,
   updatePropertyStatus,
   uploadPropertyImage,
 } from "@/lib/admin-api";
-import type { Amenity, Property, PropertyType, Restriction } from "@/types/admin";
+import type {
+  AdminCity,
+  Amenity,
+  Property,
+  PropertyType,
+} from "@/types/admin";
 
 type Tab = "details" | "content" | "rooms" | "inventory" | "pricing";
 
@@ -29,24 +35,22 @@ export default function EditPropertyPage() {
   const [tab, setTab] = useState<Tab>("details");
   const [property, setProperty] = useState<Property | null>(null);
   const [types, setTypes] = useState<PropertyType[]>([]);
+  const [cities, setCities] = useState<AdminCity[]>([]);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
-  const [restrictionsCatalog, setRestrictionsCatalog] = useState<Restriction[]>(
-    [],
-  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [p, t, a, r] = await Promise.all([
+    const [p, t, c, a] = await Promise.all([
       fetchProperty(params.id),
       fetchPropertyTypes(),
+      fetchAdminCities(),
       fetchAmenities(),
-      fetchRestrictions(),
     ]);
     setProperty(p);
     setTypes(t);
+    setCities(c);
     setAmenities(a);
-    setRestrictionsCatalog(r);
   }, [params.id]);
 
   useEffect(() => {
@@ -159,6 +163,7 @@ export default function EditPropertyPage() {
         <PropertyForm
           property={property}
           propertyTypes={types}
+          cities={cities}
           loading={loading}
           onSubmit={async (values) => {
             setLoading(true);
@@ -189,12 +194,22 @@ export default function EditPropertyPage() {
             await deletePropertyImage(property.id, imageId);
             await load();
           }}
+          onSetThumbnail={async (imageId) => {
+            setLoading(true);
+            try {
+              const updated = await setPropertyThumbnail(property.id, imageId);
+              setProperty(updated);
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Thumbnail update failed");
+            } finally {
+              setLoading(false);
+            }
+          }}
         />
       ) : tab === "content" ? (
         <PropertyContentPanel
           property={property}
           amenities={amenities}
-          restrictions={restrictionsCatalog}
           onSaved={(updated) => setProperty(updated)}
         />
       ) : (

@@ -9,9 +9,8 @@ import { Label } from "@/components/ui/label";
 import {
   updatePropertyAmenities,
   updatePropertyPolicies,
-  updatePropertyRestrictions,
 } from "@/lib/admin-api";
-import type { Amenity, Property, Restriction } from "@/types/admin";
+import type { Amenity, Property } from "@/types/admin";
 
 type PolicyDraft = {
   policyType: string;
@@ -22,7 +21,6 @@ type PolicyDraft = {
 type PropertyContentPanelProps = {
   property: Property;
   amenities: Amenity[];
-  restrictions: Restriction[];
   onSaved: (property: Property) => void;
 };
 
@@ -69,7 +67,6 @@ function SelectionPills({
 export function PropertyContentPanel({
   property,
   amenities,
-  restrictions,
   onSaved,
 }: PropertyContentPanelProps) {
   const perkCatalog = useMemo(
@@ -92,9 +89,6 @@ export function PropertyContentPanel({
       amenityCatalog.some((amenity) => amenity.id === id),
     ),
   );
-  const [restrictionIds, setRestrictionIds] = useState<string[]>(
-    () => property.restrictions?.map((r) => r.restriction.id) ?? [],
-  );
   const [policies, setPolicies] = useState<PolicyDraft[]>(() =>
     property.policies.map((policy) => ({
       policyType: policy.policyType,
@@ -110,9 +104,6 @@ export function PropertyContentPanel({
     setPerkIds(ids.filter((id) => perkCatalog.some((perk) => perk.id === id)));
     setAmenityIds(
       ids.filter((id) => amenityCatalog.some((amenity) => amenity.id === id)),
-    );
-    setRestrictionIds(
-      property.restrictions?.map((r) => r.restriction.id) ?? [],
     );
     setPolicies(
       property.policies.map((policy) => ({
@@ -133,17 +124,13 @@ export function PropertyContentPanel({
     try {
       const mergedAmenityIds = [...new Set([...perkIds, ...amenityIds])];
       await updatePropertyAmenities(property.id, mergedAmenityIds);
-      await updatePropertyPolicies(
+      const updated = await updatePropertyPolicies(
         property.id,
         policies.map((policy) => ({
           policyType: policy.policyType.trim(),
           title: policy.title.trim(),
           description: policy.description.trim() || undefined,
         })),
-      );
-      const updated = await updatePropertyRestrictions(
-        property.id,
-        restrictionIds,
       );
       onSaved(updated);
     } catch (err) {
@@ -281,20 +268,6 @@ export function PropertyContentPanel({
             ))
           )}
         </div>
-      </section>
-
-      <section className="space-y-3">
-        <div>
-          <h3 className="text-lg font-semibold">Restrictions</h3>
-          <p className="text-sm text-muted-foreground">
-            Rules shown under &quot;What to follow&quot; on the property page.
-          </p>
-        </div>
-        <SelectionPills
-          items={restrictions.map((r) => ({ id: r.id, label: r.label }))}
-          selectedIds={restrictionIds}
-          onToggle={(id) => toggleId(restrictionIds, id, setRestrictionIds)}
-        />
       </section>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}

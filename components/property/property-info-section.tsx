@@ -12,7 +12,7 @@ type PropertyInfoSectionProps = {
 export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const locationLabel = [property.area, property.city]
-    .filter(Boolean)
+    .filter((part, index, parts) => Boolean(part) && part !== parts[index - 1])
     .join(", ");
   const about = property.description?.trim() ?? "";
   const needsReadMore = about.length > 180;

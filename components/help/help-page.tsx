@@ -8,10 +8,10 @@ import {
   ChevronRightIcon,
   HeadphonesIcon,
   Loader2Icon,
+  SearchIcon,
 } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { Logo } from "@/components/common/logo";
 import { Container } from "@/components/common/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,6 @@ import {
   fetchMyBookings,
 } from "@/lib/booking-api";
 import { formatHelpStayLine } from "@/lib/booking-format";
-import { cn } from "@/lib/utils";
 import type { BookingResponse } from "@/types/booking";
 
 const PAGE_SIZE = 3;
@@ -42,24 +41,9 @@ function HelpBookingCard({ booking, onSelect }: HelpBookingCardProps) {
     <button
       type="button"
       onClick={() => onSelect(booking.reservationNumber)}
-      className="flex w-full items-center gap-3 rounded-xl border bg-white p-3 text-left transition-colors hover:border-brand/40 hover:bg-brand/2"
+      className="flex w-full items-center gap-4 rounded-2xl border bg-white p-4 text-left shadow-sm transition-all hover:border-brand/30 hover:shadow-md"
     >
-      <div className="min-w-0 flex-1 space-y-1">
-        <p className="truncate text-xs text-muted-foreground">
-          {booking.property.city ?? "India"}
-        </p>
-        <p className="line-clamp-2 text-sm font-semibold text-foreground">
-          {booking.property.name}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {formatHelpStayLine(
-            booking.checkIn,
-            booking.checkOut,
-            booking.nights,
-          )}
-        </p>
-      </div>
-      <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted sm:size-20">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-muted">
         <Image
           src={imageUrl}
           alt={booking.property.name}
@@ -68,7 +52,22 @@ function HelpBookingCard({ booking, onSelect }: HelpBookingCardProps) {
           sizes="80px"
         />
       </div>
-      <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+      <div className="min-w-0 flex-1 space-y-1">
+        <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {booking.property.city ?? "India"}
+        </p>
+        <p className="line-clamp-2 text-base font-semibold text-foreground">
+          {booking.property.name}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          )}
+        </p>
+      </div>
+      <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" />
     </button>
   );
 }
@@ -95,21 +94,21 @@ function BookingSection({
   emptyLabel,
 }: BookingSectionProps) {
   return (
-    <section className="space-y-3">
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+    <section className="space-y-4">
+      <h2 className="text-base font-semibold text-foreground">{title}</h2>
       {loading ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Array.from({ length: 2 }).map((_, index) => (
-            <Skeleton key={index} className="h-24 rounded-xl" />
+            <Skeleton key={index} className="h-28 rounded-2xl" />
           ))}
         </div>
       ) : bookings.length === 0 ? (
-        <p className="rounded-xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-2xl border border-dashed bg-white px-4 py-8 text-center text-sm text-muted-foreground">
           {emptyLabel}
         </p>
       ) : (
         <>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {bookings.map((booking) => (
               <li key={booking.reservationNumber}>
                 <HelpBookingCard booking={booking} onSelect={onSelect} />
@@ -264,102 +263,130 @@ export function HelpPage() {
   }
 
   return (
-    <section className="bg-background pb-12 pt-4 sm:pt-8">
-      <Container className="max-w-lg">
-        <Logo size="sm" />
-
-        <div className="mt-8 flex flex-col items-center text-center">
-          <div className="flex size-14 items-center justify-center rounded-full bg-brand/10 text-brand">
+    <section className="bg-muted/20 pb-16 pt-8 sm:pt-10 lg:pt-12">
+      <Container className="max-w-6xl">
+        <div className="mx-auto max-w-3xl text-center lg:max-w-none lg:text-left">
+          <div className="inline-flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
             <HeadphonesIcon className="size-7" />
           </div>
-          <p className="mt-4 text-xs font-medium text-muted-foreground">
-            Need Help with your booking?
+          <p className="mt-5 text-sm font-medium text-muted-foreground">
+            Need help with your booking?
           </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Choose the booking you need help with
           </h1>
-        </div>
-
-        {!authLoading && !isAuthenticated ? (
-          <div className="mt-8 rounded-2xl border bg-white p-6 text-center shadow-sm">
-            <p className="text-sm text-muted-foreground">
-              Sign in to see your completed and cancelled stays, or enter a
-              booking ID below.
-            </p>
-            <Button type="button" className="mt-4 rounded-xl" onClick={openLogin}>
-              Sign in
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-8 space-y-8">
-            <BookingSection
-              title="Completed"
-              bookings={completed}
-              loading={authLoading || loadingCompleted}
-              hasMore={completedHasMore}
-              loadingMore={loadingMoreCompleted}
-              onLoadMore={() => void loadMoreCompleted()}
-              onSelect={goToBookingHelp}
-              emptyLabel="No completed stays yet."
-            />
-
-            <BookingSection
-              title="Cancelled"
-              bookings={cancelled}
-              loading={authLoading || loadingCancelled}
-              hasMore={cancelledHasMore}
-              loadingMore={loadingMoreCancelled}
-              onLoadMore={() => void loadMoreCancelled()}
-              onSelect={goToBookingHelp}
-              emptyLabel="No cancelled bookings."
-            />
-          </div>
-        )}
-
-        <div
-          className={cn(
-            "mt-10 rounded-2xl border bg-white p-5 shadow-sm sm:p-6",
-          )}
-        >
-          <h2 className="text-base font-semibold">
-            Did not find the booking you are looking for?
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Enter the booking ID
+          <p className="mt-3 text-base text-muted-foreground">
+            Select a completed or cancelled stay, or search by booking ID to get
+            support faster.
           </p>
-          <div className="mt-4 space-y-3">
-            <Input
-              value={bookingId}
-              onChange={(event) => {
-                setBookingId(event.target.value);
-                setLookupError(null);
-              }}
-              placeholder="e.g. AS-XXXXXXXX"
-              className="h-11 rounded-xl"
-              onKeyDown={(event) => {
-                if (event.key === "Enter") void handleProceed();
-              }}
-            />
-            {lookupError ? (
-              <p className="text-sm text-destructive">{lookupError}</p>
-            ) : null}
-            <Button
-              type="button"
-              className="h-11 w-full rounded-xl"
-              disabled={lookingUp}
-              onClick={() => void handleProceed()}
-            >
-              {lookingUp ? "Checking…" : "Proceed"}
-            </Button>
-          </div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Looking for something else?{" "}
-          <Link href={ROUTES.help.faq} className="font-medium text-brand underline">
-            Browse FAQs
-          </Link>
-        </p>
+        <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <div className="space-y-6">
+            {!authLoading && !isAuthenticated ? (
+              <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
+                <p className="text-base text-muted-foreground">
+                  Sign in to see your completed and cancelled stays, or enter a
+                  booking ID in the panel on the right.
+                </p>
+                <Button
+                  type="button"
+                  className="mt-5 rounded-xl px-8"
+                  onClick={openLogin}
+                >
+                  Sign in
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-8 lg:grid-cols-2">
+                <BookingSection
+                  title="Completed stays"
+                  bookings={completed}
+                  loading={authLoading || loadingCompleted}
+                  hasMore={completedHasMore}
+                  loadingMore={loadingMoreCompleted}
+                  onLoadMore={() => void loadMoreCompleted()}
+                  onSelect={goToBookingHelp}
+                  emptyLabel="No completed stays yet."
+                />
+
+                <BookingSection
+                  title="Cancelled bookings"
+                  bookings={cancelled}
+                  loading={authLoading || loadingCancelled}
+                  hasMore={cancelledHasMore}
+                  loadingMore={loadingMoreCancelled}
+                  onLoadMore={() => void loadMoreCancelled()}
+                  onSelect={goToBookingHelp}
+                  emptyLabel="No cancelled bookings."
+                />
+              </div>
+            )}
+          </div>
+
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                  <SearchIcon className="size-5" />
+                </span>
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Find by booking ID
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Can&apos;t see your stay in the list?
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-3">
+                <Input
+                  value={bookingId}
+                  onChange={(event) => {
+                    setBookingId(event.target.value);
+                    setLookupError(null);
+                  }}
+                  placeholder="e.g. AS-XXXXXXXX"
+                  className="h-12 rounded-xl"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") void handleProceed();
+                  }}
+                />
+                {lookupError ? (
+                  <p className="text-sm text-destructive">{lookupError}</p>
+                ) : null}
+                <Button
+                  type="button"
+                  className="h-12 w-full rounded-xl"
+                  disabled={lookingUp}
+                  onClick={() => void handleProceed()}
+                >
+                  {lookingUp ? "Checking…" : "Proceed"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <p className="text-sm text-muted-foreground">
+                Looking for quick answers instead?
+              </p>
+              <Link
+                href={ROUTES.help.faq}
+                className="mt-2 inline-flex text-sm font-semibold text-brand underline"
+              >
+                Browse FAQs
+              </Link>
+              <span className="mx-2 text-muted-foreground">·</span>
+              <Link
+                href={ROUTES.contact}
+                className="inline-flex text-sm font-semibold text-brand underline"
+              >
+                Contact us
+              </Link>
+            </div>
+          </aside>
+        </div>
       </Container>
     </section>
   );

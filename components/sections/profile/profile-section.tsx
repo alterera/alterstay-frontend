@@ -45,21 +45,20 @@ function formatExpiry(value?: string | null) {
 export function ProfileSection({ className }: ProfileSectionProps) {
   const { user, isAuthenticated, isLoading, openLogin, logout } = useAuth();
   const { title, welcomeBanner } = profileConfig;
-  const [membershipTier, setMembershipTier] = useState(
-    user?.membershipTier ?? "Free",
-  );
-  const [expiresAt, setExpiresAt] = useState<string | null>(
-    user?.membershipExpiresAt ?? null,
-  );
+  const [membershipTier, setMembershipTier] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [membershipLoading, setMembershipLoading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setMembershipTier("Free");
+      setMembershipTier(null);
       setExpiresAt(null);
+      setMembershipLoading(false);
       return;
     }
 
     let cancelled = false;
+    setMembershipLoading(true);
     fetchMyMembership()
       .then((status) => {
         if (cancelled) return;
@@ -74,6 +73,9 @@ export function ProfileSection({ className }: ProfileSectionProps) {
         if (cancelled) return;
         setMembershipTier(user?.membershipTier ?? "Free");
         setExpiresAt(user?.membershipExpiresAt ?? null);
+      })
+      .finally(() => {
+        if (!cancelled) setMembershipLoading(false);
       });
 
     return () => {
@@ -97,7 +99,7 @@ export function ProfileSection({ className }: ProfileSectionProps) {
         <div className="mb-4 rounded-md bg-brand p-4 text-white shadow-sm sm:p-5">
           {isLoading ? (
             <div className="flex items-center gap-3">
-              <Skeleton className="size-32 rounded-full sm:size-36" />
+              <Skeleton className="size-36 rounded-full sm:size-40" />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-5 w-32 rounded-md bg-white/20" />
                 <Skeleton className="h-4 w-24 rounded-md bg-white/20" />
@@ -108,11 +110,11 @@ export function ProfileSection({ className }: ProfileSectionProps) {
               <div className="flex min-w-0 items-center gap-3">
                 <Avatar
                   size="lg"
-                  className="size-32 border border-white/20 after:border-white/20 sm:size-36"
+                  className="size-36 border-2 border-white/25 after:border-white/25 sm:size-40"
                 >
                   <AvatarImage src="/avatar.webp" alt="Profile avatar" />
                   <AvatarFallback className="bg-white/15 text-white">
-                    <UserRoundIcon className="size-12 sm:size-14" aria-hidden="true" />
+                    <UserRoundIcon className="size-14 sm:size-16" aria-hidden="true" />
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
@@ -164,18 +166,26 @@ export function ProfileSection({ className }: ProfileSectionProps) {
             ALTERSTAY
           </p>
           <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="truncate text-base font-semibold text-white">
-              {isAuthenticated ? membershipTier : "Membership"}
-            </p>
+            {isAuthenticated && membershipLoading ? (
+              <Skeleton className="h-5 w-28 rounded-md bg-white/20" />
+            ) : (
+              <p className="truncate text-base font-semibold text-white">
+                {isAuthenticated ? membershipTier : "Membership"}
+              </p>
+            )}
             <ChevronRightIcon className="size-5 shrink-0 text-white/70" />
           </div>
-          <p className="mt-3 text-xs text-white/70">
-            {isAuthenticated && expiryLabel
-              ? `Valid Until: ${expiryLabel}`
-              : isAuthenticated
-                ? "Explore plans & unlock member benefits"
-                : "Join Alterstay membership for exclusive savings"}
-          </p>
+          <div className="mt-3 text-xs text-white/70">
+            {isAuthenticated && membershipLoading ? (
+              <Skeleton className="h-3 w-40 rounded-md bg-white/15" />
+            ) : isAuthenticated && expiryLabel ? (
+              `Valid Until: ${expiryLabel}`
+            ) : isAuthenticated ? (
+              "Explore plans & unlock member benefits"
+            ) : (
+              "Join Alterstay membership for exclusive savings"
+            )}
+          </div>
         </Link>
 
         <ProfileMenuList

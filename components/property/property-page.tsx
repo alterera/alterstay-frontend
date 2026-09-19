@@ -173,7 +173,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   if (error || !property) {
     return (
       <Container className="py-16">
-        <div className="rounded-2xl border bg-white p-10 text-center">
+        <div className="rounded-md border bg-white p-10 text-center">
           <p className="text-muted-foreground">
             {error ?? "Property not found."}
           </p>
@@ -218,7 +218,6 @@ export function PropertyPage({ slug }: PropertyPageProps) {
 
             <PropertyPoliciesSection
               policies={property.policies}
-              restrictions={property.restrictions}
               checkInTime={property.checkInTime}
               checkOutTime={property.checkOutTime}
             />

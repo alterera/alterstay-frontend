@@ -12,6 +12,8 @@ type SubpageHeaderProps = {
   backLabel?: string;
   className?: string;
   rightSlot?: React.ReactNode;
+  /** When true, header is only shown on mobile (hidden from lg breakpoint up). */
+  mobileOnly?: boolean;
 };
 
 export function SubpageHeader({
@@ -20,6 +22,7 @@ export function SubpageHeader({
   backLabel = "Go back",
   className,
   rightSlot,
+  mobileOnly = false,
 }: SubpageHeaderProps) {
   const router = useRouter();
 
@@ -35,6 +38,7 @@ export function SubpageHeader({
     <header
       className={cn(
         "sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+        mobileOnly && "lg:hidden",
         className,
       )}
     >

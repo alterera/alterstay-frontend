@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDownIcon } from "lucide-react";
 
 import { mainNavigation } from "@/config/navigation";
+import { ROUTES } from "@/constants/routes";
 import { profileConfig } from "@/config/profile";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -34,13 +35,26 @@ const dropdownTriggerClass = cn(
 );
 
 const dropdownItemClass =
-  "flex flex-col items-start gap-0.5 rounded-lg p-3 text-left transition-colors hover:bg-muted/60 focus:bg-muted/60 focus-visible:ring-0 data-active:bg-muted/60 data-active:hover:bg-muted/60";
+  "flex w-fit flex-col items-start gap-0 rounded-md px-2.5 py-1.5 text-left transition-colors hover:text-brand/60 focus:bg-muted/60 focus-visible:ring-0 data-active:bg-muted/60 data-active:hover:bg-muted/60";
 
 export function NavbarDesktopNav() {
+  const { isAuthenticated } = useAuth();
+
+  const navigation = mainNavigation.map((item) => {
+    if (item.type !== "dropdown") return item;
+    return {
+      ...item,
+      items: item.items.filter(
+        (subItem) =>
+          subItem.href !== ROUTES.help.root || isAuthenticated,
+      ),
+    };
+  });
+
   return (
     <NavigationMenu align="start" className="hidden lg:flex">
       <NavigationMenuList className="gap-1">
-        {mainNavigation.map((item) => {
+        {navigation.map((item) => {
           if (item.type === "link") {
             return (
               <NavigationMenuItem key={item.href}>
@@ -63,19 +77,19 @@ export function NavbarDesktopNav() {
               <NavigationMenuTrigger className={dropdownTriggerClass}>
                 {item.label}
               </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[320px] gap-1 p-2 text-left">
+              <NavigationMenuContent className="w-fit min-w-0 p-0.5">
+                <ul className="flex w-fit flex-col gap-0.5">
                   {item.items.map((subItem) => (
-                    <li key={subItem.href}>
+                    <li key={subItem.href} className="w-fit">
                       <NavigationMenuLink
                         className={dropdownItemClass}
                         render={<Link href={subItem.href} />}
                       >
-                        <span className="text-sm font-medium text-foreground transition-colors group-hover:text-brand">
+                        <span className="whitespace-nowrap text-sm font-medium text-foreground transition-colors group-hover:text-brand">
                           {subItem.label}
                         </span>
                         {subItem.description ? (
-                          <span className="text-left text-xs text-muted-foreground">
+                          <span className="max-w-[200px] text-left text-[11px] leading-tight text-muted-foreground">
                             {subItem.description}
                           </span>
                         ) : null}
@@ -139,7 +153,13 @@ export function NavbarLoginButton({ className }: { className?: string }) {
             )}
           >
             My Account
-            <ChevronDownIcon className="size-3.5 opacity-70" aria-hidden="true" />
+            <ChevronDownIcon
+              className={cn(
+                "size-3.5 opacity-70 transition-transform duration-200",
+                open && "rotate-180",
+              )}
+              aria-hidden="true"
+            />
           </Button>
         }
       />

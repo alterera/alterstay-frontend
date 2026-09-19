@@ -15,7 +15,7 @@ export function CouponBannerSection({ className }: CouponBannerSectionProps) {
       <Container>
         <Link
           href={ROUTES.search}
-          className="block overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5 transition-opacity hover:opacity-95"
+          className="block overflow-hidden rounded-md ring-1 ring-black/5 transition-opacity hover:opacity-95"
           aria-label="New user offer — start searching stays"
         >
           <Image

@@ -51,7 +51,7 @@ export function PropertySearchUpdateBar({
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-md border bg-white">
         <div className="grid sm:grid-cols-[1fr_1fr_auto]">
           <div className="hidden lg:contents">
             <StayDatesPopover

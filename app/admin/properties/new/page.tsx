@@ -9,22 +9,25 @@ import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import {
   createProperty,
+  fetchAdminCities,
   fetchAmenities,
   fetchPropertyTypes,
 } from "@/lib/admin-api";
-import type { Amenity, PropertyType } from "@/types/admin";
+import type { AdminCity, Amenity, PropertyType } from "@/types/admin";
 
 export default function NewPropertyPage() {
   const router = useRouter();
   const [types, setTypes] = useState<PropertyType[]>([]);
+  const [cities, setCities] = useState<AdminCity[]>([]);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([fetchPropertyTypes(), fetchAmenities()])
-      .then(([t, a]) => {
+    Promise.all([fetchPropertyTypes(), fetchAdminCities(), fetchAmenities()])
+      .then(([t, c, a]) => {
         setTypes(t);
+        setCities(c);
         setAmenities(a);
       })
       .catch((err) =>
@@ -48,6 +51,7 @@ export default function NewPropertyPage() {
 
       <PropertyForm
         propertyTypes={types}
+        cities={cities}
         amenities={amenities}
         loading={loading}
         onSubmit={async (values) => {

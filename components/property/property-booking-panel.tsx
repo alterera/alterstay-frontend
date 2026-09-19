@@ -44,7 +44,7 @@ export function PropertyBookingPanel({
 
   return (
     <aside className={cn("hidden lg:block lg:self-stretch", className)}>
-      <div className="sticky top-36 rounded-md border bg-white p-5 shadow-sm">
+      <div className="sticky top-36 rounded-md border bg-white p-5">
         <div className="space-y-1">
           {selectedPlan ? (
             <>

@@ -1,13 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Loader2Icon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Amenity, Property, PropertyType } from "@/types/admin";
+import type {
+  AdminCity,
+  Amenity,
+  Property,
+  PropertyType,
+} from "@/types/admin";
 
 type PropertyFormValues = {
   name: string;
@@ -16,6 +21,8 @@ type PropertyFormValues = {
   starRating: string;
   checkInTime: string;
   checkOutTime: string;
+  cityId: string;
+  areaId: string;
   addressLine1: string;
   addressLine2: string;
   city: string;
@@ -30,15 +37,26 @@ type PropertyFormValues = {
 type PropertyFormProps = {
   property?: Property;
   propertyTypes: PropertyType[];
+  cities: AdminCity[];
   amenities?: Amenity[];
   loading?: boolean;
   onSubmit: (values: Record<string, unknown>) => Promise<void>;
   onImagesSelected?: (files: FileList) => Promise<void>;
   onDeleteImage?: (imageId: string) => void;
+  onSetThumbnail?: (imageId: string) => void;
 };
 
-function valuesFromProperty(property?: Property): PropertyFormValues {
+function valuesFromProperty(
+  property?: Property,
+  cities: AdminCity[] = [],
+): PropertyFormValues {
   const address = property?.addresses[0];
+  const linkedCity =
+    property?.area?.city ??
+    cities.find((city) =>
+      city.areas.some((area) => area.id === property?.area?.id),
+    );
+
   return {
     name: property?.name ?? "",
     propertyTypeId: property?.propertyType.id ?? "",
@@ -46,11 +64,13 @@ function valuesFromProperty(property?: Property): PropertyFormValues {
     starRating: property?.starRating?.toString() ?? "",
     checkInTime: property?.checkInTime ?? "14:00",
     checkOutTime: property?.checkOutTime ?? "11:00",
+    cityId: linkedCity?.id ?? "",
+    areaId: property?.area?.id ?? "",
     addressLine1: address?.addressLine1 ?? "",
     addressLine2: address?.addressLine2 ?? "",
-    city: address?.city ?? "",
-    state: address?.state ?? "",
-    country: address?.country ?? "India",
+    city: linkedCity?.name ?? address?.city ?? "",
+    state: linkedCity?.state ?? address?.state ?? "",
+    country: linkedCity?.country ?? address?.country ?? "India",
     postalCode: address?.postalCode ?? "",
     latitude: address?.latitude ?? "",
     longitude: address?.longitude ?? "",
@@ -61,25 +81,52 @@ function valuesFromProperty(property?: Property): PropertyFormValues {
 export function PropertyForm({
   property,
   propertyTypes,
+  cities,
   amenities = [],
   loading,
   onSubmit,
   onImagesSelected,
   onDeleteImage,
+  onSetThumbnail,
 }: PropertyFormProps) {
   const [values, setValues] = useState<PropertyFormValues>(() =>
-    valuesFromProperty(property),
+    valuesFromProperty(property, cities),
   );
 
+  const selectedCity = useMemo(
+    () => cities.find((city) => city.id === values.cityId),
+    [cities, values.cityId],
+  );
+
+  const areaOptions = selectedCity?.areas ?? [];
+
   useEffect(() => {
-    if (property) setValues(valuesFromProperty(property));
-  }, [property]);
+    if (property && cities.length) {
+      setValues(valuesFromProperty(property, cities));
+    }
+  }, [property, cities]);
 
   function update<K extends keyof PropertyFormValues>(
     key: K,
     value: PropertyFormValues[K],
   ) {
     setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleCityChange(cityId: string) {
+    const city = cities.find((item) => item.id === cityId);
+    setValues((prev) => ({
+      ...prev,
+      cityId,
+      areaId: "",
+      city: city?.name ?? "",
+      state: city?.state ?? "",
+      country: city?.country ?? "India",
+    }));
+  }
+
+  function handleAreaChange(areaId: string) {
+    setValues((prev) => ({ ...prev, areaId }));
   }
 
   function toggleAmenity(id: string) {
@@ -101,6 +148,7 @@ export function PropertyForm({
       starRating: values.starRating ? Number(values.starRating) : undefined,
       checkInTime: values.checkInTime || undefined,
       checkOutTime: values.checkOutTime || undefined,
+      areaId: values.areaId || undefined,
       address: {
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2 || undefined,
@@ -113,7 +161,6 @@ export function PropertyForm({
       },
     };
 
-    // Amenities are managed via PUT /amenities on edit; only include on create.
     if (!property) {
       payload.amenityIds = values.amenityIds;
     }
@@ -121,184 +168,198 @@ export function PropertyForm({
     await onSubmit(payload);
   }
 
+  const selectClass =
+    "flex h-9 w-full rounded-md border bg-background px-3 text-sm";
+
   return (
     <div className="space-y-8">
       <form onSubmit={handleSubmit} className="space-y-8">
-      <section className="space-y-4 rounded-lg border bg-background p-6">
-        <h2 className="font-medium">Basics</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={values.name}
-              onChange={(e) => update("name", e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="type">Property type</Label>
-            <select
-              id="type"
-              className="flex h-9 w-full rounded-md border bg-background px-3 text-sm"
-              value={values.propertyTypeId}
-              onChange={(e) => update("propertyTypeId", e.target.value)}
-              required
-            >
-              <option value="">Select type</option>
-              {propertyTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="stars">Star rating</Label>
-            <Input
-              id="stars"
-              type="number"
-              min={1}
-              max={5}
-              value={values.starRating}
-              onChange={(e) => update("starRating", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="description">About the hotel</Label>
-            <textarea
-              id="description"
-              className="min-h-32 w-full rounded-md border bg-background px-3 py-2 text-sm"
-              value={values.description}
-              onChange={(e) => update("description", e.target.value)}
-              placeholder="A short description guests will see under the address on the property page."
-            />
-            <p className="text-xs text-muted-foreground">
-              Shown on the listing Info section. Long text is collapsed behind
-              Read more.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="checkIn">Check-in time</Label>
-            <Input
-              id="checkIn"
-              value={values.checkInTime}
-              onChange={(e) => update("checkInTime", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="checkOut">Check-out time</Label>
-            <Input
-              id="checkOut"
-              value={values.checkOutTime}
-              onChange={(e) => update("checkOutTime", e.target.value)}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4 rounded-lg border bg-background p-6">
-        <h2 className="font-medium">Address</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="line1">Address line 1</Label>
-            <Input
-              id="line1"
-              value={values.addressLine1}
-              onChange={(e) => update("addressLine1", e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="line2">Address line 2</Label>
-            <Input
-              id="line2"
-              value={values.addressLine2}
-              onChange={(e) => update("addressLine2", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
-              id="city"
-              value={values.city}
-              onChange={(e) => update("city", e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="state">State</Label>
-            <Input
-              id="state"
-              value={values.state}
-              onChange={(e) => update("state", e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <Input
-              id="country"
-              value={values.country}
-              onChange={(e) => update("country", e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="postal">Postal code</Label>
-            <Input
-              id="postal"
-              value={values.postalCode}
-              onChange={(e) => update("postalCode", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lat">Latitude</Label>
-            <Input
-              id="lat"
-              value={values.latitude}
-              onChange={(e) => update("latitude", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lng">Longitude</Label>
-            <Input
-              id="lng"
-              value={values.longitude}
-              onChange={(e) => update("longitude", e.target.value)}
-            />
-          </div>
-        </div>
-      </section>
-
-      {!property && amenities.length ? (
         <section className="space-y-4 rounded-lg border bg-background p-6">
-          <h2 className="font-medium">Amenities</h2>
-          <p className="text-sm text-muted-foreground">
-            Optional on create. Perks, amenities, policies, and restrictions can
-            be managed in the Content tab after saving.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {amenities.map((amenity) => {
-              const selected = values.amenityIds.includes(amenity.id);
-              return (
-                <button
-                  key={amenity.id}
-                  type="button"
-                  onClick={() => toggleAmenity(amenity.id)}
-                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${
-                    selected
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border text-muted-foreground hover:border-foreground"
-                  }`}
-                >
-                  {amenity.name}
-                </button>
-              );
-            })}
+          <h2 className="font-medium">Basics</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={values.name}
+                onChange={(e) => update("name", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="type">Property type</Label>
+              <select
+                id="type"
+                className={selectClass}
+                value={values.propertyTypeId}
+                onChange={(e) => update("propertyTypeId", e.target.value)}
+                required
+              >
+                <option value="">Select type</option>
+                {propertyTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stars">Star rating</Label>
+              <Input
+                id="stars"
+                type="number"
+                min={1}
+                max={5}
+                value={values.starRating}
+                onChange={(e) => update("starRating", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="description">About the hotel</Label>
+              <textarea
+                id="description"
+                className="min-h-32 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                value={values.description}
+                onChange={(e) => update("description", e.target.value)}
+                placeholder="A short description guests will see under the address on the property page."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="checkIn">Check-in time</Label>
+              <Input
+                id="checkIn"
+                value={values.checkInTime}
+                onChange={(e) => update("checkInTime", e.target.value)}
+                placeholder="14:00"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="checkOut">Check-out time</Label>
+              <Input
+                id="checkOut"
+                value={values.checkOutTime}
+                onChange={(e) => update("checkOutTime", e.target.value)}
+                placeholder="11:00"
+              />
+            </div>
           </div>
         </section>
-      ) : null}
+
+        <section className="space-y-4 rounded-lg border bg-background p-6">
+          <h2 className="font-medium">Location</h2>
+          <p className="text-sm text-muted-foreground">
+            City and area come from the catalog and sync to the property address
+            for search and guest-facing labels.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="catalogCity">City</Label>
+              <select
+                id="catalogCity"
+                className={selectClass}
+                value={values.cityId}
+                onChange={(e) => handleCityChange(e.target.value)}
+                required
+              >
+                <option value="">Select city</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name}
+                    {city.state ? `, ${city.state}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="catalogArea">Area / neighbourhood</Label>
+              <select
+                id="catalogArea"
+                className={selectClass}
+                value={values.areaId}
+                onChange={(e) => handleAreaChange(e.target.value)}
+                required
+                disabled={!values.cityId}
+              >
+                <option value="">Select area</option>
+                {areaOptions.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="line1">Address line 1</Label>
+              <Input
+                id="line1"
+                value={values.addressLine1}
+                onChange={(e) => update("addressLine1", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="line2">Address line 2</Label>
+              <Input
+                id="line2"
+                value={values.addressLine2}
+                onChange={(e) => update("addressLine2", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="postal">Postal code</Label>
+              <Input
+                id="postal"
+                value={values.postalCode}
+                onChange={(e) => update("postalCode", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lat">Latitude</Label>
+              <Input
+                id="lat"
+                value={values.latitude}
+                onChange={(e) => update("latitude", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lng">Longitude</Label>
+              <Input
+                id="lng"
+                value={values.longitude}
+                onChange={(e) => update("longitude", e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {!property && amenities.length ? (
+          <section className="space-y-4 rounded-lg border bg-background p-6">
+            <h2 className="font-medium">Amenities</h2>
+            <p className="text-sm text-muted-foreground">
+              Optional on create. Perks, amenities, and policies can be managed
+              in the Content tab after saving.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {amenities.map((amenity) => {
+                const selected = values.amenityIds.includes(amenity.id);
+                return (
+                  <button
+                    key={amenity.id}
+                    type="button"
+                    onClick={() => toggleAmenity(amenity.id)}
+                    className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                      selected
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground hover:border-foreground"
+                    }`}
+                  >
+                    {amenity.name}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <Button type="submit" disabled={loading}>
           {loading ? <Loader2Icon className="animate-spin" /> : null}
@@ -322,25 +383,50 @@ export function PropertyForm({
           />
           {property.images.length ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {property.images.map((image) => (
-                <div key={image.id} className="group relative overflow-hidden rounded-md border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image.url}
-                    alt=""
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                  {onDeleteImage ? (
-                    <button
-                      type="button"
-                      onClick={() => void onDeleteImage(image.id)}
-                      className="absolute right-2 top-2 rounded bg-background/90 px-2 py-0.5 text-xs opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      Remove
-                    </button>
-                  ) : null}
-                </div>
-              ))}
+              {property.images.map((image, index) => {
+                const isThumbnail = index === 0;
+
+                return (
+                  <div
+                    key={image.id}
+                    className={`group relative overflow-hidden rounded-md border ${
+                      isThumbnail ? "ring-2 ring-brand ring-offset-2" : ""
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image.url}
+                      alt=""
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                    {isThumbnail ? (
+                      <span className="absolute left-2 top-2 rounded bg-brand px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                        Thumbnail
+                      </span>
+                    ) : null}
+                    <div className="absolute inset-x-2 bottom-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      {!isThumbnail && onSetThumbnail ? (
+                        <button
+                          type="button"
+                          onClick={() => void onSetThumbnail(image.id)}
+                          className="flex-1 rounded bg-background/95 px-2 py-1 text-xs font-medium"
+                        >
+                          Set thumbnail
+                        </button>
+                      ) : null}
+                      {onDeleteImage ? (
+                        <button
+                          type="button"
+                          onClick={() => void onDeleteImage(image.id)}
+                          className="rounded bg-background/95 px-2 py-1 text-xs font-medium text-destructive"
+                        >
+                          Remove
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : null}
         </section>

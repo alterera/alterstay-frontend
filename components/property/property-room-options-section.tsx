@@ -54,13 +54,13 @@ export function PropertyRoomOptionsSection({
         <h2 className="mt-1 text-xl font-semibold">Select your stay option</h2>
       </div>
 
-      <div className="rounded-2xl border bg-muted/30 p-4">
+      <div className="rounded-md border bg-muted/30 p-4">
         <h3 className="mb-4 text-lg font-semibold">Room Options</h3>
         <PropertySearchUpdateBar search={search} onUpdate={onSearchUpdate} />
 
         <div className="mt-4 space-y-4">
           {property.roomTypes.length === 0 ? (
-            <div className="rounded-2xl border bg-white p-8 text-center text-sm text-muted-foreground">
+            <div className="rounded-md border bg-white p-8 text-center text-sm text-muted-foreground">
               No rooms available for the selected dates. Try changing your
               search.
             </div>
@@ -112,7 +112,7 @@ function RoomTypeCard({
     : null;
 
   return (
-    <article className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+    <article className="overflow-hidden rounded-md border bg-white">
       <div className="border-b px-4 py-3">
         <h4 className="text-lg font-semibold">{roomType.name}</h4>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
