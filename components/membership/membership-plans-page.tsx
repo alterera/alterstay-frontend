@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Building2Icon, UserIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Building2Icon, UserIcon, XIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { MembershipPlansSkeleton } from "@/components/skeletons";
@@ -15,6 +16,8 @@ import {
   fetchMyMembership,
   fetchUpgradePreview,
 } from "@/lib/membership-api";
+import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/constants/routes";
 import type { MembershipPlan, MembershipStatus } from "@/types/membership";
 
 const PLAN_COPY: Record<
@@ -53,6 +56,7 @@ const PLAN_COPY: Record<
 };
 
 export function MembershipPlansPage() {
+  const router = useRouter();
   const { isAuthenticated, openLogin } = useAuth();
   const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [status, setStatus] = useState<MembershipStatus | null>(null);
@@ -169,8 +173,26 @@ export function MembershipPlansPage() {
     });
   }, [handlePurchase, plans, purchasing, status, upgradePreview]);
 
+  function handleClose() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push(isAuthenticated ? ROUTES.membership : ROUTES.home);
+  }
+
   return (
-    <div className="bg-background pb-8">
+    <div className="relative bg-background pb-8">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="absolute right-4 top-4 z-10 rounded-full border border-border/70 bg-background/90 shadow-sm backdrop-blur sm:right-6 sm:top-6"
+        onClick={handleClose}
+        aria-label="Close plans"
+      >
+        <XIcon className="size-4" />
+      </Button>
       {error ? (
         <p className="px-4 pt-2 text-center text-sm text-destructive">{error}</p>
       ) : null}

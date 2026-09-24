@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRightIcon, PencilIcon, UserRoundIcon } from "lucide-react";
+import { ChevronRightIcon, PencilIcon } from "lucide-react";
 
 import { Container } from "@/components/common/container";
 import { useAuth } from "@/components/auth/auth-provider";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { profileConfig } from "@/config/profile";
@@ -15,6 +14,7 @@ import { fetchMyMembership } from "@/lib/membership-api";
 import { cn } from "@/lib/utils";
 
 import { ProfileMenuList } from "./profile-menu-list";
+import Image from "next/image";
 
 type ProfileSectionProps = {
   className?: string;
@@ -99,7 +99,7 @@ export function ProfileSection({ className }: ProfileSectionProps) {
         <div className="mb-4 rounded-md bg-brand p-4 text-white shadow-sm sm:p-5">
           {isLoading ? (
             <div className="flex items-center gap-3">
-              <Skeleton className="size-36 rounded-full sm:size-40" />
+              <Skeleton className="size-18 rounded-full sm:size-26" />
               <div className="min-w-0 flex-1 space-y-2">
                 <Skeleton className="h-5 w-32 rounded-md bg-white/20" />
                 <Skeleton className="h-4 w-24 rounded-md bg-white/20" />
@@ -108,30 +108,16 @@ export function ProfileSection({ className }: ProfileSectionProps) {
           ) : isAuthenticated ? (
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <Avatar
-                  size="lg"
-                  className="size-36 border-2 border-white/25 after:border-white/25 sm:size-40"
-                >
-                  <AvatarImage src="/avatar.webp" alt="Profile avatar" />
-                  <AvatarFallback className="bg-white/15 text-white">
-                    <UserRoundIcon className="size-14 sm:size-16" aria-hidden="true" />
-                  </AvatarFallback>
-                </Avatar>
+                  <Image src="/avatar.webp" alt="Profile avatar"  width={70} height={70}/>
                 <div className="min-w-0">
-                  {getSavedName(user?.firstName, user?.lastName) ? (
-                    <>
-                      <p className="truncate text-base font-semibold sm:text-lg">
-                        {getSavedName(user?.firstName, user?.lastName)}
-                      </p>
-                      <p className="truncate text-xs text-white/80">
-                        {formatPhone(user?.phone)}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="truncate text-xs font-semibold sm:text-lg">
-                      {formatPhone(user?.phone)}
+                  <p className="truncate text-base font-semibold sm:text-lg">
+                    Hi, {getSavedName(user?.firstName, user?.lastName) || "Guest"}
+                  </p>
+                  {user?.phone ? (
+                    <p className="truncate text-xs text-white/80">
+                      {formatPhone(user.phone)}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <Link

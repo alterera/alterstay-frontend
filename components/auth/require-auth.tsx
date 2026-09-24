@@ -25,12 +25,20 @@ export function RequireAuth({ children }: RequireAuthProps) {
   if (isLoading) {
     return (
       <div className="min-h-[50vh] bg-background pb-12">
-        <div className="bg-brand px-4 py-10 sm:px-6 sm:py-12">
-          <Container className="flex items-center gap-5">
-            <Skeleton className="size-28 rounded-full bg-white/20 sm:size-32" />
-            <div className="space-y-2">
-              <Skeleton className="h-7 w-48 rounded-md bg-white/20" />
-              <Skeleton className="h-4 w-32 rounded-md bg-white/20" />
+        <div className="bg-brand py-5">
+          <Container className="max-w-6xl">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-[60px] shrink-0 rounded-full bg-white/20" />
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-36 rounded-md bg-white/20 sm:h-6 sm:w-44" />
+                  <Skeleton className="h-3 w-28 rounded-md bg-white/15" />
+                </div>
+              </div>
+              <div className="flex w-full gap-2 sm:w-auto">
+                <Skeleton className="h-9 flex-1 rounded-full bg-white/15 sm:w-28" />
+                <Skeleton className="h-9 flex-1 rounded-full bg-white/20 sm:w-24" />
+              </div>
             </div>
           </Container>
         </div>

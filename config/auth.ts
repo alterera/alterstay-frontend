@@ -12,13 +12,16 @@ export const authConfig = {
   welcomeTitle: "Welcome to Alterstay",
   welcomeSubtitle: "Please enter your mobile number to login",
   getOtpLabel: "Get OTP",
+  otpResendSeconds: 30,
+  otpResendLabel: "Resend OTP",
+  otpResendWaitLabel: "Resend OTP in {seconds}s",
   loginWithPasswordLabel: "Login with Password",
   whatsappOtpLabel: "OTP will be sent using WhatsApp",
   whatsappOtpHint: "OTP will be sent using WhatsApp",
   phonePlaceholder: "Enter mobile number",
   legalPrefix: "By Proceeding, you agree to our",
   benefitsPanel: {
-    headline: "Book smarter stays with AlterStays",
+    headline: "Book smarter stays with AlterStay",
     subheadline:
       "Discover trusted hotels, unlock member-only deals, and manage every booking with ease.",
   },
@@ -36,7 +39,7 @@ export const authConfig = {
     {
       id: "alter-cash",
       title: "Alter Cash",
-      description: "Earn Fab credits for future savings.",
+      description: "Earn credits for future savings.",
     },
   ] satisfies AuthBenefit[],
   legalLinks: {

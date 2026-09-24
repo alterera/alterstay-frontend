@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { StarIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from "lucide-react";
 
 import { Container } from "@/components/common/container";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import { fetchFeaturedProperties } from "@/lib/search-api";
@@ -24,13 +25,16 @@ type FeaturedPropertiesSectionProps = {
 const FALLBACK =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop";
 
+const CARD_CLASS =
+  "w-[calc((100%-0.75rem)/2)] shrink-0 snap-start sm:w-[calc((100%-2.25rem)/3)] lg:w-[calc((100%-3rem)/4)]";
+
 function PropertyCard({ property }: { property: FeaturedProperty }) {
   const image = property.imageUrl || FALLBACK;
 
   return (
     <Link
       href={ROUTES.propertyDetail(property.slug)}
-      className="group block w-[46vw] max-w-[11.5rem] shrink-0 snap-start sm:w-auto sm:max-w-none"
+      className={cn("group block", CARD_CLASS)}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-neutral-200">
         <Image
@@ -38,7 +42,7 @@ function PropertyCard({ property }: { property: FeaturedProperty }) {
           alt={property.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-          sizes="(max-width: 640px) 46vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
       </div>
       <div className="space-y-1 pt-2">
@@ -91,11 +95,12 @@ export function FeaturedPropertiesSection({
   city,
   excludeSlug,
   limit = 8,
-  title = "Book stays across pan India",
+  title = "Book stays across India",
   subtitle = "Featured properties travellers love right now",
 }: FeaturedPropertiesSectionProps) {
   const [properties, setProperties] = useState<FeaturedProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,62 +119,83 @@ export function FeaturedPropertiesSection({
     };
   }, [city, excludeSlug, limit]);
 
+  const scrollByDirection = useCallback((direction: "prev" | "next") => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const firstCard = container.querySelector<HTMLElement>("a");
+    const gap = 12;
+    const amount = firstCard
+      ? firstCard.offsetWidth + gap
+      : container.clientWidth * 0.8;
+
+    container.scrollBy({
+      left: direction === "next" ? amount : -amount,
+      behavior: "smooth",
+    });
+  }, []);
+
   if (!loading && properties.length === 0) {
     return null;
   }
+
+  const showArrows = !loading && properties.length > 1;
 
   return (
     <section className={cn("bg-background py-8 sm:py-10", className)}>
       <Container>
         <div className="mb-5 flex items-end justify-between gap-3 sm:mb-6">
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               {title}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </div>
-          <Link
-            href={ROUTES.search}
-            className="hidden text-sm font-semibold text-brand hover:underline sm:inline"
-          >
-            View all
-          </Link>
+          {showArrows ? (
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="size-8 rounded-full"
+                onClick={() => scrollByDirection("prev")}
+                aria-label="Previous properties"
+              >
+                <ChevronLeftIcon className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="size-8 rounded-full"
+                onClick={() => scrollByDirection("next")}
+                aria-label="Next properties"
+              >
+                <ChevronRightIcon className="size-4" />
+              </Button>
+            </div>
+          ) : null}
         </div>
 
         {loading ? (
-          <>
-            <div className="-mx-4 flex gap-3 overflow-hidden px-4 sm:mx-0 sm:hidden sm:px-0">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="w-[46vw] max-w-46 shrink-0 space-y-2">
-                  <Skeleton className="aspect-[4/3] rounded-md" />
-                  <Skeleton className="h-4 w-3/4 rounded-md" />
-                  <Skeleton className="h-3 w-1/2 rounded-md" />
-                </div>
-              ))}
-            </div>
-            <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="space-y-2">
-                  <Skeleton className="aspect-[4/3] rounded-md" />
-                  <Skeleton className="h-4 w-3/4 rounded-md" />
-                  <Skeleton className="h-3 w-1/2 rounded-md" />
-                </div>
-              ))}
-            </div>
-          </>
+          <div className="flex gap-3 overflow-hidden">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className={cn("space-y-2", CARD_CLASS)}>
+                <Skeleton className="aspect-[4/3] rounded-md" />
+                <Skeleton className="h-4 w-3/4 rounded-md" />
+                <Skeleton className="h-3 w-1/2 rounded-md" />
+              </div>
+            ))}
+          </div>
         ) : (
-          <>
-            <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:hidden sm:px-0 [&::-webkit-scrollbar]:hidden">
-              {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-            <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
-              {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          </>
+          <div
+            ref={scrollRef}
+            className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
         )}
       </Container>
     </section>

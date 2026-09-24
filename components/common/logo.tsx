@@ -26,7 +26,7 @@ export function Logo({
 }: LogoProps) {
   const image = (
     <Image
-      src="/logo.svg"
+      src="/alterstay-logo.png"
       alt={siteConfig.name}
       width={268}
       height={40}

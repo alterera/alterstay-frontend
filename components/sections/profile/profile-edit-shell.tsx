@@ -2,25 +2,17 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  ArrowLeftIcon,
-  BadgeCheckIcon,
-  UserRoundIcon,
-  WalletIcon,
-} from "lucide-react";
+import { BadgeCheckIcon, WalletIcon } from "lucide-react";
 
+import { AccountHero } from "@/components/account/account-hero";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
 import { fetchCurrentUser } from "@/lib/auth-api";
 import { fetchMyMembership } from "@/lib/membership-api";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
-import Image from "next/image";
 
 export type ProfileShellNavId = "profile" | "guests";
 
@@ -49,7 +41,6 @@ type ProfileEditShellProps = {
 };
 
 export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps) {
-  const router = useRouter();
   const { user: sessionUser, isAuthenticated, isLoading } = useAuth();
   const [profile, setProfile] = useState<AuthUser | null>(sessionUser);
   const [membershipTier, setMembershipTier] = useState<string | null>(null);
@@ -94,43 +85,16 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
 
   return (
     <section className="bg-background pb-10 pt-0">
-      <div className="bg-brand py-5 text-white">
-        <Container className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="shrink-0 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white lg:hidden"
-              onClick={() => router.push(ROUTES.profile)}
-              aria-label="Back to profile"
-            >
-              <ArrowLeftIcon className="size-4" />
-            </Button>
-            {/* <Avatar
-              size="lg"
-              className="size-36 shrink-0 border-2 border-white/25 after:border-white/25 sm:size-40"
-            > */}
-              <Image src="/avatar.webp" alt="Profile avatar" width={60} height={60} />
-              {/* <AvatarFallback className="bg-white/15 text-white">
-                <UserRoundIcon className="size-14 sm:size-16" />
-              </AvatarFallback>
-            </Avatar> */}
-            <div className="min-w-0">
-              <h1 className="truncate text-lg font-semibold sm:text-xl">
-                {fullName}
-              </h1>
-              {profile?.phone ? (
-                <p className="mt-1 truncate text-xs text-white/80">
-                  {profile.phone}
-                </p>
-              ) : null}
-            </div>
-          </div>
-
+      <AccountHero
+        title={fullName}
+        subtitle={profile?.phone ?? undefined}
+        backHref={ROUTES.profile}
+        backLabel="Back to profile"
+        showBackOnMobile
+        rightSlot={
           <Link
             href={ROUTES.wallet}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brand-dark/80 px-3 py-2 text-xs font-medium sm:text-sm"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-dark/80 px-3 py-2 text-xs font-medium sm:w-auto sm:text-sm"
           >
             <WalletIcon className="size-4 text-premium" />
             <span>
@@ -138,8 +102,8 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
             </span>
             <span aria-hidden>›</span>
           </Link>
-        </Container>
-      </div>
+        }
+      />
 
       <Container className="mt-4 max-w-6xl">
         <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">

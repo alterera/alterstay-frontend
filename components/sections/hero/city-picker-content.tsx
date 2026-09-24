@@ -89,7 +89,7 @@ export function CityList({
               onClick={() => onSelect(city)}
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-muted",
-                popover ? "rounded-lg py-2 text-sm" : "py-3 text-base",
+                popover ? "rounded-lg py-2 text-sm" : "py-3 text-sm",
                 isSelected && "bg-muted font-medium",
               )}
             >

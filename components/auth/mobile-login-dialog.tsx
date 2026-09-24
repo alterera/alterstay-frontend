@@ -87,7 +87,7 @@ export function MobileLoginDialog({
         </DialogHeader>
 
         <div className="flex h-[20%] min-h-28 items-center justify-center bg-gradient-hero px-6">
-          <Logo size="lg" />
+          <Logo size="lg" className="[&_img]:brightness-0 [&_img]:invert"/>
         </div>
 
         <div className="flex flex-1 flex-col overflow-y-auto bg-background px-5 py-6 sm:px-8">

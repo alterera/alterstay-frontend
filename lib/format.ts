@@ -75,10 +75,20 @@ export function formatCurrency(
 /** Property check-in/out time, e.g. "14:00" → "2:00 PM". */
 export function formatPropertyTime(time: string | null | undefined): string {
   if (!time) return "";
-  const [hourPart, minutePart] = time.split(":");
+
+  const trimmed = time.trim();
+  const twelveHourMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (twelveHourMatch) {
+    const hour = Number(twelveHourMatch[1]);
+    const minute = Number(twelveHourMatch[2]);
+    if (Number.isNaN(hour) || Number.isNaN(minute)) return trimmed;
+    return `${hour}:${String(minute).padStart(2, "0")} ${twelveHourMatch[3].toUpperCase()}`;
+  }
+
+  const [hourPart, minutePart] = trimmed.split(":");
   const hour = Number(hourPart);
-  const minute = Number(minutePart ?? "0");
-  if (Number.isNaN(hour)) return time;
+  const minute = Number((minutePart ?? "0").replace(/\D/g, ""));
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return trimmed;
 
   const period = hour >= 12 ? "PM" : "AM";
   const hour12 = hour % 12 || 12;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ export function PhoneLoginForm({
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const values: PhoneLoginFormValues = {
     countryCode: authConfig.countryCode,
@@ -50,10 +51,29 @@ export function PhoneLoginForm({
   const isValidOtp = otp.length >= 4;
   const isValidPassword = password.length >= 6;
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendCooldown((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
+
+  function startResendCooldown() {
+    setResendCooldown(authConfig.otpResendSeconds);
+  }
+
   async function handleGetOtp() {
     if (!isValidPhone) return;
     await onGetOtp?.(values);
     setStep("otp");
+    startResendCooldown();
+  }
+
+  async function handleResendOtp() {
+    if (!isValidPhone || loading || resendCooldown > 0) return;
+    await onGetOtp?.(values);
+    startResendCooldown();
   }
 
   async function handleVerifyOtp() {
@@ -65,6 +85,11 @@ export function PhoneLoginForm({
     if (!isValidPassword) return;
     await onLoginWithPassword?.({ ...values, password });
   }
+
+  const resendWaitLabel = authConfig.otpResendWaitLabel.replace(
+    "{seconds}",
+    String(resendCooldown),
+  );
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -175,12 +200,29 @@ export function PhoneLoginForm({
               >
                 {loading ? "Verifying..." : "Verify & Login"}
               </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                {resendCooldown > 0 ? (
+                  resendWaitLabel
+                ) : (
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => void handleResendOtp()}
+                    className="font-medium text-brand underline disabled:opacity-50"
+                  >
+                    {authConfig.otpResendLabel}
+                  </button>
+                )}
+              </p>
+
               <button
                 type="button"
                 disabled={loading}
                 onClick={() => {
                   setStep("phone");
                   setOtp("");
+                  setResendCooldown(0);
                 }}
                 className="mx-auto flex w-fit justify-center text-sm font-medium underline"
               >

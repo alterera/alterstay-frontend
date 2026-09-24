@@ -262,7 +262,6 @@ function MobileDateRangePicker({
         onOpenChange={handleOpenChange}
         variant={sheetVariant}
         title="Check-in & check-out dates"
-        description="Tap check-in, then tap a later day for check-out. Tap again to start over."
         stickyContent={<DateRangeWeekdayHeader />}
         footer={
           <div className="space-y-2.5">
