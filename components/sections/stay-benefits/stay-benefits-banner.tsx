@@ -19,8 +19,7 @@ export function StayBenefitsBanner({ className }: StayBenefitsBannerProps) {
                 {headline}
               </h2>
               <p className="mt-2 text-xs text-white/90 max-w-full text-center lg:text-left lg:max-w-none">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Consectetur hic aut rem reiciendis repellat dignissimos.
+              We negotiate the best prices so you don’t have to. If you find a better price, we’ll match it.
               </p>
             </div>
             <ul className="grid w-full grid-cols-2 overflow-hidden rounded-md bg-brand-dark/35 lg:max-w-3xl lg:grid-cols-4">

@@ -14,7 +14,7 @@ export type StayBenefit = {
 };
 
 export const stayBenefitsConfig = {
-  headline: "Do More in every Alterstay",
+  headline: "Do more in every Alterstay",
   benefits: [
     {
       id: "save",
@@ -23,7 +23,7 @@ export const stayBenefitsConfig = {
     },
     {
       id: "rebook",
-      label: "Automatic rebooking if the price drops",
+      label: "Auto rebooking if price drops",
       icon: RefreshCwIcon,
     },
     {

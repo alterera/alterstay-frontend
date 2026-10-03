@@ -5,6 +5,7 @@ import {
   SparklesIcon,
   TagIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { SubpageHeader } from "@/components/common/subpage-header";
@@ -38,48 +39,61 @@ export default function OffersPage() {
     <>
       <SubpageHeader title="Offers" backHref={ROUTES.home} mobileOnly />
 
-      <section className="relative overflow-hidden border-b bg-neutral-950 text-white">
+      <section className="relative hidden overflow-hidden border-b bg-neutral-950 text-white lg:block">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(255,255,255,0.14),transparent)]"
           aria-hidden="true"
         />
-        <Container className="relative max-w-5xl py-12 sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
-              <BadgePercentIcon className="size-3.5 text-brand" />
-              Offers launching soon
+        <Container className="relative max-w-6xl py-12 sm:py-16 lg:py-20">
+          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:gap-16">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
+                <BadgePercentIcon className="size-3.5 text-brand" />
+                Alterstay Offers
+              </div>
+              <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                Exclusive deals are on the way
+              </h1>
+              <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
+                We&apos;re lining up member-only rates, seasonal bundles, and
+                limited drops for Alterstay guests. Join membership to be first
+                in line.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button
+                  size="lg"
+                  className="rounded-md px-6"
+                  render={<Link href={ROUTES.membershipPlans} />}
+                >
+                  Explore membership
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-md border-white/20 bg-white/5 px-6 text-white hover:bg-white/10 hover:text-white"
+                  render={<Link href={ROUTES.search} />}
+                >
+                  Browse stays
+                </Button>
+              </div>
             </div>
-            <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              Exclusive deals are on the way
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">
-              We&apos;re lining up member-only rates, seasonal bundles, and
-              limited drops for Alterstay guests. Check back soon — or join
-              membership to be first in line.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <Button
-                size="lg"
-                className="rounded-xl px-6"
-                render={<Link href={ROUTES.membershipPlans} />}
-              >
-                Explore membership
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-xl border-white/20 bg-white/5 px-6 text-white hover:bg-white/10 hover:text-white"
-                render={<Link href={ROUTES.search} />}
-              >
-                Browse stays
-              </Button>
+
+            <div className="relative mx-auto w-full max-w-sm">
+              <Image
+                src="/offer/wallet-icon.png"
+                alt=""
+                width={640}
+                height={480}
+                className="h-auto w-full object-contain"
+                priority
+              />
             </div>
           </div>
         </Container>
       </section>
 
       <section className="bg-muted/20 py-12 sm:py-16">
-        <Container className="max-w-5xl">
+        <Container className="max-w-6xl">
           <div className="mb-8 text-center lg:text-left">
             <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               What to expect
@@ -95,7 +109,7 @@ export default function OffersPage() {
               return (
                 <article
                   key={perk.title}
-                  className="rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                  className="rounded-md border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="flex size-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
                     <Icon className="size-5" />
@@ -111,7 +125,7 @@ export default function OffersPage() {
             })}
           </div>
 
-          <div className="mt-10 rounded-2xl border bg-white p-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-8">
+          <div className="mt-10 rounded-md border bg-white p-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-8">
             <div className="flex items-start gap-4">
               <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
                 <BellIcon className="size-5" />
@@ -127,10 +141,10 @@ export default function OffersPage() {
               </div>
             </div>
             <Button
-              className="mt-5 w-full rounded-xl sm:mt-0 sm:w-auto"
+              className="mt-5 w-full rounded-md sm:mt-0 sm:w-auto"
               render={<Link href={ROUTES.membershipPlans} />}
             >
-              View plans
+              View Plans
             </Button>
           </div>
         </Container>

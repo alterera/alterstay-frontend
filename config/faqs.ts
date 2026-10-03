@@ -8,50 +8,56 @@ export type FaqItem = {
 };
 
 export const faqsConfig = {
-  eyebrow: "Support",
-  title: "FAQs",
+  eyebrow: "The AlterStay Experience",
+  title: "Frequently Asked Questions",
   description:
-    "Everything you need to know about booking stays with AlterStays. Can't find the answer you're looking for?",
+    "From discovering exceptional stays to making the most of your membership, find everything you need to know about booking with AlterStay.",
   supportLink: {
-    label: "chat to our friendly team",
+    label: "speak with our support team",
     href: ROUTES.help.support,
   },
   items: [
     {
-      id: "why-book",
-      question: "Why should we book rooms with Alterstay?",
+      id: "why-alterstays",
+      question: "What makes Alterstay different?",
       answer:
-        "AlterStays makes it easy to discover verified resorts and hotels with transparent pricing, flexible stay options, and dedicated booking support. From short hourly stays to full overnight bookings, you get trusted partner properties and a smooth check-in experience in one place.",
+        "Alterstay helps you discover premium hotels and resorts through a seamless booking experience. Explore carefully selected properties, compare available room options, review transparent pricing, and manage your reservations in one place.",
     },
     {
-      id: "cities",
-      question: "In which all cities it is possible to get Alterstay?",
-      answer: `AlterStays is available across major Indian cities including ${popularIndianCities.slice(0, 12).join(", ")}, and more destinations are being added regularly. Use the search bar on the home page to explore stays in your preferred city.`,
+      id: "membership",
+      question: "What is an Alterstay membership?",
+      answer:
+        "An Alterstay membership is designed to bring additional value to your hotel bookings through membership-specific benefits.",
+    },
+    {
+      id: "booking-confirmation",
+      question: "How do I know my reservation is confirmed?",
+      answer:
+        "Check the booking status and confirmation details displayed in your AlterStay  booking history.",
     },
     {
       id: "local-id",
-      question: "Can people with local id book hotel rooms with alterstay?",
+      question: "Can I check in using a local address or local ID?",
       answer:
-        "Yes. Guests can book with valid government-issued local ID proof such as Aadhaar, Voter ID, Driving Licence, or Passport, as accepted by the partner hotel. Please carry original ID for verification at check-in, as policies may vary by property.",
+        "Check-in eligibility and accepted identification documents depend on the partner property's policies and applicable requirements. Review the property's check-in rules before booking, and ensure every guest carries valid original identification accepted by the hotel.",
     },
     {
-      id: "safety",
-      question: "Are Alterstay partnered hotels safe?",
+      id: "couples",
+      question: "Can unmarried couples book through Alterstay?",
       answer:
-        "Yes. We partner with verified hotels and resorts that meet our quality and safety standards. Properties are reviewed for guest safety, hygiene, and service reliability. If you face any issue during your stay, our support team is available to help resolve it quickly.",
+        "Policies can vary by hotel, so review the listing carefully before booking. All guests must meet the property's age and identification requirements.",
     },
     {
-      id: "under-18-couple",
-      question:
-        "We are an unmarried couple and one of us is below 18 years of age. Can we still book an hourly hotel room?",
+      id: "refunds",
+      question: "How long do booking refunds take?",
       answer:
-        "No. All guests checking in must be 18 years of age or older. Bookings where any guest is under 18 cannot be accepted for hourly or overnight stays, even if accompanying an adult. Please ensure all guests meet the minimum age requirement before booking.",
+        "Refund eligibility and processing time depend on the cancellation terms, booking status, payment method, and payment provider. Contact support if the expected processing period has passed.",
     },
     {
-      id: "unmarried-couples",
-      question: "Are unmarried couples allowed to check-in?",
+      id: "booking-support",
+      question: "What if I face an issue during check-in or my stay?",
       answer:
-        "Yes, unmarried couples are welcome at many AlterStays partner hotels, provided both guests are 18+ and carry valid government ID. Some properties may have specific house rules, so we recommend checking the property policy on the listing page before you book.",
+        "If you encounter a booking or check-in issue, contact our support team with your booking reference and the relevant details.",
     },
   ] satisfies FaqItem[],
 } as const;

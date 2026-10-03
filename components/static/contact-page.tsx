@@ -13,8 +13,8 @@ import { Container } from "@/components/common/container";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 
-const SUPPORT_PHONE = "+91 1800 000 0000";
-const SUPPORT_EMAIL = "support@alterstay.com";
+const SUPPORT_PHONE = "+91 9906 060 060";
+const SUPPORT_EMAIL = "support@alterstay.in";
 
 const CONTACT_CHANNELS = [
   {
@@ -51,7 +51,7 @@ export function ContactPage() {
     <>
       <SubpageHeader title="Contact Us" backHref={ROUTES.home} mobileOnly />
       <section className="bg-background pb-16 pt-6 sm:pt-10 lg:pt-12">
-        <Container className="max-w-5xl">
+        <Container className="max-w-6xl">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-brand">
@@ -74,7 +74,7 @@ export function ContactPage() {
                     <a
                       key={channel.id}
                       href={channel.href}
-                      className="group rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand/20 hover:shadow-md"
+                      className="group rounded-md border bg-white p-5 shadow-sm transition-all hover:border-brand/20 hover:shadow-md"
                     >
                       <span
                         className={`inline-flex size-11 items-center justify-center rounded-xl ${channel.accent}`}
@@ -97,7 +97,7 @@ export function ContactPage() {
             </div>
 
             <aside className="space-y-4 lg:sticky lg:top-24">
-              <div className="rounded-2xl border bg-gradient-to-br from-brand/8 via-white to-white p-6 shadow-sm">
+              <div className="rounded-md border bg-gradient-to-br from-brand/8 via-white to-white p-6 shadow-sm">
                 <div className="flex items-center gap-3">
                   <span className="flex size-11 items-center justify-center rounded-xl bg-brand text-white">
                     <MessageCircleIcon className="size-5" />
@@ -122,22 +122,13 @@ export function ContactPage() {
                 </Button>
               </div>
 
-              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <div className="rounded-md border bg-white p-6 shadow-sm">
                 <div className="flex items-start gap-3">
                   <ClockIcon className="mt-0.5 size-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-semibold">Support hours</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Monday to Sunday, 9:00 AM – 9:00 PM IST
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-start gap-3">
-                  <MapPinIcon className="mt-0.5 size-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-semibold">Head office</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Guwahati, Assam, India
+                      Monday to Sunday, 9:00 AM – 9:00 PM
                     </p>
                   </div>
                 </div>
