@@ -1,6 +1,6 @@
 /**
- * Popular Indian cities for destination search.
- * Replace with API-driven results when the locations endpoint is ready.
+ * Popular Indian city names for static copy (e.g. FAQs).
+ * The search picker loads suggestions from GET /search/cities?q=&limit=.
  */
 export const popularIndianCities = [
   "Mumbai",

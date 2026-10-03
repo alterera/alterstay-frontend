@@ -1,5 +1,22 @@
 import { getApiBase } from "@/lib/auth-api";
-import type { CityListItem } from "@/types/cities";
+import type { CityListItem, CitySuggestion } from "@/types/cities";
+
+export function fetchCitySuggestions(q?: string, limit = 15) {
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  if (q?.trim()) {
+    params.set("q", q.trim());
+  }
+
+  return fetch(`${getApiBase()}/search/cities?${params.toString()}`).then(
+    async (response) => {
+      if (!response.ok) {
+        throw new Error("Failed to load city suggestions");
+      }
+      return response.json() as Promise<CitySuggestion[]>;
+    },
+  );
+}
 
 export function fetchCities() {
   return fetch(`${getApiBase()}/search/cities`).then(async (response) => {

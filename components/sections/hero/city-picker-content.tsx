@@ -3,16 +3,9 @@
 import { CheckIcon, MapPinIcon, SearchIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { popularIndianCities } from "@/config/popular-cities";
 import { cn } from "@/lib/utils";
 
-export function filterCities(query: string): readonly string[] {
-  const term = query.trim().toLowerCase();
-  if (!term) return popularIndianCities;
-  return popularIndianCities.filter((city) =>
-    city.toLowerCase().includes(term),
-  );
-}
+import { useCitySuggestions } from "./use-city-suggestions";
 
 type CitySearchInputProps = {
   query: string;
@@ -57,8 +50,23 @@ export function CityList({
   onSelect,
   variant = "sheet",
 }: CityListProps) {
-  const cities = filterCities(query);
+  const { cities, loading, error } = useCitySuggestions(query);
   const popover = variant === "popover";
+  const hasQuery = Boolean(query.trim());
+
+  if (loading && cities.length === 0) {
+    return (
+      <p className="px-3 py-2 text-sm text-muted-foreground">Loading cities…</p>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="px-3 py-2 text-sm text-muted-foreground">
+        Could not load cities. Check your connection and try again.
+      </p>
+    );
+  }
 
   if (cities.length === 0) {
     return (
@@ -68,7 +76,7 @@ export function CityList({
             type="button"
             onClick={() => onSelect(query.trim())}
             className="w-full rounded-xl px-3 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50"
-            disabled={!query.trim()}
+            disabled={!hasQuery}
           >
             Use &quot;{query}&quot;
           </button>
@@ -80,13 +88,13 @@ export function CityList({
   return (
     <ul className={cn("space-y-1", popover && "max-h-48 overflow-y-auto")}>
       {cities.map((city) => {
-        const isSelected = city === selected;
+        const isSelected = city.name === selected;
 
         return (
-          <li key={city}>
+          <li key={city.slug}>
             <button
               type="button"
-              onClick={() => onSelect(city)}
+              onClick={() => onSelect(city.name)}
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl px-3 text-left transition-colors hover:bg-muted",
                 popover ? "rounded-lg py-2 text-sm" : "py-3 text-sm",
@@ -96,7 +104,14 @@ export function CityList({
               {popover ? null : (
                 <MapPinIcon className="size-4 shrink-0 text-muted-foreground" />
               )}
-              <span className="min-w-0 flex-1 truncate">{city}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate">{city.name}</span>
+                {city.state && hasQuery ? (
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {city.state}
+                  </span>
+                ) : null}
+              </span>
               {isSelected ? (
                 <CheckIcon className="size-4 shrink-0 text-brand" />
               ) : null}
@@ -122,9 +137,16 @@ export function CityPickerContent({
   onQueryChange,
   onSelect,
 }: CityPickerContentProps) {
+  const hasQuery = Boolean(query.trim());
+
   return (
     <div className="space-y-4">
       <CitySearchInput query={query} onQueryChange={onQueryChange} />
+      {!hasQuery ? (
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Popular destinations
+        </p>
+      ) : null}
       <CityList
         variant="popover"
         query={query}
