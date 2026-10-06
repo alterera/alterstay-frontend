@@ -31,7 +31,7 @@ function CityDirectoryCard({ city }: { city: CityListItem }) {
   return (
     <Link
       href={buildCitySearchUrl(city.name)}
-      className="block rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors hover:border-brand/30 hover:bg-brand/5"
+      className="block rounded-md border border-border bg-surface p-4 transition-colors hover:border-brand/30 hover:bg-brand/5"
     >
       <h3 className="text-base font-semibold text-foreground">{city.name}</h3>
       <p className="mt-2 text-sm text-muted-foreground">{staysLabel}</p>
@@ -61,18 +61,30 @@ export function AllCitiesPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
-  const grouped = useMemo(() => groupCitiesByLetter(cities), [cities]);
+  const citiesWithStays = useMemo(
+    () => cities.filter((city) => city.propertyCount > 0),
+    [cities],
+  );
+
+  const groupedWithStays = useMemo(
+    () => groupCitiesByLetter(citiesWithStays),
+    [citiesWithStays],
+  );
 
   const availableLetters = useMemo(
     () =>
-      ALPHABET.filter((letter) => (grouped.get(letter)?.length ?? 0) > 0),
-    [grouped],
+      ALPHABET.filter(
+        (letter) => (groupedWithStays.get(letter)?.length ?? 0) > 0,
+      ),
+    [groupedWithStays],
   );
 
   const filteredCities = useMemo(() => {
-    if (!activeLetter) return cities;
-    return cities.filter((city) => cityStartsWithLetter(city, activeLetter));
-  }, [activeLetter, cities]);
+    if (!activeLetter) return citiesWithStays;
+    return citiesWithStays.filter((city) =>
+      cityStartsWithLetter(city, activeLetter),
+    );
+  }, [activeLetter, citiesWithStays]);
 
   useEffect(() => {
     let cancelled = false;
@@ -170,7 +182,7 @@ export function AllCitiesPage() {
         {loading ? (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }).map((_, index) => (
-              <Skeleton key={index} className="h-28 rounded-xl" />
+              <Skeleton key={index} className="h-28 rounded-md" />
             ))}
           </div>
         ) : null}
@@ -201,7 +213,7 @@ export function AllCitiesPage() {
             ) : (
               <div className="space-y-10">
                 {ALPHABET.map((letter) => {
-                  const items = grouped.get(letter) ?? [];
+                  const items = groupedWithStays.get(letter) ?? [];
                   if (!items.length) return null;
 
                   return (
@@ -218,7 +230,7 @@ export function AllCitiesPage() {
                   );
                 })}
 
-                {cities.length === 0 ? (
+                {citiesWithStays.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     No cities available yet.
                   </p>

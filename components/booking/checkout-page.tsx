@@ -210,7 +210,7 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
   if (error || !property || !selectedPlan || !quoteSelection) {
     return (
       <Container className="py-16">
-        <div className="rounded-2xl border bg-white p-10 text-center">
+        <div className="rounded-md border bg-white p-10 text-center">
           <p className="text-muted-foreground">
             {error ?? "Invalid or expired checkout selection."}
           </p>
@@ -305,20 +305,20 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
                 />
 
                 {intentLoading ? (
-                  <div className="rounded-2xl border bg-white p-6">
+                  <div className="rounded-md border bg-white p-6">
                     <Skeleton className="h-4 w-48 rounded-md" />
                     <Skeleton className="mt-4 h-24 w-full rounded-xl" />
                   </div>
                 ) : null}
 
                 {intentError ? (
-                  <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
                     {intentError}
                   </div>
                 ) : null}
 
                 {isAuthenticated ? (
-                  <div className="rounded-2xl border bg-white p-5 shadow-sm sm:p-6">
+                  <div className="rounded-md border bg-white p-5 sm:p-6">
                     {payError ? (
                       <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                         {payError}

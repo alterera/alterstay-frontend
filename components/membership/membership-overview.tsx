@@ -1,7 +1,12 @@
 import Link from "next/link";
-import { CalendarCheckIcon, CoinsIcon, TrendingUpIcon } from "lucide-react";
+import {
+  CalendarCheckIcon,
+  CoinsIcon,
+  CrownIcon,
+  SparklesIcon,
+  TrendingUpIcon,
+} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/constants/routes";
@@ -30,9 +35,9 @@ function StatCard({
           <Icon className="size-5" />
         </div>
         {hint ? (
-          <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+          <span className="rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {hint}
-          </Badge>
+          </span>
         ) : null}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">{label}</p>
@@ -43,16 +48,87 @@ function StatCard({
   );
 }
 
+function MembershipUpsellPanel() {
+  return (
+    <div className="relative overflow-hidden rounded-md border border-brand/20 bg-gradient-to-br from-brand/10 via-white to-premium/10 p-6 sm:p-8">
+      <div
+        className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full bg-brand/10 blur-2xl"
+        aria-hidden="true"
+      />
+      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-white/80 px-3 py-1 text-xs font-medium text-brand">
+            <CrownIcon className="size-3.5" />
+            Alterstay Membership
+          </div>
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Unlock member rates, coins, and exclusive perks
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Join thousands of travellers saving on every stay. Earn coins on
+            bookings, access member-only offers, and enjoy priority benefits
+            across India.
+          </p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: CoinsIcon, text: "Earn coins on every stay" },
+              { icon: SparklesIcon, text: "Member-only rates & offers" },
+              { icon: CalendarCheckIcon, text: "12 months of benefits" },
+            ].map((item) => (
+              <li
+                key={item.text}
+                className="flex items-center gap-2 rounded-md border bg-white/80 px-3 py-2.5 text-sm text-foreground"
+              >
+                <item.icon className="size-4 shrink-0 text-brand" />
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
+          <Button
+            render={<Link href={ROUTES.membershipPlans} />}
+            size="lg"
+            className="h-12 rounded-md px-8"
+          >
+            View membership plans
+          </Button>
+          <Button
+            render={<Link href={ROUTES.search} />}
+            variant="outline"
+            size="lg"
+            className="h-12 rounded-md px-8"
+          >
+            Browse stays first
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MembershipOverview({ status, loading }: MembershipOverviewProps) {
   if (loading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-7 w-40 rounded-md" />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <Skeleton className="h-36 rounded-2xl" />
-          <Skeleton className="h-36 rounded-2xl" />
-          <Skeleton className="h-36 rounded-2xl" />
+        <Skeleton className="h-52 rounded-md" />
+      </div>
+    );
+  }
+
+  const hasActive = Boolean(status?.active);
+
+  if (!hasActive) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Membership</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Start saving on every booking with Alterstay membership.
+          </p>
         </div>
+        <MembershipUpsellPanel />
       </div>
     );
   }
@@ -61,7 +137,6 @@ export function MembershipOverview({ status, loading }: MembershipOverviewProps)
   const coins = status?.stats?.coinsBalance ?? 0;
   const lifetimeCoins = status?.stats?.coinsEarnedLifetime ?? 0;
   const tier = status?.tier ?? "Free";
-  const hasActive = Boolean(status?.active);
 
   return (
     <div className="space-y-4">
@@ -72,15 +147,14 @@ export function MembershipOverview({ status, loading }: MembershipOverviewProps)
             Your membership activity at a glance.
           </p>
         </div>
-        {!hasActive ? (
-          <Button
-            render={<Link href={ROUTES.membershipPlans} />}
-            size="sm"
-            className="rounded-xl"
-          >
-            Upgrade plan
-          </Button>
-        ) : null}
+        <Button
+          render={<Link href={ROUTES.membershipPlans} />}
+          size="sm"
+          variant="outline"
+          className="rounded-md"
+        >
+          Upgrade plan
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -100,7 +174,7 @@ export function MembershipOverview({ status, loading }: MembershipOverviewProps)
           icon={TrendingUpIcon}
           label="Current tier"
           value={tier}
-          hint={hasActive ? "Active" : "Free"}
+          hint="Active"
         />
       </div>
 

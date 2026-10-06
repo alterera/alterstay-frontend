@@ -35,7 +35,7 @@ export function BookingHotelCard({
   );
 
   return (
-    <div className={cn("rounded-2xl border bg-white p-4 shadow-sm sm:p-5", className)}>
+    <div className={cn("rounded-md border bg-white p-4 sm:p-5", className)}>
       <div className="flex gap-4">
         <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:size-28">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -70,7 +70,7 @@ export function BookingHotelCard({
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl border bg-muted/20 px-3 py-4 text-center sm:px-4">
+      <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-md border bg-muted/20 px-3 py-4 text-center sm:px-4">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Check-In
@@ -102,7 +102,7 @@ export function BookingHotelCard({
         {formatGuestSummary(search.guests)}
       </p>
 
-      <div className="mt-4 rounded-xl border px-4 py-3">
+      <div className="mt-4 rounded-md border px-4 py-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 text-sm">
             <p className="font-semibold">

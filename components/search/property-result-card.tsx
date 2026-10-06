@@ -7,7 +7,6 @@ import {
   ChevronRight,
   HeartIcon,
   MapPinIcon,
-  StarIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -63,11 +62,9 @@ export function PropertyResultCard({
 
   const displayPrice =
     property.minPricePerNight ?? property.minTotalPrice ?? null;
-  const locationParts = [
-    property.postalCode,
-    property.city,
-    property.area && property.area !== property.city ? property.area : null,
-  ].filter(Boolean);
+  const locationLabel = [property.area, property.city]
+    .filter(Boolean)
+    .join(", ");
   const promoTag = property.tags[0];
   const score10 =
     property.guestRating != null
@@ -192,19 +189,7 @@ export function PropertyResultCard({
 
         <div className="flex min-w-0 flex-col px-4 py-3.5 lg:px-5 lg:py-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-1 text-xs text-neutral-700">
-              {property.starRating
-                ? Array.from({ length: property.starRating }).map((_, index) => (
-                    <StarIcon
-                      key={index}
-                      className="size-3.5 fill-neutral-900 text-neutral-900"
-                    />
-                  ))
-                : null}
-              {property.starRating ? (
-                <span className="ml-1 font-medium">Alterstay Stars</span>
-              ) : null}
-            </div>
+            <div className="min-w-0 flex-1" />
 
             <div className="flex items-start gap-2">
               {promoTag ? (
@@ -236,9 +221,9 @@ export function PropertyResultCard({
             <h3 className="truncate text-lg font-bold tracking-tight text-neutral-900">
               {property.name}
             </h3>
-            {locationParts.length ? (
+            {locationLabel ? (
               <p className="mt-0.5 truncate text-sm text-neutral-500">
-                {locationParts.join(", ")}
+                {locationLabel}
               </p>
             ) : null}
           </Link>

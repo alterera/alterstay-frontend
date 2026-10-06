@@ -12,7 +12,11 @@ export const metadata: Metadata = {
 export default function HelpFaqRoutePage() {
   return (
     <>
-      <SubpageHeader title="FAQs" backHref={ROUTES.help.root} />
+      <SubpageHeader
+        title="FAQs"
+        backHref={ROUTES.help.root}
+        backMobileOnly
+      />
       <FaqsSection className="pt-6 sm:pt-10" />
     </>
   );

@@ -14,6 +14,8 @@ type SubpageHeaderProps = {
   rightSlot?: React.ReactNode;
   /** When true, header is only shown on mobile (hidden from lg breakpoint up). */
   mobileOnly?: boolean;
+  /** When true, back button is only shown on mobile (hidden from lg breakpoint up). */
+  backMobileOnly?: boolean;
 };
 
 export function SubpageHeader({
@@ -23,6 +25,7 @@ export function SubpageHeader({
   className,
   rightSlot,
   mobileOnly = false,
+  backMobileOnly = false,
 }: SubpageHeaderProps) {
   const router = useRouter();
 
@@ -47,13 +50,21 @@ export function SubpageHeader({
           type="button"
           variant="ghost"
           size="icon-sm"
-          className="shrink-0 rounded-lg"
+          className={cn(
+            "shrink-0 rounded-lg",
+            backMobileOnly && "lg:hidden",
+          )}
           onClick={handleBack}
           aria-label={backLabel}
         >
           <ArrowLeftIcon className="size-4" />
         </Button>
-        <h1 className="min-w-0 flex-1 truncate text-base font-semibold tracking-tight sm:text-lg">
+        <h1
+          className={cn(
+            "min-w-0 flex-1 truncate text-base font-semibold tracking-tight sm:text-lg",
+            backMobileOnly && "lg:pl-0",
+          )}
+        >
           {title}
         </h1>
         {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}

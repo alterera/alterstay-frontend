@@ -20,16 +20,21 @@ export default function Pricing({
 }: PricingProps) {
   return (
     <Section className={cn(className)}>
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-12">
-        {(title) && (
-          <div className="flex flex-col items-center gap-4 px-4 text-center sm:gap-8">
-            {title ? (
-              <h1 className="text-xl font-semibold leading-tight sm:text-5xl sm:leading-tight">
-                {title}
-              </h1>
-            ) : null}
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 pt-10 sm:gap-12 sm:pt-12">
+        {title ? (
+          <div className="max-w-2xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+              Alterstay Membership
+            </p>
+            <h1 className="mt-3 text-2xl font-bold leading-tight tracking-tight sm:text-4xl">
+              {title}
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Choose the plan that fits your travel style. Upgrade anytime and
+              keep every benefit you have already earned.
+            </p>
           </div>
-        )}
+        ) : null}
         {plans !== false && plans.length > 0 ? (
           <div
             className={cn(

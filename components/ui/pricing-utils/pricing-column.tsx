@@ -68,8 +68,8 @@ export function PricingColumn({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-md border bg-white p-6 shadow-sm sm:p-8",
-        isGlow && "shadow-xl shadow-black/5",
+        "relative flex flex-col rounded-md border bg-white p-6 sm:p-8",
+        isGlow && "border-brand/30",
         isGlowBrand &&
           "border-brand/40 ring-1 ring-brand/20 before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-[radial-gradient(circle_at_top,color-mix(in_oklab,var(--brand)_18%,transparent),transparent_55%)]",
         className,
@@ -113,7 +113,11 @@ export function PricingColumn({
           </p>
         ) : null}
         {priceNote ? (
-          <p className="mt-2 text-sm text-muted-foreground">{priceNote}</p>
+          <div className="mt-3 rounded-md border border-brand/15 bg-brand/5 px-3 py-2.5">
+            <p className="text-xs font-medium leading-relaxed text-foreground">
+              {priceNote}
+            </p>
+          </div>
         ) : null}
       </div>
 

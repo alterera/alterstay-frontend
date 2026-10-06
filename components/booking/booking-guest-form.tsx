@@ -1,14 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BriefcaseIcon, Loader2Icon, UserRoundIcon } from "lucide-react";
+import { BriefcaseIcon, Loader2Icon, PlusIcon, UserRoundIcon } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatDisplayPhone } from "@/lib/format";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { formatDisplayPhone, normalizeBookingPhone } from "@/lib/format";
 import type { GuestFormFieldErrors } from "@/lib/booking-mapper";
-import { fetchSavedGuests, type SavedGuest } from "@/lib/guests-api";
+import {
+  createSavedGuest,
+  fetchSavedGuests,
+  type SavedGuest,
+} from "@/lib/guests-api";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 
@@ -63,6 +76,14 @@ export function BookingGuestForm({
   const [savedGuests, setSavedGuests] = useState<SavedGuest[]>([]);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   const [guestsLoading, setGuestsLoading] = useState(false);
+  const [addGuestOpen, setAddGuestOpen] = useState(false);
+  const [addGuestForm, setAddGuestForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+  });
+  const [addGuestError, setAddGuestError] = useState<string | null>(null);
+  const [savingGuest, setSavingGuest] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -103,6 +124,28 @@ export function BookingGuestForm({
     }));
   }
 
+  async function handleAddGuest() {
+    setSavingGuest(true);
+    setAddGuestError(null);
+    try {
+      const created = await createSavedGuest({
+        name: addGuestForm.name.trim(),
+        phone: normalizeBookingPhone(addGuestForm.phone),
+        email: addGuestForm.email.trim() || undefined,
+      });
+      setSavedGuests((current) => [created, ...current]);
+      applySavedGuest(created);
+      setAddGuestForm({ name: "", phone: "", email: "" });
+      setAddGuestOpen(false);
+    } catch (error) {
+      setAddGuestError(
+        error instanceof Error ? error.message : "Could not save guest",
+      );
+    } finally {
+      setSavingGuest(false);
+    }
+  }
+
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (disabled || isSubmitting) return;
@@ -128,9 +171,99 @@ export function BookingGuestForm({
             {guestsLoading ? (
               <p className="text-xs text-muted-foreground">Loading guests…</p>
             ) : savedGuests.length === 0 ? (
-              <p className="rounded-lg border border-dashed px-3 py-2.5 text-xs text-muted-foreground">
-                No saved guests yet. Add them from Profile → Guest Details.
-              </p>
+              <Popover open={addGuestOpen} onOpenChange={setAddGuestOpen}>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={inputsDisabled}
+                      className="h-10 rounded-md border-dashed px-4"
+                    >
+                      <PlusIcon className="size-4" />
+                      Add guest
+                    </Button>
+                  }
+                />
+                <PopoverContent
+                  align="start"
+                  className="w-[min(100vw-2rem,320px)] rounded-md p-4"
+                >
+                  <PopoverHeader>
+                    <PopoverTitle>Add guest</PopoverTitle>
+                    <PopoverDescription>
+                      Save a traveller for faster checkout on future bookings.
+                    </PopoverDescription>
+                  </PopoverHeader>
+                  <div className="mt-3 space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="add-guest-name">Full name</Label>
+                      <Input
+                        id="add-guest-name"
+                        value={addGuestForm.name}
+                        onChange={(event) =>
+                          setAddGuestForm((prev) => ({
+                            ...prev,
+                            name: event.target.value,
+                          }))
+                        }
+                        placeholder="Guest name"
+                        className="h-10 rounded-md"
+                        disabled={savingGuest}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="add-guest-phone">Mobile number</Label>
+                      <Input
+                        id="add-guest-phone"
+                        type="tel"
+                        value={addGuestForm.phone}
+                        onChange={(event) =>
+                          setAddGuestForm((prev) => ({
+                            ...prev,
+                            phone: event.target.value,
+                          }))
+                        }
+                        placeholder="10-digit mobile"
+                        className="h-10 rounded-md"
+                        disabled={savingGuest}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="add-guest-email">Email (optional)</Label>
+                      <Input
+                        id="add-guest-email"
+                        type="email"
+                        value={addGuestForm.email}
+                        onChange={(event) =>
+                          setAddGuestForm((prev) => ({
+                            ...prev,
+                            email: event.target.value,
+                          }))
+                        }
+                        placeholder="email@example.com"
+                        className="h-10 rounded-md"
+                        disabled={savingGuest}
+                      />
+                    </div>
+                    {addGuestError ? (
+                      <p className="text-xs text-destructive">{addGuestError}</p>
+                    ) : null}
+                    <Button
+                      type="button"
+                      className="h-10 w-full rounded-md"
+                      disabled={
+                        savingGuest ||
+                        !addGuestForm.name.trim() ||
+                        !addGuestForm.phone.trim()
+                      }
+                      onClick={() => void handleAddGuest()}
+                    >
+                      {savingGuest ? "Saving…" : "Save guest"}
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             ) : (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {savedGuests.map((guest) => {
@@ -142,7 +275,7 @@ export function BookingGuestForm({
                       disabled={inputsDisabled}
                       onClick={() => applySavedGuest(guest)}
                       className={cn(
-                        "flex min-w-[9.5rem] shrink-0 flex-col rounded-xl border px-3 py-2.5 text-left transition-colors",
+                        "flex min-w-[9.5rem] shrink-0 flex-col rounded-md border px-3 py-2.5 text-left transition-colors",
                         selected
                           ? "border-brand bg-brand/5"
                           : "border-border bg-white hover:bg-muted/40",
@@ -223,7 +356,7 @@ export function BookingGuestForm({
         </div>
       </div>
 
-      <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-3">
+      <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border border-emerald-200 bg-emerald-50/70 px-4 py-3">
         <span className="flex items-center gap-3 text-sm font-medium text-emerald-900">
           <span className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-base">
             💬
@@ -241,7 +374,7 @@ export function BookingGuestForm({
       </label>
 
       <div className="space-y-3">
-        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3">
+        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border px-4 py-3">
           <span className="flex items-center gap-3 text-sm font-medium">
             <BriefcaseIcon className="size-4 text-muted-foreground" />
             Is this a business booking?
@@ -257,7 +390,7 @@ export function BookingGuestForm({
         </label>
 
         {form.isBusinessBooking ? (
-          <div className="space-y-4 rounded-xl border bg-muted/10 p-4">
+          <div className="space-y-4 rounded-md border bg-muted/10 p-4">
             <div className="space-y-1.5">
               <Label htmlFor="gst-number" className="text-sm font-medium text-foreground">
                 GST Number
@@ -330,7 +463,7 @@ export function BookingGuestForm({
           <button
             type="submit"
             disabled={inputsDisabled}
-            className="hidden h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-base font-semibold text-brand-foreground transition-colors hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60 lg:inline-flex"
+            className="hidden h-12 w-full items-center justify-center gap-2 rounded-md bg-brand text-base font-semibold text-brand-foreground transition-colors hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60 lg:inline-flex"
           >
             {isSubmitting ? (
               <>

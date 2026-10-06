@@ -149,7 +149,7 @@ export function ProfileSection({ className }: ProfileSectionProps) {
           className="mb-8 block rounded-md bg-neutral-950 p-4 text-left shadow-sm ring-1 ring-white/10 lg:hidden"
         >
           <p className="text-xs font-bold tracking-[0.18em] text-brand">
-            ALTERSTAY
+            MEMBERSHIP
           </p>
           <div className="mt-2 flex items-center justify-between gap-3">
             {isAuthenticated && membershipLoading ? (

@@ -31,15 +31,15 @@ export function CareersPage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 Email{" "}
                 <a
-                  href="mailto:careers@alterstay.com"
+                  href="mailto:careers@alterstay.in"
                   className="font-medium text-brand underline"
                 >
-                  careers@alterstay.com
+                  careers@alterstay.in
                 </a>{" "}
                 with your portfolio or LinkedIn profile.
               </p>
               <Button
-                className="mt-4 rounded-xl"
+                className="mt-4 rounded-md"
                 variant="outline"
                 render={<Link href={ROUTES.about} />}
               >

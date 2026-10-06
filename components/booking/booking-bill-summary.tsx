@@ -40,7 +40,7 @@ export function BookingBillSummary({
       {showMembershipUpsell ? (
         <Link
           href="/membership"
-          className="flex w-full items-center justify-between rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3.5 text-left shadow-sm transition-colors hover:bg-brand/10"
+          className="flex w-full items-center justify-between rounded-md border border-brand/20 bg-brand/5 px-4 py-3.5 text-left transition-colors hover:bg-brand/10"
         >
           <span className="flex flex-col gap-0.5 text-sm">
             <span className="font-medium text-brand">
@@ -54,7 +54,7 @@ export function BookingBillSummary({
         </Link>
       ) : null}
 
-      <div className="rounded-2xl border bg-white p-5 shadow-sm">
+      <div className="rounded-md border bg-white p-5">
         <h2 className="text-lg font-semibold">Your Bill Summary</h2>
 
         {canRedeem ? (

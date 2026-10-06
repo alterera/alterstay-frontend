@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { BadgeCheckIcon, WalletIcon } from "lucide-react";
+import { ChevronRightIcon, CrownIcon, WalletIcon } from "lucide-react";
 
 import { AccountHero } from "@/components/account/account-hero";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -108,38 +108,44 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
       <Container className="mt-4 max-w-6xl">
         <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="space-y-4">
-            <div className="rounded-md border bg-white p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
-                  <BadgeCheckIcon className="size-5" />
+            <div className="overflow-hidden rounded-md border border-brand/15 bg-gradient-to-br from-brand/8 via-white to-premium/10">
+              {membershipLoading ? (
+                <div className="space-y-2 p-4">
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="h-3 w-32 rounded-md" />
+                  <Skeleton className="h-8 w-full rounded-md" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  {membershipLoading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-24 rounded-md" />
-                      <Skeleton className="h-3 w-32 rounded-md" />
-                      <Skeleton className="h-3 w-28 rounded-md" />
+              ) : (
+                <Link
+                  href={ROUTES.membership}
+                  className="group block p-4 transition-colors hover:bg-white/60"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand/80 text-white shadow-sm">
+                      <CrownIcon className="size-5" />
                     </div>
-                  ) : (
-                    <>
-                      <p className="text-sm font-semibold">{membershipTier}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {membershipExpiresAt
-                          ? `Expires ${formatMembershipExpiry(membershipExpiresAt)}`
-                          : "No active membership"}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand">
+                        Membership
                       </p>
-                      <Link
-                        href={ROUTES.membership}
-                        className="mt-2 inline-block text-xs font-medium text-brand underline"
-                      >
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {membershipExpiresAt ? membershipTier : "Free member"}
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                         {membershipExpiresAt
-                          ? "Renew or upgrade"
-                          : "Get membership"}
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </div>
+                          ? `Valid until ${formatMembershipExpiry(membershipExpiresAt)}`
+                          : "Unlock member rates, coins, and exclusive offers"}
+                      </p>
+                    </div>
+                    <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                  <div className="mt-3 rounded-md border border-brand/15 bg-white/80 px-3 py-2 text-xs font-medium text-brand">
+                    {membershipExpiresAt
+                      ? "Manage membership"
+                      : "Explore membership plans"}
+                  </div>
+                </Link>
+              )}
             </div>
 
             <nav className="overflow-hidden rounded-md border bg-white">
@@ -163,7 +169,7 @@ export function ProfileEditShell({ activeNav, children }: ProfileEditShellProps)
             </nav>
           </aside>
 
-          <div className="rounded-md border bg-white p-5 shadow-sm sm:p-6">
+          <div className="rounded-md border bg-white p-5 sm:p-6">
             {children}
           </div>
         </div>

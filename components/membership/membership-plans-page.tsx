@@ -41,7 +41,7 @@ const PLAN_COPY: Record<
     variant: "glow-brand",
   },
   CORPORATE: {
-    description: "For frequent travellers who want maximum member benefits",
+    description: "For corporate travellers who want maximum member benefits",
     features: [
       "10% discount on every booking",
       "Reward stays algorithm",
@@ -99,7 +99,7 @@ export function MembershipPlansPage() {
       .then((preview) => {
         setUpgradePreview((prev) => ({
           ...prev,
-          CORPORATE: `Your remaining value converts to ~${preview.bonusDays} bonus days. Total: ${preview.totalDays} days.`,
+          CORPORATE: `Unused membership value is credited as ${preview.bonusDays} additional days. Your renewed term extends to ${preview.totalDays} days total.`,
         }));
       })
       .catch(() => undefined);
