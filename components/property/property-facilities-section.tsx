@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { amenityIcon } from "@/lib/amenity-icons";
+import { cn } from "@/lib/utils";
 import type { PropertyAmenityDetail } from "@/types/property-detail";
 
 type PropertyFacilitiesSectionProps = {
@@ -19,12 +20,35 @@ type PropertyFacilitiesSectionProps = {
 
 const VISIBLE_AMENITIES = 6;
 
+function AmenityTile({
+  amenity,
+  compact = false,
+}: {
+  amenity: PropertyAmenityDetail;
+  compact?: boolean;
+}) {
+  const Icon = amenityIcon(amenity.name, amenity.icon);
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 rounded-md border bg-white text-center",
+        compact ? "px-2 py-3" : "px-3 py-4",
+      )}
+    >
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-brand/10 text-brand">
+        <Icon className="size-4" />
+      </span>
+      <span className="text-xs font-medium leading-snug">{amenity.name}</span>
+    </div>
+  );
+}
+
 function AmenityRow({ amenity }: { amenity: PropertyAmenityDetail }) {
   const Icon = amenityIcon(amenity.name, amenity.icon);
   return (
     <div className="flex items-center gap-3 text-sm">
       <span className="flex size-9 shrink-0 items-center justify-center text-brand">
-        <Icon className="size-4"/>
+        <Icon className="size-4" />
       </span>
       <span className="font-medium">{amenity.name}</span>
     </div>
@@ -57,9 +81,9 @@ export function PropertyFacilitiesSection({
               Special facilities at this hotel
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
             {perks.map((perk) => (
-              <AmenityRow key={perk.id} amenity={perk} />
+              <AmenityTile key={perk.id} amenity={perk} compact />
             ))}
           </div>
         </div>
@@ -76,7 +100,13 @@ export function PropertyFacilitiesSection({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:hidden">
+            {visibleAmenities.map((amenity) => (
+              <AmenityTile key={amenity.id} amenity={amenity} compact />
+            ))}
+          </div>
+
+          <div className="hidden gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3">
             {visibleAmenities.map((amenity) => (
               <AmenityRow key={amenity.id} amenity={amenity} />
             ))}
@@ -86,17 +116,17 @@ export function PropertyFacilitiesSection({
             <Button
               type="button"
               variant="outline"
-              className="rounded-full"
+              className="rounded-md"
               onClick={() => setAmenitiesOpen(true)}
             >
-              View all
+              Show all amenities
             </Button>
           ) : null}
         </div>
       ) : null}
 
       <Dialog open={amenitiesOpen} onOpenChange={setAmenitiesOpen}>
-        <DialogContent className="max-h-[80vh] max-w-lg overflow-hidden">
+        <DialogContent className="max-h-[80vh] max-w-lg overflow-hidden rounded-md">
           <DialogHeader>
             <DialogTitle>Property Amenities</DialogTitle>
           </DialogHeader>

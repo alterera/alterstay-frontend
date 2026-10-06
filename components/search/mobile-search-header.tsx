@@ -26,7 +26,7 @@ type MobileSearchHeaderProps = {
 
 function chipClass(active = false) {
   return cn(
-    "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border bg-white px-3.5 text-[13px] font-medium shadow-sm",
+    "inline-flex h-7 shrink-0 items-center gap-1 rounded-full border bg-white px-2.5 text-[11px] font-semibold shadow-sm",
     active
       ? "border-brand text-brand ring-1 ring-brand/30"
       : "border-white/70 text-neutral-800",
@@ -89,7 +89,7 @@ export function MobileSearchHeader({
           aria-pressed={filterActive}
           className={chipClass(filterActive)}
         >
-          <SlidersHorizontalIcon className="size-3.5" />
+          <SlidersHorizontalIcon className="size-3" />
           Filter
         </button>
         <button
@@ -99,7 +99,7 @@ export function MobileSearchHeader({
           className={chipClass(sortActive)}
         >
           Sort
-          <ChevronDownIcon className="size-3.5" />
+          <ChevronDownIcon className="size-3" />
         </button>
         <button
           type="button"
@@ -108,7 +108,7 @@ export function MobileSearchHeader({
           className={chipClass(priceActive)}
         >
           Price
-          <ChevronDownIcon className="size-3.5" />
+          <ChevronDownIcon className="size-3" />
         </button>
       </div>
     </div>

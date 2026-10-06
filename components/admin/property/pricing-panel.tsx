@@ -21,12 +21,14 @@ import {
   deleteRatePrices,
   fetchCancellationPolicies,
   fetchMealPlans,
+  fetchRatePlanNamePresets,
   fetchRatePlans,
   fetchRatePrices,
   fetchRoomTypes,
   updateRatePlan,
   upsertRatePrices,
 } from "@/lib/admin-api";
+import { RatePlanNameField } from "@/components/admin/property/rate-plan-name-field";
 import type {
   CancellationPolicy,
   MealPlan,
@@ -56,6 +58,7 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [policies, setPolicies] = useState<CancellationPolicy[]>([]);
+  const [ratePlanNamePresets, setRatePlanNamePresets] = useState<string[]>([]);
   const [pricesByPlan, setPricesByPlan] = useState<Record<string, RatePrice[]>>(
     {},
   );
@@ -91,16 +94,18 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
     setFetching(true);
     setError(null);
     try {
-      const [types, plans, meals, cancels] = await Promise.all([
+      const [types, plans, meals, cancels, namePresets] = await Promise.all([
         fetchRoomTypes(propertyId),
         fetchRatePlans(propertyId),
         fetchMealPlans(),
         fetchCancellationPolicies(),
+        fetchRatePlanNamePresets(),
       ]);
       setRoomTypes(types);
       setRatePlans(plans);
       setMealPlans(meals);
       setPolicies(cancels);
+      setRatePlanNamePresets(namePresets.presets);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load pricing");
     } finally {
@@ -275,12 +280,10 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
                 </option>
               ))}
             </select>
-            <Input
-              placeholder="Plan name"
+            <RatePlanNameField
               value={planForm.name}
-              onChange={(e) =>
-                setPlanForm((f) => ({ ...f, name: e.target.value }))
-              }
+              onChange={(name) => setPlanForm((f) => ({ ...f, name }))}
+              presets={ratePlanNamePresets}
             />
             <Input
               placeholder="Description (optional)"
@@ -338,11 +341,10 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
             <CardTitle>Edit {editPlan.name}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Input
+            <RatePlanNameField
               value={editPlanForm.name}
-              onChange={(e) =>
-                setEditPlanForm((f) => ({ ...f, name: e.target.value }))
-              }
+              onChange={(name) => setEditPlanForm((f) => ({ ...f, name }))}
+              presets={ratePlanNamePresets}
             />
             <Input
               placeholder="Description"

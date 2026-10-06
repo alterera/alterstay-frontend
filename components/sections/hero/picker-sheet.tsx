@@ -47,7 +47,7 @@ export function PickerSheet({
   // browsers from raising the keyboard as soon as the sheet opens.
   const shellRef = useRef<HTMLDivElement>(null);
   const fullscreen = variant === "fullscreen";
-  const gutter = fullscreen ? "px-4" : "px-5";
+  const gutter = fullscreen ? "px-3 sm:px-4" : "px-5";
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

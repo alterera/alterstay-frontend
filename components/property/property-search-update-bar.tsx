@@ -27,11 +27,13 @@ import {
 type PropertySearchUpdateBarProps = {
   search: PropertySearchParams;
   onUpdate: (search: PropertySearchParams) => void;
+  submitLabel?: string;
 };
 
 export function PropertySearchUpdateBar({
   search,
   onUpdate,
+  submitLabel = "Update Search",
 }: PropertySearchUpdateBarProps) {
   const [draft, setDraft] = useState(search);
   const [datesOpen, setDatesOpen] = useState(false);
@@ -122,7 +124,7 @@ export function PropertySearchUpdateBar({
               className="w-full rounded-lg bg-brand text-brand-foreground hover:bg-brand/90 sm:min-w-36"
               onClick={handleUpdate}
             >
-              Update Search
+              {submitLabel}
             </Button>
           </div>
         </div>
@@ -131,7 +133,7 @@ export function PropertySearchUpdateBar({
       <Sheet open={datesOpen} onOpenChange={setDatesOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[92dvh] overflow-y-auto rounded-t-3xl lg:hidden"
+          className="max-h-[92dvh] w-full max-w-full overflow-y-auto rounded-t-3xl px-4 lg:hidden"
         >
           <SheetHeader className="border-b pb-4 text-left">
             <SheetTitle>Select dates</SheetTitle>
@@ -150,7 +152,7 @@ export function PropertySearchUpdateBar({
       <Sheet open={guestsOpen} onOpenChange={setGuestsOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[92dvh] overflow-y-auto rounded-t-3xl lg:hidden"
+          className="max-h-[92dvh] w-full max-w-full overflow-y-auto rounded-t-3xl px-4 lg:hidden"
         >
           <SheetHeader className="border-b pb-4 text-left">
             <SheetTitle>Select guests</SheetTitle>

@@ -22,6 +22,8 @@ type SearchChoiceSheetProps = {
   value: SortOption;
   options: SortChoice[];
   onChange: (value: SortOption) => void;
+  defaultValue?: SortOption;
+  clearLabel?: string;
 };
 
 export function SearchChoiceSheet({
@@ -32,7 +34,11 @@ export function SearchChoiceSheet({
   value,
   options,
   onChange,
+  defaultValue = "recommended",
+  clearLabel = "Clear filter",
 }: SearchChoiceSheetProps) {
+  const canClear = value !== defaultValue;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -41,7 +47,7 @@ export function SearchChoiceSheet({
         className="inset-x-0 bottom-0 h-auto max-h-[70dvh] w-full gap-0 overflow-hidden rounded-t-xl border-0 bg-background p-0 shadow-none data-[side=bottom]:h-auto"
       >
         <div className="flex min-h-0 flex-col pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <header className="shrink-0 border-b bg-background px-5 pb-3 pt-3">
+          <header className="shrink-0 border-b bg-background px-4 pb-3 pt-3 sm:px-5">
             <div className="mb-3 flex justify-center">
               <span className="h-1 w-10 rounded-full bg-muted-foreground/25" />
             </div>
@@ -87,6 +93,22 @@ export function SearchChoiceSheet({
               );
             })}
           </div>
+
+          {canClear ? (
+            <div className="border-t px-4 py-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full rounded-md"
+                onClick={() => {
+                  onChange(defaultValue);
+                  onOpenChange(false);
+                }}
+              >
+                {clearLabel}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </SheetContent>
     </Sheet>

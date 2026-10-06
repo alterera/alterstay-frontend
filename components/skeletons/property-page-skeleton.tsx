@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function PropertyPageSkeleton() {
   return (
-    <div className="bg-muted/20 pb-24 lg:pb-12">
+    <div className="bg-white pb-24 lg:pb-12">
       <Container className="space-y-6 py-6">
         <Skeleton className="hidden h-4 w-64 rounded-md lg:block" />
         <div className="grid gap-2 lg:grid-cols-4 lg:grid-rows-2 lg:gap-3">

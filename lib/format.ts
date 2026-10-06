@@ -140,6 +140,12 @@ export function normalizeBookingPhone(mobile: string): string {
   return `+${digits}`;
 }
 
+/** Property mobile header date chip, e.g. "Tue 6 Oct". */
+export function formatPropertyHeaderDate(date: Date | undefined): string {
+  if (!date) return "Select date";
+  return format(date, "EEE d MMM");
+}
+
 /** Navbar / mobile summary date format, e.g. "Mon, 17 Aug — Tue, 18 Aug". */
 export function formatNavDateRange(range: DateRange): string {
   if (!range.from) return "Select dates";

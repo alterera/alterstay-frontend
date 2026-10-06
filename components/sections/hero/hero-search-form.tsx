@@ -35,6 +35,9 @@ type HeroSearchFormProps = {
    * `fullscreen` so each field reads as its own page instead of a bottom sheet.
    */
   mobilePickerVariant?: PickerSheetVariant;
+  /** Hide the city field (property stay edit). */
+  hideCity?: boolean;
+  searchButtonLabel?: string;
 };
 
 const MORPH_TRANSITION = "transition-all duration-500 ease-in-out";
@@ -48,6 +51,8 @@ export function HeroSearchForm({
   compact = false,
   dateLayout = "split",
   mobilePickerVariant = "sheet",
+  hideCity = false,
+  searchButtonLabel = "Search",
 }: HeroSearchFormProps) {
   const router = useRouter();
   const [searchParams, setSearchParams] = useState<PropertySearchParams>(
@@ -102,26 +107,30 @@ export function HeroSearchForm({
               : "flex-col lg:flex-row lg:items-center",
           )}
         >
-          <CityPicker
-            value={searchParams.city}
-            onChange={(city) =>
-              setSearchParams((current) => ({ ...current, city }))
-            }
-            compact={compact}
-            sheetVariant={mobilePickerVariant}
-            className={morph ? "min-w-0 flex-1" : "lg:flex-1"}
-          />
+          {hideCity ? null : (
+            <>
+              <CityPicker
+                value={searchParams.city}
+                onChange={(city) =>
+                  setSearchParams((current) => ({ ...current, city }))
+                }
+                compact={compact}
+                sheetVariant={mobilePickerVariant}
+                className={morph ? "min-w-0 flex-1" : "lg:flex-1"}
+              />
 
-          {morph ? null : <Separator className="lg:hidden" />}
-          <Separator
-            orientation="vertical"
-            className={cn(
-              "mx-1 data-vertical:self-center",
-              MORPH_TRANSITION,
-              morph ? "block" : "hidden lg:block",
-              compact ? "data-vertical:h-6" : "data-vertical:h-10",
-            )}
-          />
+              {morph ? null : <Separator className="lg:hidden" />}
+              <Separator
+                orientation="vertical"
+                className={cn(
+                  "mx-1 data-vertical:self-center",
+                  MORPH_TRANSITION,
+                  morph ? "block" : "hidden lg:block",
+                  compact ? "data-vertical:h-6" : "data-vertical:h-10",
+                )}
+              />
+            </>
+          )}
 
           <DateRangePicker
             value={searchParams.dateRange}
@@ -179,7 +188,7 @@ export function HeroSearchForm({
               compact ? "max-w-0 opacity-0" : "max-w-24 opacity-100",
             )}
           >
-            Search
+            {searchButtonLabel}
           </span>
         </Button>
       </div>

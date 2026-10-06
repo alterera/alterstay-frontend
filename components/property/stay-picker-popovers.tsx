@@ -65,7 +65,10 @@ export function StayGuestsPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={trigger} />
-      <PopoverContent align={align} className="w-[min(100vw-2rem,320px)] p-4">
+      <PopoverContent
+        align={align}
+        className="w-[min(calc(100vw-2rem),320px)] max-w-[calc(100vw-2rem)] p-4"
+      >
         <StayGuestsPicker
           guests={guests}
           onChange={onChange}

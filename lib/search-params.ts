@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 
 import type { PropertySearchParams } from "@/types/search";
+import { createDefaultSearchParams } from "@/types/search";
 import type { SearchFilters } from "@/types/search-results";
 
 export function formatDateParam(date: Date): string {
@@ -12,6 +13,36 @@ export function parseDateParam(value: string | null): Date | undefined {
   const iso = value.includes("T") ? value.slice(0, 10) : value;
   const parsed = new Date(`${iso}T00:00:00`);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
+export function hasValidStayDates(search: PropertySearchParams): boolean {
+  const { from, to } = search.dateRange;
+  if (!from || !to) return false;
+
+  const checkIn = formatDateParam(from);
+  const checkOut = formatDateParam(to);
+  return Boolean(checkIn && checkOut && checkIn < checkOut);
+}
+
+/** Fills missing stay dates (today → tomorrow) and guest defaults (2 adults, 1 room). */
+export function resolvePropertySearchParams(
+  search: PropertySearchParams,
+): PropertySearchParams {
+  const defaults = createDefaultSearchParams();
+
+  return {
+    ...search,
+    dateRange: hasValidStayDates(search) ? search.dateRange : defaults.dateRange,
+    guests: {
+      rooms: search.guests.rooms > 0 ? search.guests.rooms : defaults.guests.rooms,
+      adults: search.guests.adults > 0 ? search.guests.adults : defaults.guests.adults,
+      children: 0,
+    },
+  };
+}
+
+export function propertySearchNeedsDefaults(params: URLSearchParams): boolean {
+  return !params.get("checkIn") || !params.get("checkOut");
 }
 
 export function parseSearchParams(

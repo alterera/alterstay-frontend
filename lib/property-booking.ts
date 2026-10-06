@@ -1,8 +1,34 @@
 import type {
   PropertyDetail,
   PropertyRoomTypeDetail,
+  PropertyRatePlanDetail,
   SelectedRoomPlan,
 } from "@/types/property-detail";
+
+function ratePlanPrice(plan: PropertyRatePlanDetail): number {
+  return plan.pricePerNight ?? plan.totalPrice ?? 0;
+}
+
+function roomTypeLowestPrice(roomType: PropertyRoomTypeDetail): number {
+  const prices = roomType.ratePlans
+    .map(ratePlanPrice)
+    .filter((price) => price > 0);
+  return prices.length ? Math.min(...prices) : 0;
+}
+
+/** Sorts room types and their rate plans from lowest to highest price. */
+export function sortRoomTypesByPriceAsc(
+  roomTypes: PropertyRoomTypeDetail[],
+): PropertyRoomTypeDetail[] {
+  return [...roomTypes]
+    .map((roomType) => ({
+      ...roomType,
+      ratePlans: [...roomType.ratePlans].sort(
+        (a, b) => ratePlanPrice(a) - ratePlanPrice(b),
+      ),
+    }))
+    .sort((a, b) => roomTypeLowestPrice(a) - roomTypeLowestPrice(b));
+}
 
 export function planToSelection(
   roomType: PropertyRoomTypeDetail,

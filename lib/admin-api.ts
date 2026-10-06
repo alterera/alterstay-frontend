@@ -104,6 +104,12 @@ export function fetchMealPlans() {
   return adminFetch<MealPlan[]>("/admin/meal-plans");
 }
 
+export function fetchRatePlanNamePresets() {
+  return adminFetch<{ presets: string[]; allowCustom: boolean }>(
+    "/admin/rate-plan-name-presets",
+  );
+}
+
 export function fetchCancellationPolicies() {
   return adminFetch<CancellationPolicy[]>("/admin/cancellation-policies");
 }

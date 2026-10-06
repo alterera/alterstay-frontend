@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckIcon, SearchIcon, StarIcon } from "lucide-react";
+import Image from "next/image";
+import { CheckIcon, SearchIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -40,9 +41,11 @@ function FilterSection({
     <section className="space-y-3 border-b border-border/80 pb-6 last:border-b-0 last:pb-0">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+            {title}
+          </h3>
           {hint ? (
-            <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
           ) : null}
         </div>
         {onClear ? (
@@ -60,24 +63,27 @@ function FilterSection({
   );
 }
 
-function Chip({
+function FilterChip({
   selected,
   onClick,
   children,
+  className,
 }: {
   selected: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-10 items-center rounded-full border px-3.5 text-sm font-medium transition-colors",
+        "inline-flex min-h-9 items-center justify-center rounded-md border px-3 text-xs font-semibold tracking-tight transition-colors",
         selected
-          ? "border-brand bg-brand text-brand-foreground"
-          : "border-border bg-background text-foreground hover:border-foreground/30",
+          ? "border-neutral-900 bg-neutral-900 text-white"
+          : "border-border bg-white text-foreground hover:border-neutral-400",
+        className,
       )}
     >
       {children}
@@ -126,7 +132,7 @@ export function SearchFiltersPanel({
             value={areaSearch}
             onChange={(e) => onAreaSearchChange(e.target.value)}
             placeholder={`Search areas in ${city}`}
-            className="h-11 rounded-md pl-10"
+            className="h-10 rounded-md border-border pl-10"
           />
         </div>
         <div
@@ -146,19 +152,21 @@ export function SearchFiltersPanel({
                 <label
                   key={area.id}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm",
-                    selected ? "bg-brand/10" : "bg-muted/50",
+                    "flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors",
+                    selected
+                      ? "border-neutral-900 bg-neutral-900/5"
+                      : "border-border bg-white",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex size-5 shrink-0 items-center justify-center rounded-sm border",
+                      "flex size-4 shrink-0 items-center justify-center rounded-sm border",
                       selected
-                        ? "border-brand bg-brand text-brand-foreground"
-                        : "border-border bg-background",
+                        ? "border-neutral-900 bg-neutral-900 text-white"
+                        : "border-border bg-white",
                     )}
                   >
-                    {selected ? <CheckIcon className="size-3.5" /> : null}
+                    {selected ? <CheckIcon className="size-3" /> : null}
                   </span>
                   <input
                     type="checkbox"
@@ -186,23 +194,37 @@ export function SearchFiltersPanel({
             : undefined
         }
       >
-        <div className="flex flex-wrap gap-2">
-          {PRICE_FILTER_OPTIONS.map((option) => (
-            <Chip
-              key={option.id}
-              selected={filters.priceBuckets.includes(option.id)}
-              onClick={() =>
-                patch({
-                  priceBuckets: toggleArrayItem(
-                    filters.priceBuckets,
-                    option.id,
-                  ),
-                })
-              }
-            >
-              {option.label}
-            </Chip>
-          ))}
+        <div className="grid grid-cols-2 gap-2">
+          {PRICE_FILTER_OPTIONS.map((option) => {
+            const selected = filters.priceBuckets.includes(option.id);
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() =>
+                  patch({
+                    priceBuckets: toggleArrayItem(
+                      filters.priceBuckets,
+                      option.id,
+                    ),
+                  })
+                }
+                className={cn(
+                  "rounded-md border px-3 py-3 text-left transition-colors",
+                  selected
+                    ? "border-neutral-900 bg-neutral-900 text-white"
+                    : "border-border bg-white hover:border-neutral-400",
+                )}
+              >
+                <span className="block text-[10px] font-medium uppercase tracking-wider opacity-70">
+                  Per night
+                </span>
+                <span className="mt-1 block text-xs font-bold tracking-tight">
+                  {option.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </FilterSection>
 
@@ -214,22 +236,44 @@ export function SearchFiltersPanel({
             : undefined
         }
       >
-        <div className="flex flex-wrap gap-2">
-          {RATING_FILTER_OPTIONS.map((option) => (
-            <Chip
-              key={option.value}
-              selected={filters.minRating === option.value}
-              onClick={() =>
-                patch({
-                  minRating:
-                    filters.minRating === option.value ? null : option.value,
-                })
-              }
-            >
-              <StarIcon className="mr-1 size-3.5 fill-current" />
-              {option.label}
-            </Chip>
-          ))}
+        <div className="grid grid-cols-2 gap-2">
+          {RATING_FILTER_OPTIONS.map((option) => {
+            const selected = filters.minRating === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() =>
+                  patch({
+                    minRating:
+                      filters.minRating === option.value ? null : option.value,
+                  })
+                }
+                className={cn(
+                  "flex items-center justify-between rounded-md border px-3 py-3 transition-colors",
+                  selected
+                    ? "border-neutral-900 bg-neutral-900 text-white"
+                    : "border-border bg-white hover:border-neutral-400",
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <Image
+                    src="/icons/star.png"
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="size-4 shrink-0"
+                  />
+                  <span className="text-sm font-bold tracking-tight">
+                    {option.label}
+                  </span>
+                </span>
+                <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
+                  & up
+                </span>
+              </button>
+            );
+          })}
         </div>
       </FilterSection>
 
@@ -243,7 +287,7 @@ export function SearchFiltersPanel({
       >
         <div className="flex flex-wrap gap-2">
           {propertyTypes.map((type) => (
-            <Chip
+            <FilterChip
               key={type.id}
               selected={filters.propertyTypeIds.includes(type.id)}
               onClick={() =>
@@ -256,7 +300,7 @@ export function SearchFiltersPanel({
               }
             >
               {type.name}
-            </Chip>
+            </FilterChip>
           ))}
         </div>
       </FilterSection>
@@ -266,10 +310,10 @@ export function SearchFiltersPanel({
           type="button"
           onClick={() => patch({ businessHotels: !filters.businessHotels })}
           className={cn(
-            "flex w-full items-center justify-between rounded-md border px-4 py-3.5 text-left",
+            "flex w-full items-center justify-between rounded-md border px-4 py-3.5 text-left transition-colors",
             filters.businessHotels
-              ? "border-brand bg-brand/10"
-              : "border-border bg-muted/40",
+              ? "border-neutral-900 bg-neutral-900/5"
+              : "border-border bg-white",
           )}
         >
           <span>
@@ -280,13 +324,13 @@ export function SearchFiltersPanel({
           </span>
           <span
             className={cn(
-              "flex size-5 shrink-0 items-center justify-center rounded-sm border",
+              "flex size-4 shrink-0 items-center justify-center rounded-sm border",
               filters.businessHotels
-                ? "border-brand bg-brand text-brand-foreground"
-                : "border-border bg-background",
+                ? "border-neutral-900 bg-neutral-900 text-white"
+                : "border-border bg-white",
             )}
           >
-            {filters.businessHotels ? <CheckIcon className="size-3.5" /> : null}
+            {filters.businessHotels ? <CheckIcon className="size-3" /> : null}
           </span>
         </button>
       </FilterSection>

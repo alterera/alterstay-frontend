@@ -35,6 +35,7 @@ export const ROUTES = {
   search: "/search",
   cities: "/cities",
   propertyDetail: (slug: string) => `/properties/${slug}`,
+  propertyRooms: (slug: string) => `/properties/${slug}/rooms`,
   checkout: (slug: string) => `/properties/${slug}/checkout`,
   checkoutLogin: (slug: string) => `/properties/${slug}/checkout/login`,
   /** @deprecated redirects to checkout */

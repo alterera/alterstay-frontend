@@ -14,7 +14,7 @@ type LogoProps = {
 };
 
 const sizeClasses = {
-  sm: "h-6 w-auto",
+  sm: "h-7 w-auto",
   default: "h-7 w-auto sm:h-8",
   lg: "h-8 w-auto sm:h-9",
 } as const;

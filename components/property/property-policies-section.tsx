@@ -97,7 +97,7 @@ export function PropertyPoliciesSection({
             <p className="text-sm font-semibold text-foreground sm:text-base">
               {checkInLabel ? (
                 <>
-                  Check-in Time:{" "}
+                  Check-in:{" "}
                   <span className="text-brand">{checkInLabel}</span>
                 </>
               ) : null}
@@ -106,7 +106,7 @@ export function PropertyPoliciesSection({
               ) : null}
               {checkOutLabel ? (
                 <>
-                  Check-out Time:{" "}
+                  Check-out:{" "}
                   <span className="text-brand">{checkOutLabel}</span>
                 </>
               ) : null}

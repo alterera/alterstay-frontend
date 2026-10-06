@@ -359,6 +359,7 @@ export function SearchPage() {
         value={filters.sortBy}
         options={MOBILE_PRICE_OPTIONS}
         onChange={(sortBy) => handleFiltersChange({ ...filters, sortBy })}
+        clearLabel="Reset price sort"
       />
 
       <SearchFiltersSheet

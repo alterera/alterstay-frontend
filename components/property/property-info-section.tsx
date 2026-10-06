@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MapPinIcon, StarIcon } from "lucide-react";
+import Image from "next/image";
+import { MapPinIcon } from "lucide-react";
 
 import type { PropertyDetail } from "@/types/property-detail";
 
@@ -23,16 +24,27 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
         {property.starRating ? (
           <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
             {Array.from({ length: property.starRating }).map((_, index) => (
-              <StarIcon
+              <Image
                 key={index}
-                className="size-3 fill-premium text-premium"
+                src="/icons/star.png"
+                alt=""
+                width={14}
+                height={14}
+                className="size-3.5"
               />
             ))}
           </span>
         ) : null}
         {property.guestRating ? (
           <span className="inline-flex items-center gap-1 rounded-md bg-emerald-700 px-2 py-1 text-xs font-semibold text-white">
-            ★ {property.guestRating.toFixed(1)}
+            <Image
+              src="/icons/star.png"
+              alt=""
+              width={14}
+              height={14}
+              className="size-3.5 brightness-0 invert"
+            />
+            {property.guestRating.toFixed(1)}
           </span>
         ) : null}
         {property.isBusinessHotel ? (

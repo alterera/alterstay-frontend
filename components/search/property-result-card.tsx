@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  HeartIcon,
-  MapPinIcon,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, HeartIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useFavouriteProperty } from "@/hooks/use-favourite-property";
@@ -239,32 +234,20 @@ export function PropertyResultCard({
                   </span>
                 );
               })}
-              {property.area ? (
-                <>
-                  <span className="hidden h-3 w-px bg-neutral-300 sm:block" />
-                  <span className="inline-flex items-center gap-1">
-                    <MapPinIcon className="size-3.5" />
-                    {property.area}
-                  </span>
-                </>
-              ) : null}
             </div>
           ) : null}
 
-          <div className="mt-4 flex flex-1 items-end justify-between gap-3">
-            <div className="min-w-0">
+          <div className="mt-4 flex flex-1 items-end justify-end gap-3">
+            <div className="flex shrink-0 items-end gap-3">
               {property.remainingRooms != null &&
               property.remainingRooms > 0 &&
-              property.remainingRooms <= 3 ? (
-                <p className="text-sm font-medium text-brand">
-                  Only {property.remainingRooms}{" "}
-                  {property.remainingRooms === 1 ? "room" : "rooms"} left on our
-                  site
+              property.remainingRooms < 10 ? (
+                <p className="max-w-[7.5rem] text-right text-xs font-semibold leading-tight text-red-600">
+                  {property.remainingRooms}{" "}
+                  {property.remainingRooms === 1 ? "room" : "rooms"} left,
+                  hurry!
                 </p>
               ) : null}
-            </div>
-
-            <div className="flex shrink-0 items-end gap-4">
               <div className="text-right">
                 {displayPrice !== null ? (
                   <>

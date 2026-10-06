@@ -24,3 +24,11 @@ export function buildPropertyUrl(
   const query = buildPropertyQueryString(search);
   return `/properties/${slug}?${query}`;
 }
+
+export function buildPropertyRoomsUrl(
+  slug: string,
+  search: PropertySearchParams,
+): string {
+  const query = buildPropertyQueryString(search);
+  return `/properties/${slug}/rooms?${query}`;
+}

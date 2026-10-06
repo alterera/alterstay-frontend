@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { SelectedRoomPlan } from "@/types/property-detail";
 import type { PropertySearchParams } from "@/types/search";
 
+import { PropertyPriceBreakup } from "./property-price-breakup";
 import { PropertyStayControls } from "./property-stay-controls";
 
 type PropertyBookingPanelProps = {
@@ -106,25 +107,13 @@ export function PropertyBookingPanel({
         </button>
 
         {selectedPlan ? (
-          <div className="mt-4 space-y-2 border-t pt-4 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Room total</span>
-              <span className="font-medium">
-                {formatCurrency(roomTotal, displayCurrency)}
-              </span>
-            </div>
-            {taxes > 0 ? (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Taxes</span>
-                <span className="font-medium">
-                  {formatCurrency(taxes, displayCurrency)}
-                </span>
-              </div>
-            ) : null}
-            <div className="flex justify-between font-semibold">
-              <span>Total</span>
-              <span>{formatCurrency(roomTotal + taxes, displayCurrency)}</span>
-            </div>
+          <div className="mt-4 border-t pt-4">
+            <PropertyPriceBreakup
+              className="border-0 bg-transparent p-0"
+              roomTotal={roomTotal}
+              taxes={taxes}
+              currency={displayCurrency}
+            />
           </div>
         ) : null}
 

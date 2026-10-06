@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { HeartIcon } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Container } from "@/components/common/container";
+import { Button } from "@/components/ui/button";
 import { PropertyBookingPanel } from "@/components/property/property-booking-panel";
 import { PropertyBreadcrumb } from "@/components/property/property-breadcrumb";
 import { PropertyFacilitiesSection } from "@/components/property/property-facilities-section";
@@ -12,12 +14,15 @@ import { PropertyImageGrid } from "@/components/property/property-image-grid";
 import { PropertyInfoSection } from "@/components/property/property-info-section";
 import { PropertyLocationSection } from "@/components/property/property-location-section";
 import { PropertyMobileBookingDock } from "@/components/property/property-mobile-booking-dock";
+import { PropertyMobileStayHeader } from "@/components/property/property-mobile-stay-header";
 import { PropertyPoliciesSection } from "@/components/property/property-policies-section";
 import { PropertyRatingsSection } from "@/components/property/property-ratings-section";
 import { PropertyRoomOptionsSection } from "@/components/property/property-room-options-section";
 import { PropertySectionNav } from "@/components/property/property-section-nav";
+import { PropertyPageSkeleton } from "@/components/skeletons";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
 import { useFavouriteProperty } from "@/hooks/use-favourite-property";
+import { usePropertySearchDefaults } from "@/hooks/use-property-search-defaults";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import {
   buildCheckoutLoginUrl,
@@ -26,12 +31,16 @@ import {
 import { fetchQuote } from "@/lib/quote-api";
 import { quoteToBill } from "@/lib/quote-utils";
 import { fetchPropertyDetail } from "@/lib/property-api";
-import { PropertyPageSkeleton } from "@/components/skeletons";
 import { findLowestPricePlan, planToSelection } from "@/lib/property-booking";
 import { FeaturedPropertiesSection } from "@/components/sections/featured-properties";
 import { splitAmenities } from "@/lib/property-enrichment";
-import { buildPropertyUrl } from "@/lib/property-url";
-import { parseSearchParams, formatDateParam } from "@/lib/search-params";
+import { buildPropertyRoomsUrl, buildPropertyUrl } from "@/lib/property-url";
+import {
+  parseSearchParams,
+  formatDateParam,
+  resolvePropertySearchParams,
+} from "@/lib/search-params";
+import { cn } from "@/lib/utils";
 import {
   PROPERTY_SECTIONS,
   type PropertyDetail,
@@ -45,14 +54,24 @@ type PropertyPageProps = {
   slug: string;
 };
 
+function toResolvedSearch(params: URLSearchParams): PropertySearchParams {
+  const parsed = parseSearchParams(params);
+  return resolvePropertySearchParams({
+    city: parsed.city,
+    dateRange: parsed.dateRange,
+    guests: parsed.guests,
+  });
+}
+
 export function PropertyPage({ slug }: PropertyPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const isDesktop = useIsDesktop();
-  const initialSearch = parseSearchParams(searchParams);
 
-  const [search, setSearch] = useState<PropertySearchParams>(initialSearch);
+  const [search, setSearch] = useState<PropertySearchParams>(() =>
+    toResolvedSearch(searchParams),
+  );
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +80,8 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   );
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
+
+  usePropertySearchDefaults({ slug, buildUrl: buildPropertyUrl });
 
   const { isFavourite, toggleFavourite } = useFavouriteProperty(slug);
   const sectionIds = PROPERTY_SECTIONS.map((section) => section.id);
@@ -95,8 +116,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   }, [loadProperty]);
 
   useEffect(() => {
-    const parsed = parseSearchParams(searchParams);
-    setSearch(parsed);
+    setSearch(toResolvedSearch(searchParams));
   }, [searchParams]);
 
   useEffect(() => {
@@ -144,6 +164,18 @@ export function PropertyPage({ slug }: PropertyPageProps) {
     router.push(buildPropertyUrl(slug, nextSearch));
   }
 
+  function handleSectionNavigate(id: PropertySectionId) {
+    if (id === "room-options" && isDesktop === false) {
+      router.push(buildPropertyRoomsUrl(slug, search));
+      return;
+    }
+    scrollToSection(id);
+  }
+
+  function handleSelectRoom() {
+    router.push(buildPropertyRoomsUrl(slug, search));
+  }
+
   function handleBookNow() {
     if (!selectedPlan || authLoading) return;
 
@@ -166,40 +198,77 @@ export function PropertyPage({ slug }: PropertyPageProps) {
     };
   }, [quote, selectedPlan]);
 
-  if (loading) {
-    return <PropertyPageSkeleton />;
+  if (error || (!loading && !property)) {
+    return (
+      <div className="bg-white pb-24 lg:pb-12">
+        <PropertyMobileStayHeader
+          search={search}
+          onSearchUpdate={handleSearchUpdate}
+        />
+        <Container className="py-16">
+          <div className="rounded-md border bg-white p-10 text-center">
+            <p className="text-muted-foreground">
+              {error ?? "Property not found."}
+            </p>
+          </div>
+        </Container>
+      </div>
+    );
   }
 
-  if (error || !property) {
+  if (loading || !property) {
     return (
-      <Container className="py-16">
-        <div className="rounded-md border bg-white p-10 text-center">
-          <p className="text-muted-foreground">
-            {error ?? "Property not found."}
-          </p>
-        </div>
-      </Container>
+      <div className="bg-white">
+        <PropertyMobileStayHeader
+          search={search}
+          onSearchUpdate={handleSearchUpdate}
+        />
+        <PropertyPageSkeleton />
+      </div>
     );
   }
 
   const { perks, amenities } = splitAmenities(property);
 
   return (
-    <div className="bg-muted/20 pb-24 lg:pb-12">
+    <div className="bg-white pb-24 lg:pb-12">
+      <PropertyMobileStayHeader
+        search={search}
+        onSearchUpdate={handleSearchUpdate}
+      />
+
       <Container className="space-y-6 py-6">
         <div className="hidden lg:block">
           <PropertyBreadcrumb city={property.city} propertyName={property.name} />
         </div>
-        <PropertyImageGrid name={property.name} imageUrls={property.imageUrls} />
+        <div className="relative">
+          <div className="absolute right-3 top-3 z-20 lg:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              className="rounded-md bg-white/95 backdrop-blur"
+              onClick={toggleFavourite}
+              aria-label={
+                isFavourite ? "Remove from favourites" : "Add to favourites"
+              }
+              aria-pressed={isFavourite}
+            >
+              <HeartIcon
+                className={cn(
+                  "size-4",
+                  isFavourite ? "fill-rose-500 text-rose-500" : "text-foreground",
+                )}
+              />
+            </Button>
+          </div>
+          <PropertyImageGrid name={property.name} imageUrls={property.imageUrls} />
+        </div>
       </Container>
 
       <PropertySectionNav
         activeId={activeId as PropertySectionId}
-        onNavigate={scrollToSection}
-        propertyName={property.name}
-        onBack={() => router.back()}
-        isFavourite={isFavourite}
-        onToggleFavourite={toggleFavourite}
+        onNavigate={handleSectionNavigate}
       />
 
       <Container className="py-10">
@@ -245,12 +314,8 @@ export function PropertyPage({ slug }: PropertyPageProps) {
       </Container>
 
       <PropertyMobileBookingDock
-        search={search}
-        selectedPlan={displayPlan}
-        currency={property.currency}
-        quoteLoading={quoteLoading}
-        quoteAvailable={quote?.available ?? true}
-        onBookNow={handleBookNow}
+        property={property}
+        onSelectRoom={handleSelectRoom}
       />
 
       {property.city ? (
