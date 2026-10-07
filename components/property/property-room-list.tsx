@@ -10,6 +10,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { getProductGuestLabel } from "@/lib/rate-products";
 import { planToSelection, sortRoomTypesByPriceAsc } from "@/lib/property-booking";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -109,13 +110,16 @@ function RoomTypeCard({
       <div className="space-y-3 p-4">
         {roomType.ratePlans.map((plan, index) => {
           const isSelected = selectedRatePlanId === plan.id;
+          const label =
+            plan.guestLabel ??
+            getProductGuestLabel(plan.productCode, plan.name);
 
           return (
             <div key={plan.id}>
               {index > 0 ? <Separator className="my-3" /> : null}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <p className="font-semibold">{plan.name}</p>
+                  <p className="font-semibold">{label}</p>
                 </div>
 
                 <div className="flex items-end justify-between gap-4 sm:flex-col sm:items-end">

@@ -41,10 +41,12 @@ export function planToSelection(
     roomTypeId: roomType.id,
     roomTypeName: roomType.name,
     ratePlanId: plan.id,
-    ratePlanName: plan.name,
+    ratePlanName: plan.guestLabel ?? plan.name,
     pricePerNight: plan.pricePerNight,
     totalPrice: plan.totalPrice,
     estimatedTaxes: plan.estimatedTaxes,
+    estimatedGst: plan.estimatedGst,
+    estimatedPlatformFee: plan.estimatedPlatformFee,
     currency: plan.currency,
   };
 }

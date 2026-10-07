@@ -1,7 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/format";
-import { calculatePropertyFeeBreakup } from "@/lib/property-fees";
+import type { PropertyFeeBreakup } from "@/lib/property-fees";
 import { cn } from "@/lib/utils";
 
 import { PropertyTaxesFeesInfo } from "./property-taxes-fees-info";
@@ -9,6 +9,7 @@ import { PropertyTaxesFeesInfo } from "./property-taxes-fees-info";
 type PropertyPriceBreakupProps = {
   roomTotal: number;
   currency: string;
+  feeBreakup: PropertyFeeBreakup | null;
   className?: string;
   compact?: boolean;
 };
@@ -16,11 +17,11 @@ type PropertyPriceBreakupProps = {
 export function PropertyPriceBreakup({
   roomTotal,
   currency,
+  feeBreakup,
   className,
   compact = false,
 }: PropertyPriceBreakupProps) {
-  const feeBreakup = calculatePropertyFeeBreakup(roomTotal);
-  const total = roomTotal + feeBreakup.taxesAndFees;
+  const total = roomTotal + (feeBreakup?.taxesAndFees ?? 0);
 
   return (
     <div
@@ -45,7 +46,7 @@ export function PropertyPriceBreakup({
             {formatCurrency(roomTotal, currency)}
           </span>
         </div>
-        {roomTotal > 0 ? (
+        {roomTotal > 0 && feeBreakup ? (
           <div className="flex justify-between gap-4">
             <span className="flex items-center gap-1 text-muted-foreground">
               Taxes and Fees

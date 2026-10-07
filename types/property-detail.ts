@@ -60,13 +60,18 @@ export type PropertyRestriction = PropertyRestrictionDetail;
 
 export type PropertyRatePlanDetail = {
   id: string;
+  productCode?: string | null;
   name: string;
+  guestLabel?: string | null;
   description: string | null;
   mealPlan: { code: string; name: string } | null;
   cancellationPolicy: { name: string; description: string } | null;
+  isRefundable?: boolean | null;
   totalPrice: number | null;
   pricePerNight: number | null;
   estimatedTaxes: number | null;
+  estimatedGst?: number | null;
+  estimatedPlatformFee?: number | null;
   currency: string;
 };
 
@@ -112,6 +117,8 @@ export type PropertyDetail = {
   minTotalPrice: number | null;
   minPricePerNight: number | null;
   estimatedTaxes: number | null;
+  estimatedGst?: number | null;
+  estimatedPlatformFee?: number | null;
   currency: string;
   nights: number;
 };
@@ -135,5 +142,7 @@ export type SelectedRoomPlan = {
   pricePerNight: number;
   totalPrice: number;
   estimatedTaxes: number | null;
+  estimatedGst?: number | null;
+  estimatedPlatformFee?: number | null;
   currency: string;
 };

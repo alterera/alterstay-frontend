@@ -7,9 +7,11 @@ describe("quoteToBill", () => {
   it("maps coins applied and earn preview from quote", () => {
     const quote: QuoteResponse = {
       subtotal: 3000,
-      taxAmount: 450,
+      gstAmount: 450,
+      platformFee: 262,
+      taxAmount: 712,
       discountAmount: 0,
-      totalAmount: 2950,
+      totalAmount: 3212,
       currency: "INR",
       nights: 1,
       rooms: 1,
@@ -27,7 +29,7 @@ describe("quoteToBill", () => {
     const bill = quoteToBill(quote);
     expect(bill.discount).toBe(0);
     expect(bill.coinsApplied).toBe(500);
-    expect(bill.toPay).toBe(2950);
+    expect(bill.toPay).toBe(3212);
     expect(bill.coinEarnPreview?.earnableAmount).toBe(150);
   });
 });

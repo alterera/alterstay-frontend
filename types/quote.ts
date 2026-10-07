@@ -4,8 +4,22 @@ export type CoinEarnPreview = {
   earnableAmount: number;
 };
 
+export type QuoteNightlyRate = {
+  date: string;
+  barPrice: number;
+  finalPrice: number;
+  adjustments: {
+    code: string;
+    label: string;
+    multiplier?: number;
+    amountDelta?: number;
+  }[];
+};
+
 export type QuoteResponse = {
   subtotal: number;
+  gstAmount: number;
+  platformFee: number;
   taxAmount: number;
   discountAmount: number;
   totalAmount: number;
@@ -15,6 +29,7 @@ export type QuoteResponse = {
   available: boolean;
   remainingRooms: number;
   expiresAt: string;
+  nightly?: QuoteNightlyRate[];
   coinEarnPreview?: CoinEarnPreview;
   coinsRedeemed?: number;
   /** @deprecated No checkout discount — use coinEarnPreview. */

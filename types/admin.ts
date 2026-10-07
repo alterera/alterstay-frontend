@@ -233,14 +233,22 @@ export type RatePlan = {
   name: string;
   description: string | null;
   status: string;
+  productCode?: string | null;
   roomType: RoomType;
   mealPlan: MealPlan | null;
   cancellationPolicy: CancellationPolicy | null;
-  _count?: { reservationItems: number; prices: number };
+  _count?: { reservationItems: number; prices?: number };
   prices?: RatePrice[];
 };
 
 export type RatePrice = {
+  id: string;
+  date: string;
+  basePrice: string;
+  currency: string;
+};
+
+export type RoomTypeDailyRate = {
   id: string;
   date: string;
   basePrice: string;

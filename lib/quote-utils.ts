@@ -7,6 +7,8 @@ export function quoteToBill(quote: QuoteResponse): BookingBill {
     roomPrice: quote.subtotal,
     discount: 0,
     coinsApplied,
+    gstAmount: quote.gstAmount,
+    platformFee: quote.platformFee,
     tax: quote.taxAmount,
     toPay: quote.totalAmount,
     currency: quote.currency,

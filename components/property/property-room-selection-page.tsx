@@ -31,6 +31,8 @@ import type { PropertySearchParams } from "@/types/search";
 import type { QuoteResponse } from "@/types/quote";
 
 import { PropertyMobileStayHeader } from "./property-mobile-stay-header";
+import { feeBreakupFromSource } from "@/lib/property-fees";
+
 import { PropertyPriceBreakup } from "./property-price-breakup";
 import { PropertyRoomList } from "./property-room-list";
 import { PropertyRoomSelectionDock } from "./property-room-selection-dock";
@@ -151,6 +153,8 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
       ...selectedPlan,
       totalPrice: bill.roomPrice,
       estimatedTaxes: bill.tax,
+      estimatedGst: bill.gstAmount,
+      estimatedPlatformFee: bill.platformFee,
       currency: bill.currency,
     };
   }, [quote, selectedPlan]);
@@ -211,6 +215,7 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
           <PropertyPriceBreakup
             roomTotal={displayPlan.totalPrice}
             currency={displayPlan.currency}
+            feeBreakup={feeBreakupFromSource(displayPlan)}
           />
         ) : null}
 

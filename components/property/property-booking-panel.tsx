@@ -9,8 +9,9 @@ import {
   getStayNights,
 } from "@/lib/format";
 import {
-  calculateMemberSavings,
-  calculatePropertyFeeBreakup,
+  calculateMemberSavingsFromTotal,
+  feeBreakupFromSource,
+  grandTotalFromSource,
 } from "@/lib/property-fees";
 import { cn } from "@/lib/utils";
 import type { SelectedRoomPlan } from "@/types/property-detail";
@@ -53,14 +54,16 @@ export function PropertyBookingPanel({
   className,
 }: PropertyBookingPanelProps) {
   const nights = getStayNights(search.dateRange);
-  const roomTotal = selectedPlan?.totalPrice ?? 0;
   const displayCurrency = selectedPlan?.currency ?? currency;
-  const feeBreakup = calculatePropertyFeeBreakup(roomTotal);
-  const memberSavings = calculateMemberSavings(roomTotal);
+  const feeBreakup = selectedPlan ? feeBreakupFromSource(selectedPlan) : null;
+  const grandTotal = selectedPlan
+    ? grandTotalFromSource(selectedPlan)
+    : 0;
+  const memberSavings = calculateMemberSavingsFromTotal(grandTotal);
 
   return (
     <aside className={cn("hidden lg:block lg:self-stretch", className)}>
-      <div className="sticky top-20 overflow-hidden rounded-md border bg-white">
+      <div className="sticky top-20 overflow-hidden rounded-md border bg-white lg:top-28">
         {selectedPlan ? (
           <PropertyMemberLoginBanner
             savingsAmount={memberSavings}
@@ -80,7 +83,7 @@ export function PropertyBookingPanel({
                     / night
                   </span>
                 </p>
-                {roomTotal > 0 ? (
+                {feeBreakup ? (
                   <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                     <span>
                       +{formatCurrency(feeBreakup.taxesAndFees, displayCurrency)}{" "}
@@ -141,8 +144,9 @@ export function PropertyBookingPanel({
             <div className="border-t pt-3">
               <PropertyPriceBreakup
                 className="border-0 bg-transparent p-0"
-                roomTotal={roomTotal}
+                roomTotal={selectedPlan.totalPrice}
                 currency={displayCurrency}
+                feeBreakup={feeBreakup}
                 compact
               />
             </div>

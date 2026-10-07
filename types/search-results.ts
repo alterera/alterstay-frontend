@@ -57,6 +57,8 @@ export type PropertySearchResult = {
   minTotalPrice: number | null;
   minPricePerNight: number | null;
   estimatedTaxes: number | null;
+  estimatedGst?: number | null;
+  estimatedPlatformFee?: number | null;
   currency: string;
   nights: number;
   availableRoomTypeCount: number;

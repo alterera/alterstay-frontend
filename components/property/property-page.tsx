@@ -198,6 +198,8 @@ export function PropertyPage({ slug }: PropertyPageProps) {
       ...selectedPlan,
       totalPrice: bill.roomPrice,
       estimatedTaxes: bill.tax,
+      estimatedGst: bill.gstAmount,
+      estimatedPlatformFee: bill.platformFee,
       currency: bill.currency,
     };
   }, [quote, selectedPlan]);

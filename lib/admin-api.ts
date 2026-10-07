@@ -1,3 +1,4 @@
+import type { RateProductCode } from "@/lib/rate-products";
 import type { AuthResponse } from "@/types/auth";
 import type {
   AdminArea,
@@ -16,6 +17,7 @@ import type {
   Room,
   RoomInventory,
   RoomType,
+  RoomTypeDailyRate,
   SearchResult,
 } from "@/types/admin";
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth-storage";
@@ -270,6 +272,80 @@ export function deleteInventoryRange(
   const query = new URLSearchParams(params);
   return adminFetch<{ deleted: number }>(
     `/admin/properties/${propertyId}/inventory?${query.toString()}`,
+    { method: "DELETE" },
+  );
+}
+
+export type PropertyPricingConfig = {
+  version: 1;
+  weekendDays: number[];
+  weekendMultiplier: number;
+  minNightlyPrice: number | null;
+  maxNightlyPrice: number | null;
+  platformFeeAmount: number;
+  breakfastUpliftPerNight: number;
+  halfBoardUpliftPerNight: number;
+  fullBoardUpliftPerNight: number;
+  nonRefundableDiscountPercent: number;
+  enabledProductCodes: RateProductCode[];
+};
+
+export function fetchPropertyPricingConfig(propertyId: string) {
+  return adminFetch<PropertyPricingConfig>(
+    `/admin/properties/${propertyId}/pricing-config`,
+  );
+}
+
+export function updatePropertyPricingConfig(
+  propertyId: string,
+  data: Omit<PropertyPricingConfig, "version">,
+) {
+  return adminFetch<PropertyPricingConfig>(
+    `/admin/properties/${propertyId}/pricing-config`,
+    { method: "PATCH", body: JSON.stringify(data) },
+  );
+}
+
+export function syncPropertyRatePlans(propertyId: string) {
+  return adminFetch<{ success: boolean }>(
+    `/admin/properties/${propertyId}/sync-rate-plans`,
+    { method: "POST" },
+  );
+}
+
+export function fetchRoomTypeRates(
+  propertyId: string,
+  roomTypeId: string,
+  params?: { from?: string; to?: string },
+) {
+  const query = new URLSearchParams();
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return adminFetch<RoomTypeDailyRate[]>(
+    `/admin/properties/${propertyId}/room-types/${roomTypeId}/rates${suffix}`,
+  );
+}
+
+export function upsertRoomTypeRates(
+  propertyId: string,
+  roomTypeId: string,
+  data: Record<string, unknown>,
+) {
+  return adminFetch<RoomTypeDailyRate[]>(
+    `/admin/properties/${propertyId}/room-types/${roomTypeId}/rates`,
+    { method: "POST", body: JSON.stringify(data) },
+  );
+}
+
+export function deleteRoomTypeRates(
+  propertyId: string,
+  roomTypeId: string,
+  params: { from: string; to: string },
+) {
+  const query = new URLSearchParams(params);
+  return adminFetch<{ deleted: number }>(
+    `/admin/properties/${propertyId}/room-types/${roomTypeId}/rates?${query.toString()}`,
     { method: "DELETE" },
   );
 }

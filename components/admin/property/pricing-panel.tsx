@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Loader2Icon, PencilIcon, Trash2Icon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Loader2Icon, RefreshCwIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,26 +16,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  createRatePlan,
-  deleteRatePlan,
-  deleteRatePrices,
-  fetchCancellationPolicies,
-  fetchMealPlans,
-  fetchRatePlanNamePresets,
+  deleteRoomTypeRates,
+  fetchPropertyPricingConfig,
   fetchRatePlans,
-  fetchRatePrices,
+  fetchRoomTypeRates,
   fetchRoomTypes,
-  updateRatePlan,
-  upsertRatePrices,
+  syncPropertyRatePlans,
+  updatePropertyPricingConfig,
+  upsertRoomTypeRates,
+  type PropertyPricingConfig,
 } from "@/lib/admin-api";
-import { RatePlanNameField } from "@/components/admin/property/rate-plan-name-field";
-import type {
-  CancellationPolicy,
-  MealPlan,
-  RatePlan,
-  RatePrice,
-  RoomType,
-} from "@/types/admin";
+import {
+  getProductGuestLabel,
+  RATE_PRODUCT_CATALOG,
+  REQUIRED_PRODUCT_CODE,
+  type RateProductCode,
+} from "@/lib/rate-products";
+import type { RatePlan, RoomType, RoomTypeDailyRate } from "@/types/admin";
 
 type PricingPanelProps = {
   propertyId: string;
@@ -56,56 +53,90 @@ function formatInr(value: string | number) {
 export function PricingPanel({ propertyId }: PricingPanelProps) {
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [ratePlans, setRatePlans] = useState<RatePlan[]>([]);
-  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
-  const [policies, setPolicies] = useState<CancellationPolicy[]>([]);
-  const [ratePlanNamePresets, setRatePlanNamePresets] = useState<string[]>([]);
-  const [pricesByPlan, setPricesByPlan] = useState<Record<string, RatePrice[]>>(
-    {},
-  );
+  const [ratesByRoomType, setRatesByRoomType] = useState<
+    Record<string, RoomTypeDailyRate[]>
+  >({});
   const [error, setError] = useState<string | null>(null);
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
-  const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
-
-  const [planForm, setPlanForm] = useState({
-    roomTypeId: "",
-    name: "",
-    description: "",
-    mealPlanId: "",
-    cancellationPolicyId: "",
-  });
+  const [syncing, setSyncing] = useState(false);
+  const [expandedRoomTypeId, setExpandedRoomTypeId] = useState<string | null>(
+    null,
+  );
 
   const [priceForm, setPriceForm] = useState({
-    ratePlanId: "",
+    roomTypeId: "",
     startDate: isoDate(0),
     endDate: isoDate(90),
     basePrice: "",
   });
 
-  const [editPlan, setEditPlan] = useState<RatePlan | null>(null);
-  const [editPlanForm, setEditPlanForm] = useState({
-    name: "",
-    description: "",
-    status: "ACTIVE",
+  const [pricingConfig, setPricingConfig] = useState<PropertyPricingConfig>({
+    version: 1,
+    weekendDays: [5, 6],
+    weekendMultiplier: 1.15,
+    minNightlyPrice: null,
+    maxNightlyPrice: null,
+    platformFeeAmount: 262,
+    breakfastUpliftPerNight: 400,
+    halfBoardUpliftPerNight: 800,
+    fullBoardUpliftPerNight: 1200,
+    nonRefundableDiscountPercent: 10,
+    enabledProductCodes: [
+      "EP_REFUNDABLE",
+      "EP_NON_REFUNDABLE",
+      "CP_REFUNDABLE",
+      "CP_NON_REFUNDABLE",
+    ],
   });
 
-  const loadPlans = useCallback(async () => {
+  const plansByRoomType = useMemo(() => {
+    const map = new Map<string, RatePlan[]>();
+    for (const plan of ratePlans) {
+      if (plan.status !== "ACTIVE" || !plan.productCode) continue;
+      const list = map.get(plan.roomType.id) ?? [];
+      list.push(plan);
+      map.set(plan.roomType.id, list);
+    }
+    return map;
+  }, [ratePlans]);
+
+  const enabledProductCount = pricingConfig.enabledProductCodes.length;
+
+  function toggleProduct(code: RateProductCode, checked: boolean) {
+    if (code === REQUIRED_PRODUCT_CODE) return;
+
+    setPricingConfig((current) => {
+      const enabled = new Set(current.enabledProductCodes);
+      if (checked) {
+        enabled.add(code);
+      } else {
+        enabled.delete(code);
+      }
+      if (!enabled.has(REQUIRED_PRODUCT_CODE)) {
+        enabled.add(REQUIRED_PRODUCT_CODE);
+      }
+      return {
+        ...current,
+        enabledProductCodes: RATE_PRODUCT_CATALOG
+          .map((product) => product.code)
+          .filter((productCode) => enabled.has(productCode)),
+      };
+    });
+  }
+
+  const loadData = useCallback(async () => {
     setFetching(true);
     setError(null);
     try {
-      const [types, plans, meals, cancels, namePresets] = await Promise.all([
+      const [types, plans, config] = await Promise.all([
         fetchRoomTypes(propertyId),
         fetchRatePlans(propertyId),
-        fetchMealPlans(),
-        fetchCancellationPolicies(),
-        fetchRatePlanNamePresets(),
+        fetchPropertyPricingConfig(propertyId),
       ]);
       setRoomTypes(types);
       setRatePlans(plans);
-      setMealPlans(meals);
-      setPolicies(cancels);
-      setRatePlanNamePresets(namePresets.presets);
+      setPricingConfig(config);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load pricing");
     } finally {
@@ -114,127 +145,110 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
   }, [propertyId]);
 
   useEffect(() => {
-    void loadPlans();
-  }, [loadPlans]);
+    void loadData();
+  }, [loadData]);
 
-  async function loadPricesForPlan(planId: string, from?: string, to?: string) {
-    const rows = await fetchRatePrices(propertyId, planId, { from, to });
-    setPricesByPlan((prev) => ({ ...prev, [planId]: rows }));
+  async function loadRatesForRoomType(roomTypeId: string, from?: string, to?: string) {
+    const rows = await fetchRoomTypeRates(propertyId, roomTypeId, { from, to });
+    setRatesByRoomType((prev) => ({ ...prev, [roomTypeId]: rows }));
   }
 
-  async function handleCreatePlan() {
+  async function handleSyncRatePlans() {
+    setSyncing(true);
+    setError(null);
+    try {
+      await syncPropertyRatePlans(propertyId);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to sync rate plans");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleSavePricingConfig() {
     setSaving(true);
     setError(null);
     try {
-      await createRatePlan(propertyId, {
-        roomTypeId: planForm.roomTypeId,
-        name: planForm.name,
-        description: planForm.description || undefined,
-        mealPlanId: planForm.mealPlanId || undefined,
-        cancellationPolicyId: planForm.cancellationPolicyId || undefined,
+      const saved = await updatePropertyPricingConfig(propertyId, {
+        weekendDays: pricingConfig.weekendDays,
+        weekendMultiplier: pricingConfig.weekendMultiplier,
+        minNightlyPrice: pricingConfig.minNightlyPrice,
+        maxNightlyPrice: pricingConfig.maxNightlyPrice,
+        platformFeeAmount: pricingConfig.platformFeeAmount,
+        breakfastUpliftPerNight: pricingConfig.breakfastUpliftPerNight,
+        halfBoardUpliftPerNight: pricingConfig.halfBoardUpliftPerNight,
+        fullBoardUpliftPerNight: pricingConfig.fullBoardUpliftPerNight,
+        nonRefundableDiscountPercent: pricingConfig.nonRefundableDiscountPercent,
+        enabledProductCodes: pricingConfig.enabledProductCodes,
       });
-      setPlanForm({
-        roomTypeId: planForm.roomTypeId,
-        name: "",
-        description: "",
-        mealPlanId: "",
-        cancellationPolicyId: "",
-      });
-      await loadPlans();
+      setPricingConfig(saved);
+      await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create rate plan");
+      setError(
+        err instanceof Error ? err.message : "Failed to save pricing rules",
+      );
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleSavePlanEdit() {
-    if (!editPlan) return;
+  async function handleUpsertRates(roomTypeId: string) {
+    if (!priceForm.basePrice) return;
     setSaving(true);
     setError(null);
     try {
-      await updateRatePlan(propertyId, editPlan.id, editPlanForm);
-      setEditPlan(null);
-      await loadPlans();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update plan");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDeletePlan(plan: RatePlan) {
-    if (
-      !window.confirm(
-        `Delete rate plan "${plan.name}"? Blocked if bookings exist.`,
-      )
-    ) {
-      return;
-    }
-    setDeletingPlanId(plan.id);
-    setError(null);
-    try {
-      await deleteRatePlan(propertyId, plan.id);
-      await loadPlans();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete plan");
-    } finally {
-      setDeletingPlanId(null);
-    }
-  }
-
-  async function handleUpsertPrices() {
-    if (!priceForm.ratePlanId || !priceForm.basePrice) return;
-    setSaving(true);
-    setError(null);
-    try {
-      await upsertRatePrices(propertyId, priceForm.ratePlanId, {
+      await upsertRoomTypeRates(propertyId, roomTypeId, {
         startDate: priceForm.startDate,
         endDate: priceForm.endDate,
         basePrice: Number(priceForm.basePrice),
       });
-      await loadPricesForPlan(
-        priceForm.ratePlanId,
+      await loadRatesForRoomType(
+        roomTypeId,
         priceForm.startDate,
         priceForm.endDate,
       );
-      setExpandedPlanId(priceForm.ratePlanId);
+      setExpandedRoomTypeId(roomTypeId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save prices");
+      setError(err instanceof Error ? err.message : "Failed to save base rates");
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleDeletePrices(planId: string) {
-    if (!window.confirm("Delete prices in the selected date range?")) return;
+  async function handleDeleteRates(roomTypeId: string) {
+    if (!window.confirm("Delete base rates in the selected date range?")) return;
     setSaving(true);
     setError(null);
     try {
-      await deleteRatePrices(propertyId, planId, {
+      await deleteRoomTypeRates(propertyId, roomTypeId, {
         from: priceForm.startDate,
         to: priceForm.endDate,
       });
-      await loadPricesForPlan(planId, priceForm.startDate, priceForm.endDate);
+      await loadRatesForRoomType(
+        roomTypeId,
+        priceForm.startDate,
+        priceForm.endDate,
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete prices");
+      setError(err instanceof Error ? err.message : "Failed to delete rates");
     } finally {
       setSaving(false);
     }
   }
 
-  async function togglePlanExpand(plan: RatePlan) {
-    const next = expandedPlanId === plan.id ? null : plan.id;
-    setExpandedPlanId(next);
+  async function toggleRoomTypeExpand(roomTypeId: string) {
+    const next = expandedRoomTypeId === roomTypeId ? null : roomTypeId;
+    setExpandedRoomTypeId(next);
     if (next) {
       setPriceForm((f) => ({
         ...f,
-        ratePlanId: plan.id,
+        roomTypeId,
         startDate: f.startDate || isoDate(0),
         endDate: f.endDate || isoDate(90),
       }));
-      if (!pricesByPlan[plan.id]) {
-        await loadPricesForPlan(plan.id, isoDate(0), isoDate(90));
+      if (!ratesByRoomType[roomTypeId]) {
+        await loadRatesForRoomType(roomTypeId, isoDate(0), isoDate(90));
       }
     }
   }
@@ -257,216 +271,258 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
       ) : null}
 
       <Card>
-        <CardHeader>
-          <CardTitle>Create rate plan</CardTitle>
-          <CardDescription>
-            A rate plan links a room type to meal and cancellation rules. Set
-            nightly prices on each plan below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <select
-              className="h-9 rounded-md border px-3 text-sm"
-              value={planForm.roomTypeId}
-              onChange={(e) =>
-                setPlanForm((f) => ({ ...f, roomTypeId: e.target.value }))
-              }
-            >
-              <option value="">Room type</option>
-              {roomTypes.map((rt) => (
-                <option key={rt.id} value={rt.id}>
-                  {rt.name}
-                </option>
-              ))}
-            </select>
-            <RatePlanNameField
-              value={planForm.name}
-              onChange={(name) => setPlanForm((f) => ({ ...f, name }))}
-              presets={ratePlanNamePresets}
-            />
-            <Input
-              placeholder="Description (optional)"
-              value={planForm.description}
-              onChange={(e) =>
-                setPlanForm((f) => ({ ...f, description: e.target.value }))
-              }
-            />
-            <select
-              className="h-9 rounded-md border px-3 text-sm"
-              value={planForm.mealPlanId}
-              onChange={(e) =>
-                setPlanForm((f) => ({ ...f, mealPlanId: e.target.value }))
-              }
-            >
-              <option value="">Meal plan (optional)</option>
-              {mealPlans.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-            <select
-              className="h-9 rounded-md border px-3 text-sm sm:col-span-2"
-              value={planForm.cancellationPolicyId}
-              onChange={(e) =>
-                setPlanForm((f) => ({
-                  ...f,
-                  cancellationPolicyId: e.target.value,
-                }))
-              }
-            >
-              <option value="">Cancellation policy (optional)</option>
-              {policies.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle>Pricing rules</CardTitle>
+            <CardDescription>
+              Dynamic pricing is always on. Choose which sell products guests
+              see ({enabledProductCount} active), then set base BAR once per
+              room type.
+            </CardDescription>
           </div>
           <Button
             type="button"
-            disabled={saving || !planForm.roomTypeId || !planForm.name}
-            onClick={() => void handleCreatePlan()}
+            variant="outline"
+            size="sm"
+            disabled={syncing}
+            onClick={() => void handleSyncRatePlans()}
           >
-            {saving ? <Loader2Icon className="animate-spin" /> : null}
-            Add rate plan
+            {syncing ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <RefreshCwIcon className="size-4" />
+            )}
+            Sync products
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-md border bg-muted/20 p-4 space-y-3">
+            <p className="text-sm font-medium">Sell products for this property</p>
+            <p className="text-xs text-muted-foreground">
+              Check the rate options guests can book. Saving applies them to
+              every room type.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {RATE_PRODUCT_CATALOG.map((product) => {
+                const checked = pricingConfig.enabledProductCodes.includes(
+                  product.code,
+                );
+                return (
+                  <label
+                    key={product.code}
+                    className="flex items-start gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-0.5"
+                      checked={checked}
+                      disabled={product.required}
+                      onChange={(e) =>
+                        toggleProduct(product.code, e.target.checked)
+                      }
+                    />
+                    <span>
+                      {product.guestLabel}
+                      {product.required ? (
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          (required)
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <Label>Weekend multiplier</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="1"
+                value={pricingConfig.weekendMultiplier}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    weekendMultiplier: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Breakfast uplift / night (INR)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={pricingConfig.breakfastUpliftPerNight}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    breakfastUpliftPerNight: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Half board uplift / night (INR)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={pricingConfig.halfBoardUpliftPerNight}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    halfBoardUpliftPerNight: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Full board uplift / night (INR)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={pricingConfig.fullBoardUpliftPerNight}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    fullBoardUpliftPerNight: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Non-refundable discount (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={pricingConfig.nonRefundableDiscountPercent}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    nonRefundableDiscountPercent: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Platform fee (INR)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={pricingConfig.platformFeeAmount}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    platformFeeAmount: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Min nightly price (optional)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={pricingConfig.minNightlyPrice ?? ""}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    minNightlyPrice:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Max nightly price (optional)</Label>
+              <Input
+                type="number"
+                min="0"
+                value={pricingConfig.maxNightlyPrice ?? ""}
+                onChange={(e) =>
+                  setPricingConfig((c) => ({
+                    ...c,
+                    maxNightlyPrice:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <Button
+            type="button"
+            disabled={saving}
+            onClick={() => void handleSavePricingConfig()}
+          >
+            Save pricing rules &amp; sync products
           </Button>
         </CardContent>
       </Card>
 
-      {editPlan ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit {editPlan.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <RatePlanNameField
-              value={editPlanForm.name}
-              onChange={(name) => setEditPlanForm((f) => ({ ...f, name }))}
-              presets={ratePlanNamePresets}
-            />
-            <Input
-              placeholder="Description"
-              value={editPlanForm.description}
-              onChange={(e) =>
-                setEditPlanForm((f) => ({ ...f, description: e.target.value }))
-              }
-            />
-            <select
-              className="h-9 w-full rounded-md border px-3 text-sm"
-              value={editPlanForm.status}
-              onChange={(e) =>
-                setEditPlanForm((f) => ({ ...f, status: e.target.value }))
-              }
-            >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INACTIVE">INACTIVE</option>
-            </select>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                disabled={saving}
-                onClick={() => void handleSavePlanEdit()}
-              >
-                Save
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditPlan(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {ratePlans.length === 0 ? (
+      {roomTypes.length === 0 ? (
         <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No rate plans yet. Create one to set nightly prices for search and
-          booking.
+          Add a room type first. Sell products will be created automatically.
         </p>
       ) : (
-        ratePlans.map((plan) => {
-          const prices = pricesByPlan[plan.id] ?? [];
-          const expanded = expandedPlanId === plan.id;
+        roomTypes.map((roomType) => {
+          const products = plansByRoomType.get(roomType.id) ?? [];
+          const rates = ratesByRoomType[roomType.id] ?? [];
+          const expanded = expandedRoomTypeId === roomType.id;
+
           return (
-            <Card key={plan.id}>
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>
-                    {plan.roomType.name}
-                    {plan.mealPlan ? ` · ${plan.mealPlan.name}` : ""} ·{" "}
-                    {plan.status}
-                    {(plan._count?.reservationItems ?? 0) > 0
-                      ? ` · ${plan._count?.reservationItems} bookings`
-                      : ""}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={plan._count?.prices ? "success" : "warning"}>
-                    {plan._count?.prices ?? 0} priced nights
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Edit plan"
-                    onClick={() => {
-                      setEditPlan(plan);
-                      setEditPlanForm({
-                        name: plan.name,
-                        description: plan.description ?? "",
-                        status: plan.status,
-                      });
-                    }}
-                  >
-                    <PencilIcon className="size-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Delete plan"
-                    disabled={deletingPlanId === plan.id}
-                    onClick={() => void handleDeletePlan(plan)}
-                  >
-                    {deletingPlanId === plan.id ? (
-                      <Loader2Icon className="size-4 animate-spin" />
-                    ) : (
-                      <Trash2Icon className="size-4" />
-                    )}
-                  </Button>
-                </div>
+            <Card key={roomType.id}>
+              <CardHeader>
+                <CardTitle>{roomType.name}</CardTitle>
+                <CardDescription>
+                  Set base BAR below. Guests see {products.length || enabledProductCount}{" "}
+                  sell option{products.length === 1 ? "" : "s"} at checkout.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {products.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {products.map((plan) => (
+                      <Badge key={plan.id} variant="secondary">
+                        {getProductGuestLabel(plan.productCode, plan.name)}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No sell products yet. Click &quot;Sync products&quot; above.
+                  </p>
+                )}
+
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => void togglePlanExpand(plan)}
+                  onClick={() => void toggleRoomTypeExpand(roomType.id)}
                 >
-                  {expanded ? "Hide prices" : "Manage prices"}
+                  {expanded ? "Hide base rates" : "Set base BAR"}
                 </Button>
 
                 {expanded ? (
                   <>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="space-y-2">
-                        <Label>Nightly price (INR)</Label>
+                        <Label>Base price / night (INR)</Label>
                         <Input
                           type="number"
                           min={0}
                           value={
-                            priceForm.ratePlanId === plan.id
+                            priceForm.roomTypeId === roomType.id
                               ? priceForm.basePrice
                               : ""
                           }
                           onChange={(e) =>
                             setPriceForm((f) => ({
                               ...f,
-                              ratePlanId: plan.id,
+                              roomTypeId: roomType.id,
                               basePrice: e.target.value,
                             }))
                           }
@@ -477,14 +533,14 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
                         <Input
                           type="date"
                           value={
-                            priceForm.ratePlanId === plan.id
+                            priceForm.roomTypeId === roomType.id
                               ? priceForm.startDate
                               : isoDate(0)
                           }
                           onChange={(e) =>
                             setPriceForm((f) => ({
                               ...f,
-                              ratePlanId: plan.id,
+                              roomTypeId: roomType.id,
                               startDate: e.target.value,
                             }))
                           }
@@ -495,14 +551,14 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
                         <Input
                           type="date"
                           value={
-                            priceForm.ratePlanId === plan.id
+                            priceForm.roomTypeId === roomType.id
                               ? priceForm.endDate
                               : isoDate(90)
                           }
                           onChange={(e) =>
                             setPriceForm((f) => ({
                               ...f,
-                              ratePlanId: plan.id,
+                              roomTypeId: roomType.id,
                               endDate: e.target.value,
                             }))
                           }
@@ -513,27 +569,29 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
                           type="button"
                           disabled={
                             saving ||
-                            priceForm.ratePlanId !== plan.id ||
+                            priceForm.roomTypeId !== roomType.id ||
                             !priceForm.basePrice
                           }
-                          onClick={() => void handleUpsertPrices()}
+                          onClick={() => void handleUpsertRates(roomType.id)}
                         >
-                          Save prices
+                          Save BAR
                         </Button>
                         <Button
                           type="button"
                           variant="outline"
-                          disabled={saving || priceForm.ratePlanId !== plan.id}
-                          onClick={() => void handleDeletePrices(plan.id)}
+                          disabled={
+                            saving || priceForm.roomTypeId !== roomType.id
+                          }
+                          onClick={() => void handleDeleteRates(roomType.id)}
                         >
                           Clear range
                         </Button>
                       </div>
                     </div>
 
-                    {prices.length === 0 ? (
+                    {rates.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
-                        No prices in the loaded range. Save a date range above.
+                        No base rates in range. Save a date range above.
                       </p>
                     ) : (
                       <div className="max-h-64 overflow-auto rounded-md border text-sm">
@@ -541,11 +599,11 @@ export function PricingPanel({ propertyId }: PricingPanelProps) {
                           <thead className="sticky top-0 bg-muted/40 text-left">
                             <tr>
                               <th className="px-3 py-2">Date</th>
-                              <th className="px-3 py-2">Price</th>
+                              <th className="px-3 py-2">Base BAR</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {prices.map((row) => (
+                            {rates.map((row) => (
                               <tr key={row.id} className="border-t">
                                 <td className="px-3 py-2">
                                   {new Date(row.date).toLocaleDateString()}

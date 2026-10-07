@@ -5,8 +5,8 @@ import { ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, getStayNights } from "@/lib/format";
 import {
-  calculateMemberSavings,
-  calculatePropertyGrandTotal,
+  calculateMemberSavingsFromTotal,
+  grandTotalFromSource,
 } from "@/lib/property-fees";
 import type { SelectedRoomPlan } from "@/types/property-detail";
 import type { PropertySearchParams } from "@/types/search";
@@ -39,10 +39,9 @@ export function PropertyRoomSelectionDock({
   onReserve,
 }: PropertyRoomSelectionDockProps) {
   const nights = getStayNights(search.dateRange);
-  const roomTotal = selectedPlan?.totalPrice ?? 0;
   const displayCurrency = selectedPlan?.currency ?? currency;
-  const grandTotal = calculatePropertyGrandTotal(roomTotal);
-  const memberSavings = calculateMemberSavings(roomTotal);
+  const grandTotal = selectedPlan ? grandTotalFromSource(selectedPlan) : 0;
+  const memberSavings = calculateMemberSavingsFromTotal(grandTotal);
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 lg:hidden">

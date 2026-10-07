@@ -20,9 +20,11 @@ const selection: QuoteSelectionInput = {
 
 const quote = {
   subtotal: 10000,
-  taxAmount: 1800,
+  gstAmount: 1800,
+  platformFee: 262,
+  taxAmount: 2062,
   discountAmount: 0,
-  totalAmount: 11800,
+  totalAmount: 12062,
   currency: "INR",
   nights: 2,
   rooms: 1,

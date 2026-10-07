@@ -116,8 +116,24 @@ export function BookingBillSummary({
               </dd>
             </div>
           ) : null}
+          {bill.gstAmount != null ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">GST (18%)</dt>
+              <dd className="font-medium">
+                {formatCurrency(bill.gstAmount, bill.currency)}
+              </dd>
+            </div>
+          ) : null}
+          {bill.platformFee != null && bill.platformFee > 0 ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Platform charge</dt>
+              <dd className="font-medium">
+                {formatCurrency(bill.platformFee, bill.currency)}
+              </dd>
+            </div>
+          ) : null}
           <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Tax</dt>
+            <dt className="text-muted-foreground">Taxes and fees</dt>
             <dd className="font-medium">
               {formatCurrency(bill.tax, bill.currency)}
             </dd>

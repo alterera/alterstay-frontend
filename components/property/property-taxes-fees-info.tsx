@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/popover";
 import { formatCurrency } from "@/lib/format";
 import type { PropertyFeeBreakup } from "@/lib/property-fees";
-import { GST_RATE } from "@/lib/property-fees";
 
 type PropertyTaxesFeesInfoProps = {
   breakup: PropertyFeeBreakup;
@@ -23,9 +22,7 @@ function TaxesFeesBreakdown({
   return (
     <div className="space-y-2 text-sm">
       <div className="flex justify-between gap-4">
-        <span className="text-muted-foreground">
-          Tax ({Math.round(GST_RATE * 100)}% GST)
-        </span>
+        <span className="text-muted-foreground">Tax (18% GST)</span>
         <span className="font-medium">
           {formatCurrency(breakup.gstAmount, currency)}
         </span>

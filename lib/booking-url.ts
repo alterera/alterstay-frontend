@@ -64,6 +64,8 @@ export type BookingBill = {
   roomPrice: number;
   discount: number;
   coinsApplied?: number;
+  gstAmount?: number;
+  platformFee?: number;
   tax: number;
   toPay: number;
   currency: string;
@@ -75,13 +77,17 @@ export type BookingBill = {
   };
 };
 
-/** Server-aligned estimate: subtotal + 18% tax, no mock discounts or fees. */
+/** Server-aligned estimate from browse API fields when quote is unavailable. */
 export function estimateBillFromPlan(plan: SelectedRoomPlan): BookingBill {
   const roomPrice = plan.totalPrice;
-  const tax = plan.estimatedTaxes ?? Math.round(roomPrice * 0.18);
+  const gstAmount = plan.estimatedGst ?? Math.round(roomPrice * 0.18);
+  const platformFee = plan.estimatedPlatformFee ?? 0;
+  const tax = plan.estimatedTaxes ?? gstAmount + platformFee;
   return {
     roomPrice,
     discount: 0,
+    gstAmount,
+    platformFee,
     tax,
     toPay: roomPrice + tax,
     currency: plan.currency,
