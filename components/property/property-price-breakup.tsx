@@ -1,37 +1,62 @@
 "use client";
 
 import { formatCurrency } from "@/lib/format";
+import { calculatePropertyFeeBreakup } from "@/lib/property-fees";
 import { cn } from "@/lib/utils";
+
+import { PropertyTaxesFeesInfo } from "./property-taxes-fees-info";
 
 type PropertyPriceBreakupProps = {
   roomTotal: number;
-  taxes: number;
   currency: string;
   className?: string;
+  compact?: boolean;
 };
 
 export function PropertyPriceBreakup({
   roomTotal,
-  taxes,
   currency,
   className,
+  compact = false,
 }: PropertyPriceBreakupProps) {
-  const total = roomTotal + taxes;
+  const feeBreakup = calculatePropertyFeeBreakup(roomTotal);
+  const total = roomTotal + feeBreakup.taxesAndFees;
 
   return (
-    <div className={cn("rounded-md border bg-white p-4 text-sm", className)}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <div
+      className={cn(
+        "rounded-md border bg-white text-sm",
+        compact ? "p-0 text-xs" : "p-4",
+        className,
+      )}
+    >
+      <p
+        className={cn(
+          "font-semibold uppercase tracking-wide text-muted-foreground",
+          compact ? "text-[10px]" : "text-xs",
+        )}
+      >
         Price breakup
       </p>
-      <div className="mt-3 space-y-2">
+      <div className={cn(compact ? "mt-2 space-y-1.5" : "mt-3 space-y-2")}>
         <div className="flex justify-between gap-4">
           <span className="text-muted-foreground">Room total</span>
-          <span className="font-medium">{formatCurrency(roomTotal, currency)}</span>
+          <span className="font-medium">
+            {formatCurrency(roomTotal, currency)}
+          </span>
         </div>
-        {taxes > 0 ? (
+        {roomTotal > 0 ? (
           <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Taxes</span>
-            <span className="font-medium">{formatCurrency(taxes, currency)}</span>
+            <span className="flex items-center gap-1 text-muted-foreground">
+              Taxes and Fees
+              <PropertyTaxesFeesInfo
+                breakup={feeBreakup}
+                currency={currency}
+              />
+            </span>
+            <span className="font-medium">
+              {formatCurrency(feeBreakup.taxesAndFees, currency)}
+            </span>
           </div>
         ) : null}
         <div className="flex justify-between gap-4 border-t pt-2 font-semibold">

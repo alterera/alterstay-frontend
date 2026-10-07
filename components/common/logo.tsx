@@ -5,10 +5,14 @@ import { cn } from "@/lib/utils";
 import { ROUTES } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
 
+export type LogoVariant = "default" | "hero";
+
 type LogoProps = {
   className?: string;
   /** Visual size of the logo mark + wordmark */
   size?: "sm" | "default" | "lg";
+  /** Light logo treatment for dark/hero backgrounds */
+  variant?: LogoVariant;
   /** Link target; pass `false` when the logo is already inside another link */
   href?: string | false;
 };
@@ -22,6 +26,7 @@ const sizeClasses = {
 export function Logo({
   className,
   size = "default",
+  variant = "default",
   href = ROUTES.home,
 }: LogoProps) {
   const image = (
@@ -31,7 +36,10 @@ export function Logo({
       width={268}
       height={40}
       priority
-      className={cn(sizeClasses[size])}
+      className={cn(
+        sizeClasses[size],
+        variant === "hero" && "brightness-0 invert",
+      )}
     />
   );
 

@@ -31,7 +31,11 @@ import {
 import { fetchQuote } from "@/lib/quote-api";
 import { quoteToBill } from "@/lib/quote-utils";
 import { fetchPropertyDetail } from "@/lib/property-api";
-import { findLowestPricePlan, planToSelection } from "@/lib/property-booking";
+import {
+  findLowestPricePlan,
+  getSelectedCancellationPolicy,
+  planToSelection,
+} from "@/lib/property-booking";
 import { FeaturedPropertiesSection } from "@/components/sections/featured-properties";
 import { splitAmenities } from "@/lib/property-enrichment";
 import { buildPropertyRoomsUrl, buildPropertyUrl } from "@/lib/property-url";
@@ -200,7 +204,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
 
   if (error || (!loading && !property)) {
     return (
-      <div className="bg-white pb-24 lg:pb-12">
+      <div className="bg-white pb-28 lg:pb-12">
         <PropertyMobileStayHeader
           search={search}
           onSearchUpdate={handleSearchUpdate}
@@ -229,9 +233,13 @@ export function PropertyPage({ slug }: PropertyPageProps) {
   }
 
   const { perks, amenities } = splitAmenities(property);
+  const cancellationPolicy = getSelectedCancellationPolicy(
+    property,
+    displayPlan,
+  );
 
   return (
-    <div className="bg-white pb-24 lg:pb-12">
+    <div className="bg-white pb-28 lg:pb-12">
       <PropertyMobileStayHeader
         search={search}
         onSearchUpdate={handleSearchUpdate}
@@ -306,6 +314,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
             currency={property.currency}
             quoteLoading={quoteLoading}
             quoteAvailable={quote?.available ?? true}
+            cancellationPolicy={cancellationPolicy}
             onSearchUpdate={handleSearchUpdate}
             onChooseRoom={() => scrollToSection("room-options")}
             onBookNow={handleBookNow}

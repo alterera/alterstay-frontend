@@ -49,6 +49,23 @@ export function planToSelection(
   };
 }
 
+export function getSelectedCancellationPolicy(
+  property: PropertyDetail,
+  selectedPlan: SelectedRoomPlan | null,
+): { name: string; description: string } | null {
+  if (!selectedPlan) return null;
+
+  for (const roomType of property.roomTypes) {
+    if (roomType.id !== selectedPlan.roomTypeId) continue;
+    const plan = roomType.ratePlans.find(
+      (item) => item.id === selectedPlan.ratePlanId,
+    );
+    return plan?.cancellationPolicy ?? null;
+  }
+
+  return null;
+}
+
 /** Picks the cheapest available rate plan across all room types. */
 export function findLowestPricePlan(
   property: PropertyDetail,

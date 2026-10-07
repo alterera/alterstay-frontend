@@ -170,4 +170,62 @@
   .bg-gradient-hospitality {
     background-image: var(--gradient-hospitality);
   }
+
+  /* Membership upsell — iOS-style liquid glass (column 2 card only) */
+  .membership-glass-strong {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 -0.5px 0 rgba(255, 255, 255, 0.12),
+      0 12px 40px rgba(15, 23, 42, 0.14);
+  }
+
+  .membership-glass-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.08) 38%,
+      rgba(255, 255, 255, 0) 68%
+    );
+    pointer-events: none;
+  }
+
+  .membership-glass-strong::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.28);
+    pointer-events: none;
+  }
+
+  .membership-glass-light {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 4px 16px rgba(15, 23, 42, 0.08);
+  }
+
+  .membership-glass-accent {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    border: 1px solid rgba(236, 24, 70, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 4px 16px rgba(236, 24, 70, 0.1);
+  }
 }

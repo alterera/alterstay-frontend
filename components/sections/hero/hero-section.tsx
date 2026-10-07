@@ -13,12 +13,7 @@ type HeroSectionProps = {
 
 export function HeroSection({ className }: HeroSectionProps) {
   return (
-    <section
-      className={cn(
-        "relative overflow-hidden lg:-mt-14",
-        className
-      )}
-    >
+    <section className={cn("relative overflow-hidden", className)}>
       <div className="absolute inset-0">
         <Image
           src={siteConfig.hero.backgroundImage}

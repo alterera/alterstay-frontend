@@ -16,7 +16,10 @@ import {
 import { fetchQuote } from "@/lib/quote-api";
 import { quoteToBill } from "@/lib/quote-utils";
 import { fetchPropertyDetail } from "@/lib/property-api";
-import { findLowestPricePlan } from "@/lib/property-booking";
+import {
+  findLowestPricePlan,
+  getSelectedCancellationPolicy,
+} from "@/lib/property-booking";
 import { buildPropertyRoomsUrl, buildPropertyUrl } from "@/lib/property-url";
 import {
   parseSearchParams,
@@ -187,9 +190,13 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
   }
 
   const roomTypeCount = property.roomTypes.length;
+  const cancellationPolicy = getSelectedCancellationPolicy(
+    property,
+    displayPlan,
+  );
 
   return (
-    <div className="bg-white pb-28">
+    <div className="bg-white pb-44">
       <PropertyMobileStayHeader
         search={search}
         onSearchUpdate={handleSearchUpdate}
@@ -203,7 +210,6 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
         {displayPlan ? (
           <PropertyPriceBreakup
             roomTotal={displayPlan.totalPrice}
-            taxes={displayPlan.estimatedTaxes ?? 0}
             currency={displayPlan.currency}
           />
         ) : null}
@@ -222,6 +228,7 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
         currency={property.currency}
         quoteLoading={quoteLoading}
         quoteAvailable={quote?.available ?? true}
+        cancellationPolicy={cancellationPolicy}
         onReserve={handleReserve}
       />
     </div>

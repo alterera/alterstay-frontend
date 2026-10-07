@@ -26,19 +26,32 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-const navLinkClass =
-  "rounded-none bg-transparent text-sm text-muted-foreground transition-colors hover:bg-transparent hover:text-foreground focus:bg-transparent focus:text-foreground data-open:bg-transparent data-open:text-foreground data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent";
+function navLinkClass(variant: "default" | "hero") {
+  return variant === "hero"
+    ? "rounded-none bg-transparent text-sm text-white/80 transition-colors hover:bg-transparent hover:text-white focus:bg-transparent focus:text-white data-open:bg-transparent data-open:text-white data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent"
+    : "rounded-none bg-transparent text-sm text-muted-foreground transition-colors hover:bg-transparent hover:text-foreground focus:bg-transparent focus:text-foreground data-open:bg-transparent data-open:text-foreground data-open:hover:bg-transparent data-open:focus:bg-transparent data-popup-open:bg-transparent data-popup-open:hover:bg-transparent";
+}
 
-const dropdownTriggerClass = cn(
-  navLinkClass,
-  "hover:text-brand data-open:text-brand data-popup-open:text-brand",
-);
+function dropdownTriggerClass(variant: "default" | "hero") {
+  return cn(
+    navLinkClass(variant),
+    variant === "hero"
+      ? "hover:text-white data-open:text-white data-popup-open:text-white"
+      : "hover:text-brand data-open:text-brand data-popup-open:text-brand",
+  );
+}
 
 const dropdownItemClass =
   "flex w-fit flex-col items-start gap-0 rounded-md px-2.5 py-1.5 text-left transition-colors hover:text-brand/60 focus:bg-muted/60 focus-visible:ring-0 data-active:bg-muted/60 data-active:hover:bg-muted/60";
 
-export function NavbarDesktopNav() {
+type NavbarDesktopNavProps = {
+  variant?: "default" | "hero";
+};
+
+export function NavbarDesktopNav({ variant = "default" }: NavbarDesktopNavProps) {
   const { isAuthenticated } = useAuth();
+  const linkClass = navLinkClass(variant);
+  const triggerClass = dropdownTriggerClass(variant);
 
   const navigation = mainNavigation.map((item) => {
     if (item.type !== "dropdown") return item;
@@ -61,8 +74,8 @@ export function NavbarDesktopNav() {
                 <NavigationMenuLink
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    navLinkClass,
-                    "hover:text-brand",
+                    linkClass,
+                    variant === "hero" ? "hover:text-white" : "hover:text-brand",
                   )}
                   render={<Link href={item.href} />}
                 >
@@ -74,7 +87,7 @@ export function NavbarDesktopNav() {
 
           return (
             <NavigationMenuItem key={item.label}>
-              <NavigationMenuTrigger className={dropdownTriggerClass}>
+              <NavigationMenuTrigger className={triggerClass}>
                 {item.label}
               </NavigationMenuTrigger>
               <NavigationMenuContent className="w-fit min-w-0 p-0.5">
@@ -109,7 +122,16 @@ export function NavbarDesktopNav() {
 const accountButtonClass =
   "rounded-sm px-4 text-xs font-medium text-white shadow-none bg-brand hover:bg-brand/90 hover:text-white";
 
-export function NavbarLoginButton({ className }: { className?: string }) {
+const heroAccountButtonClass =
+  "rounded-sm border border-white/45 bg-white/12 px-4 text-xs font-medium text-white shadow-none backdrop-blur-sm hover:bg-white/20 hover:text-white";
+
+export function NavbarLoginButton({
+  className,
+  variant = "default",
+}: {
+  className?: string;
+  variant?: "default" | "hero";
+}) {
   const { isAuthenticated, isLoading, openLogin, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -131,7 +153,10 @@ export function NavbarLoginButton({ className }: { className?: string }) {
         size="default"
         variant="default"
         onClick={openLogin}
-        className={cn(accountButtonClass, className)}
+        className={cn(
+          variant === "hero" ? heroAccountButtonClass : accountButtonClass,
+          className,
+        )}
       >
         Login
       </Button>
@@ -147,7 +172,7 @@ export function NavbarLoginButton({ className }: { className?: string }) {
             size="lg"
             variant="default"
             className={cn(
-              accountButtonClass,
+              variant === "hero" ? heroAccountButtonClass : accountButtonClass,
               "gap-2 cursor-pointer",
               className,
             )}

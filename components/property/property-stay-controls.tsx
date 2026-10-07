@@ -7,6 +7,7 @@ import {
   formatCompactDateRange,
   formatGuestSummary,
 } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { PropertySearchParams } from "@/types/search";
 
 import {
@@ -18,30 +19,57 @@ type PropertyStayControlsProps = {
   search: PropertySearchParams;
   onUpdate: (search: PropertySearchParams) => void;
   className?: string;
+  compact?: boolean;
 };
 
 export function PropertyStayControls({
   search,
   onUpdate,
   className,
+  compact = false,
 }: PropertyStayControlsProps) {
   return (
     <div className={className}>
-      <div className="overflow-hidden rounded-xl border bg-muted/30">
+      <div
+        className={cn(
+          "overflow-hidden border bg-muted/30",
+          compact ? "rounded-lg" : "rounded-xl",
+        )}
+      >
         <StayDatesPopover
           dateRange={search.dateRange}
           onChange={(dateRange) => onUpdate({ ...search, dateRange })}
           trigger={
             <button
               type="button"
-              className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+              className={cn(
+                "flex w-full items-center text-left transition-colors hover:bg-muted/50",
+                compact
+                  ? "gap-2 px-3 py-2"
+                  : "items-start gap-3 px-4 py-3",
+              )}
             >
-              <CalendarIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              <CalendarIcon
+                className={cn(
+                  "shrink-0 text-muted-foreground",
+                  compact ? "size-3.5" : "mt-0.5 size-4",
+                )}
+              />
               <span className="min-w-0">
-                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                <span
+                  className={cn(
+                    "block uppercase tracking-wide text-muted-foreground",
+                    compact ? "text-[10px]" : "text-[11px]",
+                  )}
+                >
                   Dates
                 </span>
-                <span className="block text-sm font-medium">
+                <span
+                  className={cn(
+                    "block font-medium",
+                    compact ? "text-xs" : "text-sm",
+                  )}
+                >
                   {formatCompactDateRange(search.dateRange)}
                 </span>
               </span>
@@ -57,14 +85,34 @@ export function PropertyStayControls({
           trigger={
             <button
               type="button"
-              className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+              className={cn(
+                "flex w-full items-center text-left transition-colors hover:bg-muted/50",
+                compact
+                  ? "gap-2 px-3 py-2"
+                  : "items-start gap-3 px-4 py-3",
+              )}
             >
-              <UsersIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              <UsersIcon
+                className={cn(
+                  "shrink-0 text-muted-foreground",
+                  compact ? "size-3.5" : "mt-0.5 size-4",
+                )}
+              />
               <span className="min-w-0">
-                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
+                <span
+                  className={cn(
+                    "block uppercase tracking-wide text-muted-foreground",
+                    compact ? "text-[10px]" : "text-[11px]",
+                  )}
+                >
                   Guests
                 </span>
-                <span className="block text-sm font-medium">
+                <span
+                  className={cn(
+                    "block font-medium",
+                    compact ? "text-xs" : "text-sm",
+                  )}
+                >
                   {formatGuestSummary(search.guests)}
                 </span>
               </span>

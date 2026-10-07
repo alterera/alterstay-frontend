@@ -17,8 +17,8 @@ export function PropertyMobileBookingDock({
   const roomTypeCount = property.roomTypes.length;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
-      <div className="border-t bg-white px-4 py-3 shadow-[0_-10px_40px_rgba(15,23,42,0.12)]">
+    <div className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 lg:hidden">
+      <div className="rounded-xl border bg-white px-4 py-3 shadow-[0_-10px_40px_rgba(15,23,42,0.12)]">
         <div className="mx-auto flex max-w-6xl items-center gap-4">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-foreground">

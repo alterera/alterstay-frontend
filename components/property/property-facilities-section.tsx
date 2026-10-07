@@ -126,7 +126,7 @@ export function PropertyFacilitiesSection({
       ) : null}
 
       <Dialog open={amenitiesOpen} onOpenChange={setAmenitiesOpen}>
-        <DialogContent className="max-h-[80vh] max-w-lg overflow-hidden rounded-md">
+        <DialogContent className="max-h-[80vh] w-[calc(100%-3rem)] max-w-sm overflow-hidden rounded-md sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Property Amenities</DialogTitle>
           </DialogHeader>
