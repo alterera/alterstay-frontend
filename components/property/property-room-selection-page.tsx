@@ -16,10 +16,6 @@ import {
 import { fetchQuote } from "@/lib/quote-api";
 import { quoteToBill } from "@/lib/quote-utils";
 import { fetchPropertyDetail } from "@/lib/property-api";
-import {
-  findLowestPricePlan,
-  getSelectedCancellationPolicy,
-} from "@/lib/property-booking";
 import { buildPropertyRoomsUrl, buildPropertyUrl } from "@/lib/property-url";
 import {
   parseSearchParams,
@@ -31,11 +27,8 @@ import type { PropertySearchParams } from "@/types/search";
 import type { QuoteResponse } from "@/types/quote";
 
 import { PropertyMobileStayHeader } from "./property-mobile-stay-header";
-import { feeBreakupFromSource } from "@/lib/property-fees";
-
-import { PropertyPriceBreakup } from "./property-price-breakup";
-import { PropertyRoomList } from "./property-room-list";
 import { PropertyRoomSelectionDock } from "./property-room-selection-dock";
+import { PropertyRoomSelectionMobile } from "./property-room-selection-mobile";
 
 type PropertyRoomSelectionPageProps = {
   slug: string;
@@ -70,7 +63,7 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
     try {
       const data = await fetchPropertyDetail(slug, search);
       setProperty(data);
-      setSelectedPlan(findLowestPricePlan(data));
+      setSelectedPlan(null);
     } catch {
       setError("Could not load room options.");
       setProperty(null);
@@ -193,39 +186,24 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
     );
   }
 
-  const roomTypeCount = property.roomTypes.length;
-  const cancellationPolicy = getSelectedCancellationPolicy(
-    property,
-    displayPlan,
-  );
-
   return (
-    <div className="bg-white pb-44">
+    <div className="bg-white pb-20">
       <PropertyMobileStayHeader
         search={search}
         onSearchUpdate={handleSearchUpdate}
+        leadAction="back"
+        onBack={() => router.back()}
       />
 
-      <div className="bg-neutral-900 px-4 py-2 text-center text-xs font-semibold text-brand lg:hidden">
-        {roomTypeCount} Room Type{roomTypeCount === 1 ? "" : "s"} Available
-      </div>
-
-      <Container className="max-w-6xl space-y-4 py-5">
-        {displayPlan ? (
-          <PropertyPriceBreakup
-            roomTotal={displayPlan.totalPrice}
-            currency={displayPlan.currency}
-            feeBreakup={feeBreakupFromSource(displayPlan)}
-          />
-        ) : null}
-
-        <PropertyRoomList
+      <div className="py-3 lg:hidden">
+        <PropertyRoomSelectionMobile
           roomTypes={property.roomTypes}
           currency={property.currency}
+          search={search}
           selectedPlan={selectedPlan}
           onSelectPlan={setSelectedPlan}
         />
-      </Container>
+      </div>
 
       <PropertyRoomSelectionDock
         search={search}
@@ -233,7 +211,6 @@ export function PropertyRoomSelectionPage({ slug }: PropertyRoomSelectionPagePro
         currency={property.currency}
         quoteLoading={quoteLoading}
         quoteAvailable={quote?.available ?? true}
-        cancellationPolicy={cancellationPolicy}
         onReserve={handleReserve}
       />
     </div>

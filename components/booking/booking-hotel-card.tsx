@@ -1,12 +1,10 @@
 "use client";
 
+import { format } from "date-fns";
 import { StarIcon } from "lucide-react";
 
-import {
-  formatBookingDateTime,
-  formatGuestSummary,
-  getStayNights,
-} from "@/lib/format";
+import { PropertyBookingLegalFooter } from "@/components/property/property-booking-legal-footer";
+import { formatGuestSummary, getStayNights } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { PropertyDetail, SelectedRoomPlan } from "@/types/property-detail";
 import type { PropertySearchParams } from "@/types/search";
@@ -16,23 +14,106 @@ type BookingHotelCardProps = {
   search: PropertySearchParams;
   selectedPlan: SelectedRoomPlan;
   className?: string;
+  layout?: "default" | "mobile-checkout";
+  cancellationPolicy?: { name: string; description: string } | null;
 };
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800";
 
 export function BookingHotelCard({
   property,
   search,
   selectedPlan,
   className,
+  layout = "default",
+  cancellationPolicy = null,
 }: BookingHotelCardProps) {
   const nights = getStayNights(search.dateRange);
-  const imageUrl = property.imageUrls[0] ?? FALLBACK_IMAGE;
+  const isMobileCheckout = layout === "mobile-checkout";
+
+  if (isMobileCheckout) {
+    return (
+      <div className={cn("rounded-md border bg-white px-4 py-3", className)}>
+        <div className="flex flex-wrap items-center gap-2">
+          {property.guestRating ? (
+            <span className="inline-flex items-center gap-1 text-sm font-semibold">
+              <StarIcon className="size-3.5 fill-premium text-premium" />
+              {property.guestRating.toFixed(1)}
+            </span>
+          ) : null}
+          <h2 className="text-base font-semibold leading-snug">{property.name}</h2>
+        </div>
+
+        <div className="my-3 border-t" />
+
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center text-xs">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Check-in
+            </p>
+            <p className="mt-0.5 font-semibold">
+              {search.dateRange.from
+                ? format(search.dateRange.from, "dd MMM yy")
+                : "—"}
+            </p>
+          </div>
+          <span className="rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+            {nights > 0
+              ? `${nights} Night${nights === 1 ? "" : "s"}`
+              : "Stay"}
+          </span>
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Check-out
+            </p>
+            <p className="mt-0.5 font-semibold">
+              {search.dateRange.to
+                ? format(search.dateRange.to, "dd MMM yy")
+                : "—"}
+            </p>
+          </div>
+        </div>
+
+        <div className="my-3 border-t" />
+
+        <p className="text-center text-xs font-medium text-muted-foreground">
+          Total: {formatGuestSummary(search.guests)}
+        </p>
+
+        <div className="my-3 border-t" />
+
+        <div className="flex items-start justify-between gap-3 text-sm">
+          <div className="min-w-0">
+            <p className="font-semibold">
+              {search.guests.rooms}× {selectedPlan.roomTypeName}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {selectedPlan.ratePlanName}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {search.guests.adults}{" "}
+              {search.guests.adults === 1 ? "Adult" : "Adults"}
+            </p>
+          </div>
+          <PropertyBookingLegalFooter
+            cancellationPolicy={cancellationPolicy}
+            compact
+            policyLinkLabel="View Policy & Details"
+            showAgreementText={false}
+            className="shrink-0 text-left [&_button]:text-xs"
+          />
+        </div>
+      </div>
+    );
+  }
+
   const locationLabel = property.area ?? property.city ?? "";
   const premiumTag = property.tags.find(
-    (tag) => tag.code.toUpperCase() === "PREMIUM" || tag.name.toUpperCase() === "PREMIUM",
+    (tag) =>
+      tag.code.toUpperCase() === "PREMIUM" ||
+      tag.name.toUpperCase() === "PREMIUM",
   );
+  const imageUrl =
+    property.imageUrls[0] ??
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800";
 
   return (
     <div className={cn("rounded-md border bg-white p-4 sm:p-5", className)}>
@@ -76,7 +157,9 @@ export function BookingHotelCard({
             Check-In
           </p>
           <p className="mt-1 text-xs font-semibold sm:text-sm">
-            {formatBookingDateTime(search.dateRange.from, property.checkInTime)}
+            {search.dateRange.from
+              ? format(search.dateRange.from, "dd MMM yy")
+              : "—"}
           </p>
         </div>
 
@@ -93,7 +176,9 @@ export function BookingHotelCard({
             Check-Out
           </p>
           <p className="mt-1 text-xs font-semibold sm:text-sm">
-            {formatBookingDateTime(search.dateRange.to, property.checkOutTime)}
+            {search.dateRange.to
+              ? format(search.dateRange.to, "dd MMM yy")
+              : "—"}
           </p>
         </div>
       </div>
@@ -108,18 +193,19 @@ export function BookingHotelCard({
             <p className="font-semibold">
               {search.guests.rooms} x {selectedPlan.roomTypeName}
             </p>
-            <p className="mt-0.5 text-muted-foreground">{selectedPlan.ratePlanName}</p>
+            <p className="mt-0.5 text-muted-foreground">
+              {selectedPlan.ratePlanName}
+            </p>
             <p className="mt-0.5 text-muted-foreground">
               {search.guests.adults}{" "}
               {search.guests.adults === 1 ? "Adult" : "Adults"}
             </p>
           </div>
-          <button
-            type="button"
-            className="shrink-0 text-xs font-medium text-sky-700 hover:underline sm:text-sm"
-          >
-            View Policy &amp; Details
-          </button>
+          <PropertyBookingLegalFooter
+            cancellationPolicy={cancellationPolicy}
+            compact
+            className="shrink-0 text-left"
+          />
         </div>
       </div>
     </div>

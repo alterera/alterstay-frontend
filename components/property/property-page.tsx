@@ -11,6 +11,9 @@ import { PropertyBookingPanel } from "@/components/property/property-booking-pan
 import { PropertyBreadcrumb } from "@/components/property/property-breadcrumb";
 import { PropertyFacilitiesSection } from "@/components/property/property-facilities-section";
 import { PropertyImageGrid } from "@/components/property/property-image-grid";
+import { PropertyMobileImageCarousel } from "@/components/property/property-mobile-image-carousel";
+import { PropertyMobileAboutSection } from "@/components/property/property-mobile-about-section";
+import { PropertyMobilePoliciesTeaser } from "@/components/property/property-mobile-policies-teaser";
 import { PropertyInfoSection } from "@/components/property/property-info-section";
 import { PropertyLocationSection } from "@/components/property/property-location-section";
 import { PropertyMobileBookingDock } from "@/components/property/property-mobile-booking-dock";
@@ -37,7 +40,6 @@ import {
   planToSelection,
 } from "@/lib/property-booking";
 import { FeaturedPropertiesSection } from "@/components/sections/featured-properties";
-import { splitAmenities } from "@/lib/property-enrichment";
 import { buildPropertyRoomsUrl, buildPropertyUrl } from "@/lib/property-url";
 import {
   parseSearchParams,
@@ -89,7 +91,11 @@ export function PropertyPage({ slug }: PropertyPageProps) {
 
   const { isFavourite, toggleFavourite } = useFavouriteProperty(slug);
   const sectionIds = PROPERTY_SECTIONS.map((section) => section.id);
-  const { activeId, scrollToSection } = useScrollSpy(sectionIds);
+  const scrollSpyRootMargin =
+    isDesktop === false ? "-140px 0px -50% 0px" : "-40% 0px -45% 0px";
+  const { activeId, scrollToSection } = useScrollSpy(sectionIds, {
+    rootMargin: scrollSpyRootMargin,
+  });
 
   const loadProperty = useCallback(async () => {
     setLoading(true);
@@ -206,7 +212,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
 
   if (error || (!loading && !property)) {
     return (
-      <div className="bg-white pb-28 lg:pb-12">
+      <div className="bg-white pb-20 lg:pb-12">
         <PropertyMobileStayHeader
           search={search}
           onSearchUpdate={handleSearchUpdate}
@@ -234,51 +240,54 @@ export function PropertyPage({ slug }: PropertyPageProps) {
     );
   }
 
-  const { perks, amenities } = splitAmenities(property);
   const cancellationPolicy = getSelectedCancellationPolicy(
     property,
     displayPlan,
   );
 
   return (
-    <div className="bg-white pb-28 lg:pb-12">
+    <div className="bg-white pb-20 lg:pb-12">
       <PropertyMobileStayHeader
         search={search}
         onSearchUpdate={handleSearchUpdate}
       />
 
-      <Container className="space-y-6 py-6">
-        <div className="hidden lg:block">
-          <PropertyBreadcrumb city={property.city} propertyName={property.name} />
+      <div className="relative lg:hidden">
+        <div className="absolute right-3 top-3 z-20">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            className="rounded-md bg-white/95 backdrop-blur"
+            onClick={toggleFavourite}
+            aria-label={
+              isFavourite ? "Remove from favourites" : "Add to favourites"
+            }
+            aria-pressed={isFavourite}
+          >
+            <HeartIcon
+              className={cn(
+                "size-4",
+                isFavourite ? "fill-rose-500 text-rose-500" : "text-foreground",
+              )}
+            />
+          </Button>
         </div>
-        <div className="relative">
-          <div className="absolute right-3 top-3 z-20 lg:hidden">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              className="rounded-md bg-white/95 backdrop-blur"
-              onClick={toggleFavourite}
-              aria-label={
-                isFavourite ? "Remove from favourites" : "Add to favourites"
-              }
-              aria-pressed={isFavourite}
-            >
-              <HeartIcon
-                className={cn(
-                  "size-4",
-                  isFavourite ? "fill-rose-500 text-rose-500" : "text-foreground",
-                )}
-              />
-            </Button>
-          </div>
-          <PropertyImageGrid name={property.name} imageUrls={property.imageUrls} />
-        </div>
+        <PropertyMobileImageCarousel
+          name={property.name}
+          imageUrls={property.imageUrls}
+        />
+      </div>
+
+      <Container className="hidden space-y-6 py-6 lg:block">
+        <PropertyBreadcrumb city={property.city} propertyName={property.name} />
+        <PropertyImageGrid name={property.name} imageUrls={property.imageUrls} />
       </Container>
 
       <PropertySectionNav
         activeId={activeId as PropertySectionId}
         onNavigate={handleSectionNavigate}
+        mobileStickyTopClassName="top-[calc(2.75rem+env(safe-area-inset-top,0px))]"
       />
 
       <Container className="py-10">
@@ -286,7 +295,23 @@ export function PropertyPage({ slug }: PropertyPageProps) {
           <div className="space-y-16">
             <PropertyInfoSection property={property} />
 
-            <PropertyFacilitiesSection perks={perks} amenities={amenities} />
+            <PropertyFacilitiesSection amenities={property.amenities} />
+
+            <section id="policies" className="scroll-mt-36 space-y-4 lg:space-y-8">
+              <PropertyMobilePoliciesTeaser
+                policies={property.policies}
+                checkInTime={property.checkInTime}
+                checkOutTime={property.checkOutTime}
+              />
+              <div className="hidden lg:block">
+                <PropertyPoliciesSection
+                  policies={property.policies}
+                  checkInTime={property.checkInTime}
+                  checkOutTime={property.checkOutTime}
+                  withAnchor={false}
+                />
+              </div>
+            </section>
 
             <PropertyLocationSection property={property} />
 
@@ -295,11 +320,7 @@ export function PropertyPage({ slug }: PropertyPageProps) {
               reviews={property.reviews}
             />
 
-            <PropertyPoliciesSection
-              policies={property.policies}
-              checkInTime={property.checkInTime}
-              checkOutTime={property.checkOutTime}
-            />
+            <PropertyMobileAboutSection description={property.description} />
 
             <PropertyRoomOptionsSection
               property={property}

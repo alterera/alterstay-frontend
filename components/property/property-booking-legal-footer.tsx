@@ -23,12 +23,16 @@ type PropertyBookingLegalFooterProps = {
   cancellationPolicy?: CancellationPolicy;
   className?: string;
   compact?: boolean;
+  policyLinkLabel?: string;
+  showAgreementText?: boolean;
 };
 
 export function PropertyBookingLegalFooter({
   cancellationPolicy,
   className,
   compact = false,
+  policyLinkLabel = "Cancellation Policy",
+  showAgreementText = true,
 }: PropertyBookingLegalFooterProps) {
   const fallbackIntro = cancellationSections[0]?.paragraphs?.[0];
 
@@ -45,7 +49,7 @@ export function PropertyBookingLegalFooter({
           type="button"
           className="font-medium text-brand underline-offset-2 hover:underline"
         >
-          Cancellation Policy
+          {policyLinkLabel}
         </PopoverTrigger>
         <PopoverContent align="center" className="w-80 p-4">
           <PopoverHeader>
@@ -67,16 +71,18 @@ export function PropertyBookingLegalFooter({
         </PopoverContent>
       </Popover>
 
-      <p>
-        By proceeding, you agree to our{" "}
-        <Link
-          href={ROUTES.terms}
-          className="font-medium text-brand underline-offset-2 hover:underline"
-        >
-          Guest Policies
-        </Link>
-        .
-      </p>
+      {showAgreementText ? (
+        <p>
+          By proceeding, you agree to our{" "}
+          <Link
+            href={ROUTES.terms}
+            className="font-medium text-brand underline-offset-2 hover:underline"
+          >
+            Guest Policies
+          </Link>
+          .
+        </p>
+      ) : null}
     </div>
   );
 }

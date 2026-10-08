@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
       ...mediaPatterns,
     ],
   },
-  allowedDevOrigins: ["172.20.10.3"],
+  allowedDevOrigins: ["192.168.0.101"],
 };
 
 export default nextConfig;

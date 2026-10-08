@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import type { PropertyAmenityDetail } from "@/types/property-detail";
 
 type PropertyFacilitiesSectionProps = {
-  perks: PropertyAmenityDetail[];
   amenities: PropertyAmenityDetail[];
 };
 
@@ -56,14 +55,27 @@ function AmenityRow({ amenity }: { amenity: PropertyAmenityDetail }) {
 }
 
 export function PropertyFacilitiesSection({
-  perks,
   amenities,
 }: PropertyFacilitiesSectionProps) {
   const [amenitiesOpen, setAmenitiesOpen] = useState(false);
-  const visibleAmenities = amenities.slice(0, VISIBLE_AMENITIES);
+
+  const mergedAmenities = useMemo(() => {
+    const seen = new Set<string>();
+    return amenities.filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  }, [amenities]);
+
+  const visibleAmenities = mergedAmenities.slice(0, VISIBLE_AMENITIES);
+
+  if (mergedAmenities.length === 0) {
+    return null;
+  }
 
   return (
-    <section id="facilities" className="scroll-mt-36 space-y-8">
+    <section id="facilities" className="scroll-mt-36 space-y-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Facilities
@@ -71,58 +83,27 @@ export function PropertyFacilitiesSection({
         <h2 className="mt-1 text-xl font-semibold">What this place offers</h2>
       </div>
 
-      {perks.length > 0 ? (
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Perks
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Special facilities at this hotel
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
-            {perks.map((perk) => (
-              <AmenityTile key={perk.id} amenity={perk} compact />
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <div className="grid grid-cols-3 gap-2 sm:hidden">
+        {visibleAmenities.map((amenity) => (
+          <AmenityTile key={amenity.id} amenity={amenity} compact />
+        ))}
+      </div>
 
-      {amenities.length > 0 ? (
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Amenities
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Things that make the stay better
-            </p>
-          </div>
+      <div className="hidden gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3">
+        {visibleAmenities.map((amenity) => (
+          <AmenityRow key={amenity.id} amenity={amenity} />
+        ))}
+      </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:hidden">
-            {visibleAmenities.map((amenity) => (
-              <AmenityTile key={amenity.id} amenity={amenity} compact />
-            ))}
-          </div>
-
-          <div className="hidden gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3">
-            {visibleAmenities.map((amenity) => (
-              <AmenityRow key={amenity.id} amenity={amenity} />
-            ))}
-          </div>
-
-          {amenities.length > VISIBLE_AMENITIES ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-md"
-              onClick={() => setAmenitiesOpen(true)}
-            >
-              Show all amenities
-            </Button>
-          ) : null}
-        </div>
+      {mergedAmenities.length > VISIBLE_AMENITIES ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-md"
+          onClick={() => setAmenitiesOpen(true)}
+        >
+          Show all amenities
+        </Button>
       ) : null}
 
       <Dialog open={amenitiesOpen} onOpenChange={setAmenitiesOpen}>
@@ -131,7 +112,7 @@ export function PropertyFacilitiesSection({
             <DialogTitle>Property Amenities</DialogTitle>
           </DialogHeader>
           <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
-            {amenities.map((amenity) => (
+            {mergedAmenities.map((amenity) => (
               <AmenityRow key={amenity.id} amenity={amenity} />
             ))}
           </div>

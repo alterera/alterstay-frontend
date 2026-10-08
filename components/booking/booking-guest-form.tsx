@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BriefcaseIcon, Loader2Icon, PlusIcon, UserRoundIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  BriefcaseIcon,
+  ChevronRightIcon,
+  CoinsIcon,
+  Loader2Icon,
+  PlusIcon,
+  TicketIcon,
+  UserRoundIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +31,7 @@ import {
   fetchSavedGuests,
   type SavedGuest,
 } from "@/lib/guests-api";
+import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 
@@ -40,12 +50,18 @@ type BookingGuestFormProps = {
   user: AuthUser | null;
   formId?: string;
   className?: string;
+  layout?: "default" | "mobile-checkout";
   onSubmit?: (values: GuestFormState) => void;
   showPayButton?: boolean;
   payLabel?: string;
   disabled?: boolean;
   isSubmitting?: boolean;
   fieldErrors?: GuestFormFieldErrors;
+  coinsBalance?: number;
+  maxCoinsRedeemable?: number;
+  coinsToRedeem?: number;
+  onCoinsToRedeemChange?: (value: number) => void;
+  coinsInputDisabled?: boolean;
 };
 
 function getGuestDefaults(user: AuthUser | null): GuestFormState {
@@ -65,12 +81,18 @@ export function BookingGuestForm({
   user,
   formId,
   className,
+  layout = "default",
   onSubmit,
   showPayButton = true,
   payLabel = "Pay Now",
   disabled = false,
   isSubmitting = false,
   fieldErrors,
+  coinsBalance,
+  maxCoinsRedeemable,
+  coinsToRedeem = 0,
+  onCoinsToRedeemChange,
+  coinsInputDisabled = false,
 }: BookingGuestFormProps) {
   const [form, setForm] = useState<GuestFormState>(() => getGuestDefaults(user));
   const [savedGuests, setSavedGuests] = useState<SavedGuest[]>([]);
@@ -153,17 +175,80 @@ export function BookingGuestForm({
   }
 
   const inputsDisabled = disabled || isSubmitting;
+  const isMobileCheckout = layout === "mobile-checkout";
+  const canRedeemCoins =
+    isMobileCheckout &&
+    typeof coinsBalance === "number" &&
+    coinsBalance > 0 &&
+    typeof onCoinsToRedeemChange === "function";
+
+  const chooseGuestControl = user ? (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={inputsDisabled}
+            className="h-8 shrink-0 rounded-md px-3 text-xs"
+          >
+            Choose Guest
+          </Button>
+        }
+      />
+      <PopoverContent align="end" className="w-72 p-3">
+        <PopoverHeader>
+          <PopoverTitle className="text-sm">Saved guests</PopoverTitle>
+        </PopoverHeader>
+        {guestsLoading ? (
+          <p className="mt-2 text-xs text-muted-foreground">Loading…</p>
+        ) : savedGuests.length === 0 ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            No saved guests yet.
+          </p>
+        ) : (
+          <div className="mt-2 max-h-48 space-y-1 overflow-y-auto">
+            {savedGuests.map((guest) => (
+              <button
+                key={guest.id}
+                type="button"
+                disabled={inputsDisabled}
+                onClick={() => applySavedGuest(guest)}
+                className="flex w-full flex-col rounded-md border px-3 py-2 text-left text-sm hover:bg-muted/40"
+              >
+                <span className="font-medium">{guest.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {formatDisplayPhone(guest.phone)}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  ) : null;
 
   return (
     <form
       id={formId}
       onSubmit={handleSubmit}
-      className={cn("space-y-5", className)}
+      className={cn(isMobileCheckout ? "space-y-3" : "space-y-5", className)}
     >
-      <div>
-        <h2 className="text-lg font-semibold">Guest Information</h2>
+      <div className={cn(isMobileCheckout && "rounded-md border bg-white px-4 py-3")}>
+        <div className="flex items-center justify-between gap-2">
+          <h2
+            className={cn(
+              "font-semibold",
+              isMobileCheckout ? "text-sm" : "text-lg",
+            )}
+          >
+            {isMobileCheckout ? "Guest's Details" : "Guest Information"}
+          </h2>
+          {isMobileCheckout ? chooseGuestControl : null}
+        </div>
 
-        {user ? (
+        {user && !isMobileCheckout ? (
           <div className="mt-4 space-y-2">
             <Label className="text-sm font-medium text-foreground">
               Select saved guest
@@ -296,9 +381,15 @@ export function BookingGuestForm({
           </div>
         ) : null}
 
-        <div className="mt-4 space-y-4">
+        <div className={cn("space-y-3", isMobileCheckout ? "mt-3" : "mt-4 space-y-4")}>
           <div className="space-y-1.5">
-            <Label htmlFor="guest-name" className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor="guest-name"
+              className={cn(
+                "font-medium text-foreground",
+                isMobileCheckout ? "text-xs" : "text-sm",
+              )}
+            >
               Guest Name
             </Label>
             <Input
@@ -306,7 +397,10 @@ export function BookingGuestForm({
               value={form.guestName}
               onChange={(event) => updateField("guestName", event.target.value)}
               placeholder="Enter guest name"
-              className="h-11 rounded-lg border-input/80 bg-white px-3 text-sm"
+              className={cn(
+                "rounded-lg border-input/80 bg-white px-3 text-sm",
+                isMobileCheckout ? "h-10" : "h-11",
+              )}
               required
               disabled={inputsDisabled}
             />
@@ -316,26 +410,13 @@ export function BookingGuestForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="guest-email" className="text-sm font-medium text-foreground">
-              Email Address
-            </Label>
-            <Input
-              id="guest-email"
-              type="email"
-              value={form.email}
-              onChange={(event) => updateField("email", event.target.value)}
-              placeholder="Enter email address"
-              className="h-11 rounded-lg border-input/80 bg-white px-3 text-sm"
-              required
-              disabled={inputsDisabled}
-            />
-            {fieldErrors?.email ? (
-              <p className="text-xs text-destructive">{fieldErrors.email}</p>
-            ) : null}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="guest-mobile" className="text-sm font-medium text-foreground">
+            <Label
+              htmlFor="guest-mobile"
+              className={cn(
+                "font-medium text-foreground",
+                isMobileCheckout ? "text-xs" : "text-sm",
+              )}
+            >
               Mobile Number
             </Label>
             <Input
@@ -345,7 +426,10 @@ export function BookingGuestForm({
               value={form.mobile}
               onChange={(event) => updateField("mobile", event.target.value)}
               placeholder="Enter mobile number"
-              className="h-11 rounded-lg border-input/80 bg-white px-3 text-sm"
+              className={cn(
+                "rounded-lg border-input/80 bg-white px-3 text-sm",
+                isMobileCheckout ? "h-10" : "h-11",
+              )}
               required
               disabled={inputsDisabled}
             />
@@ -353,9 +437,125 @@ export function BookingGuestForm({
               <p className="text-xs text-destructive">{fieldErrors.mobile}</p>
             ) : null}
           </div>
+
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="guest-email"
+              className={cn(
+                "font-medium text-foreground",
+                isMobileCheckout ? "text-xs" : "text-sm",
+              )}
+            >
+              Email Address
+            </Label>
+            <Input
+              id="guest-email"
+              type="email"
+              value={form.email}
+              onChange={(event) => updateField("email", event.target.value)}
+              placeholder="Enter email address"
+              className={cn(
+                "rounded-lg border-input/80 bg-white px-3 text-sm",
+                isMobileCheckout ? "h-10" : "h-11",
+              )}
+              required
+              disabled={inputsDisabled}
+            />
+            {fieldErrors?.email ? (
+              <p className="text-xs text-destructive">{fieldErrors.email}</p>
+            ) : null}
+          </div>
         </div>
       </div>
 
+      {isMobileCheckout ? (
+        <div className="space-y-2">
+          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border bg-white px-4 py-3">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <BriefcaseIcon className="size-4 text-muted-foreground" />
+              Staying for business purpose?
+            </span>
+            <Checkbox
+              checked={form.isBusinessBooking}
+              onCheckedChange={(checked) =>
+                updateField("isBusinessBooking", checked === true)
+              }
+              disabled={inputsDisabled}
+              className="size-5 rounded-md"
+            />
+          </label>
+
+          <Link
+            href={ROUTES.offers}
+            className="flex items-center justify-between gap-3 rounded-md border bg-white px-4 py-3 text-sm font-medium"
+          >
+            <span className="flex items-center gap-2">
+              <TicketIcon className="size-4 text-muted-foreground" />
+              View All Coupons
+            </span>
+            <ChevronRightIcon className="size-4 text-muted-foreground" />
+          </Link>
+
+          {canRedeemCoins ? (
+            <div className="rounded-md border bg-white px-4 py-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <CoinsIcon className="size-4 text-brand" />
+                Coins
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Total Available Coins: {coinsBalance!.toLocaleString("en-IN")}
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  max={maxCoinsRedeemable ?? coinsBalance}
+                  value={coinsToRedeem || ""}
+                  placeholder="0"
+                  disabled={coinsInputDisabled || inputsDisabled}
+                  className="h-9"
+                  onChange={(event) => {
+                    const raw = event.target.value;
+                    const next = raw === "" ? 0 : Number(raw);
+                    if (!Number.isFinite(next) || next < 0) return;
+                    const cap = maxCoinsRedeemable ?? coinsBalance!;
+                    onCoinsToRedeemChange!(Math.min(next, cap));
+                  }}
+                />
+                <button
+                  type="button"
+                  className="shrink-0 text-xs font-semibold text-brand disabled:opacity-50"
+                  disabled={coinsInputDisabled || inputsDisabled}
+                  onClick={() =>
+                    onCoinsToRedeemChange!(
+                      maxCoinsRedeemable ?? coinsBalance!,
+                    )
+                  }
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border bg-white px-4 py-3">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <span className="text-base">💬</span>
+              Receive booking details on Whatsapp
+            </span>
+            <Checkbox
+              checked={form.whatsappNotify}
+              onCheckedChange={(checked) =>
+                updateField("whatsappNotify", checked === true)
+              }
+              disabled={inputsDisabled}
+              className="size-5 rounded-md"
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {!isMobileCheckout ? (
       <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border border-emerald-200 bg-emerald-50/70 px-4 py-3">
         <span className="flex items-center gap-3 text-sm font-medium text-emerald-900">
           <span className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-base">
@@ -372,7 +572,9 @@ export function BookingGuestForm({
           className="size-5 rounded-md border-emerald-400 data-checked:border-emerald-600 data-checked:bg-emerald-600"
         />
       </label>
+      ) : null}
 
+      {!isMobileCheckout ? (
       <div className="space-y-3">
         <label className="flex cursor-pointer items-center justify-between gap-3 rounded-md border px-4 py-3">
           <span className="flex items-center gap-3 text-sm font-medium">
@@ -457,6 +659,62 @@ export function BookingGuestForm({
           </div>
         ) : null}
       </div>
+      ) : null}
+
+      {form.isBusinessBooking && isMobileCheckout ? (
+        <div className="space-y-3 rounded-md border bg-white px-4 py-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="gst-number-mobile" className="text-xs font-medium">
+              GST Number
+            </Label>
+            <Input
+              id="gst-number-mobile"
+              value={form.gstNumber}
+              onChange={(event) => updateField("gstNumber", event.target.value)}
+              placeholder="Enter GST number"
+              className="h-10 rounded-lg text-sm"
+              required
+              disabled={inputsDisabled}
+            />
+            {fieldErrors?.gstNumber ? (
+              <p className="text-xs text-destructive">{fieldErrors.gstNumber}</p>
+            ) : null}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="company-name-mobile" className="text-xs font-medium">
+              Company Name
+            </Label>
+            <Input
+              id="company-name-mobile"
+              value={form.companyName}
+              onChange={(event) =>
+                updateField("companyName", event.target.value)
+              }
+              className="h-10 rounded-lg text-sm"
+              required
+              disabled={inputsDisabled}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="company-address-mobile"
+              className="text-xs font-medium"
+            >
+              Company Address
+            </Label>
+            <Input
+              id="company-address-mobile"
+              value={form.companyAddress}
+              onChange={(event) =>
+                updateField("companyAddress", event.target.value)
+              }
+              className="h-10 rounded-lg text-sm"
+              required
+              disabled={inputsDisabled}
+            />
+          </div>
+        </div>
+      ) : null}
 
       {showPayButton ? (
         <>

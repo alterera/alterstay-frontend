@@ -88,6 +88,8 @@ export type PropertyRoomTypeDetail = {
   amenities: string[];
   ratePlans: PropertyRatePlanDetail[];
   minPricePerNight: number | null;
+  /** Min free inventory across stay nights; omitted when dates unknown. */
+  roomsAvailable?: number | null;
 };
 
 export type PropertyDetail = {
@@ -126,9 +128,9 @@ export type PropertyDetail = {
 export const PROPERTY_SECTIONS = [
   { id: "info", label: "Info" },
   { id: "facilities", label: "Facilities" },
+  { id: "policies", label: "Policies" },
   { id: "location", label: "Location" },
   { id: "ratings", label: "Ratings" },
-  { id: "policies", label: "Policies" },
   { id: "room-options", label: "Room Options" },
 ] as const;
 

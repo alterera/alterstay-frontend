@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+function isSpyTargetVisible(element: HTMLElement): boolean {
+  return element.getClientRects().length > 0;
+}
+
 export function useScrollSpy(
   sectionIds: readonly string[],
   options?: { rootMargin?: string; threshold?: number },
@@ -13,7 +17,10 @@ export function useScrollSpy(
 
     const elements = sectionIds
       .map((id) => document.getElementById(id))
-      .filter((node): node is HTMLElement => node !== null);
+      .filter(
+        (node): node is HTMLElement =>
+          node !== null && isSpyTargetVisible(node),
+      );
 
     if (elements.length === 0) return;
 
@@ -21,15 +28,23 @@ export function useScrollSpy(
       (entries) => {
         const visible = entries
           .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          .sort(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
+          );
 
-        if (visible[0]?.target.id) {
-          setActiveId(visible[0].target.id);
+        if (visible.length === 0) return;
+
+        const belowHeader =
+          visible.find((entry) => entry.boundingClientRect.top >= 0) ??
+          visible[visible.length - 1];
+
+        if (belowHeader.target.id) {
+          setActiveId(belowHeader.target.id);
         }
       },
       {
         rootMargin: options?.rootMargin ?? "-40% 0px -45% 0px",
-        threshold: options?.threshold ?? [0, 0.25, 0.5, 0.75, 1],
+        threshold: options?.threshold ?? [0, 0.1, 0.25, 0.5],
       },
     );
 
@@ -39,7 +54,7 @@ export function useScrollSpy(
 
   function scrollToSection(id: string) {
     const element = document.getElementById(id);
-    if (!element) return;
+    if (!element || !isSpyTargetVisible(element)) return;
     element.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

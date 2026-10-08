@@ -17,6 +17,10 @@ type PropertyPoliciesSectionProps = {
   policies: PropertyPolicyDetail[];
   checkInTime: string | null;
   checkOutTime: string | null;
+  /** Full policy list for sheets / embeds (no section chrome). */
+  embedded?: boolean;
+  /** When false, omit `id="policies"` (parent provides scroll anchor). */
+  withAnchor?: boolean;
 };
 
 const VISIBLE_POLICY_COUNT = 5;
@@ -36,6 +40,8 @@ export function PropertyPoliciesSection({
   policies,
   checkInTime,
   checkOutTime,
+  embedded = false,
+  withAnchor = true,
 }: PropertyPoliciesSectionProps) {
   const [policiesOpen, setPoliciesOpen] = useState(false);
 
@@ -72,8 +78,12 @@ export function PropertyPoliciesSection({
     })),
   ];
 
-  const visiblePolicies = policyItems.slice(0, VISIBLE_POLICY_COUNT);
-  const hiddenCount = Math.max(0, policyItems.length - VISIBLE_POLICY_COUNT);
+  const visiblePolicies = embedded
+    ? policyItems
+    : policyItems.slice(0, VISIBLE_POLICY_COUNT);
+  const hiddenCount = embedded
+    ? 0
+    : Math.max(0, policyItems.length - VISIBLE_POLICY_COUNT);
 
   const checkInLabel = checkInTime
     ? formatPropertyTime(checkInTime)
@@ -82,13 +92,28 @@ export function PropertyPoliciesSection({
     ? formatPropertyTime(checkOutTime)
     : null;
 
+  if (embedded) {
+    return (
+      <ul className="space-y-3">
+        {policyItems.map((policy) => (
+          <PolicyBullet key={policy.id}>{policy.text}</PolicyBullet>
+        ))}
+      </ul>
+    );
+  }
+
+  const SectionTag = withAnchor ? "section" : "div";
+
   return (
-    <section id="policies" className="scroll-mt-36 space-y-8">
+    <SectionTag
+      {...(withAnchor ? { id: "policies" } : {})}
+      className={withAnchor ? "scroll-mt-36 space-y-8" : "space-y-8"}
+    >
       <div>
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Policies
         </p>
-        <h2 className="mt-1 text-xl font-semibold">What you must know</h2>
+        <h2 className="mt-1 text-xl font-semibold">Things you must know</h2>
       </div>
 
       <div className="overflow-hidden rounded-md border bg-white">
@@ -146,6 +171,6 @@ export function PropertyPoliciesSection({
           </ul>
         </DialogContent>
       </Dialog>
-    </section>
+    </SectionTag>
   );
 }

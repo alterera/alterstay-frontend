@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 type BookingBillSummaryProps = {
   bill: BookingBill;
   className?: string;
+  layout?: "default" | "mobile-checkout";
   showMembershipUpsell?: boolean;
   coinsBalance?: number;
   maxCoinsRedeemable?: number;
@@ -23,6 +24,7 @@ type BookingBillSummaryProps = {
 export function BookingBillSummary({
   bill,
   className,
+  layout = "default",
   showMembershipUpsell = false,
   coinsBalance,
   maxCoinsRedeemable,
@@ -34,6 +36,59 @@ export function BookingBillSummary({
     typeof coinsBalance === "number" &&
     coinsBalance > 0 &&
     typeof onCoinsToRedeemChange === "function";
+  const isMobileCheckout = layout === "mobile-checkout";
+  const convenienceFee = bill.platformFee ?? 0;
+  const taxLine =
+    bill.gstAmount != null ? bill.gstAmount : Math.max(0, bill.tax - convenienceFee);
+
+  if (isMobileCheckout) {
+    return (
+      <div className={cn("rounded-md border bg-white px-4 py-3", className)}>
+        <h2 className="text-sm font-semibold">Bill Summary</h2>
+        <dl className="mt-3 space-y-2 text-sm">
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">Room price</dt>
+            <dd className="font-medium">
+              {formatCurrency(bill.roomPrice, bill.currency)}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">Tax</dt>
+            <dd className="font-medium">
+              {formatCurrency(taxLine, bill.currency)}
+            </dd>
+          </div>
+          {convenienceFee > 0 ? (
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">Convenience Fee</dt>
+              <dd className="font-medium">
+                {formatCurrency(convenienceFee, bill.currency)}
+              </dd>
+            </div>
+          ) : null}
+          {(bill.coinsApplied ?? 0) > 0 ? (
+            <div className="flex justify-between gap-4 text-emerald-700">
+              <dt>Coins applied</dt>
+              <dd className="font-medium">
+                -{formatCurrency(bill.coinsApplied ?? 0, bill.currency)}
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+        <div className="mt-3 flex items-end justify-between border-t pt-3">
+          <div>
+            <p className="text-sm font-semibold">To Pay</p>
+            <p className="text-[10px] text-muted-foreground">
+              Inclusive of all Taxes
+            </p>
+          </div>
+          <p className="text-xl font-bold tracking-tight">
+            {formatCurrency(bill.toPay, bill.currency)}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-4", className)}>

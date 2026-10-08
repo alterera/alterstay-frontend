@@ -67,7 +67,7 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
       </div>
 
       {about ? (
-        <div className="max-w-3xl">
+        <div className="hidden max-w-3xl lg:block">
           <p
             className={
               expanded || !needsReadMore

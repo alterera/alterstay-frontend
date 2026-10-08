@@ -20,7 +20,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
 import { fetchPropertyDetail } from "@/lib/property-api";
-import { planToSelection } from "@/lib/property-booking";
+import {
+  getSelectedCancellationPolicy,
+  planToSelection,
+} from "@/lib/property-booking";
 import { buildCheckoutUrl, estimateBillFromPlan } from "@/lib/booking-url";
 import { quoteToBill } from "@/lib/quote-utils";
 import { buildPropertyUrl } from "@/lib/property-url";
@@ -225,6 +228,10 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
   const bill = intent ? quoteToBill(intent.quote) : estimateBillFromPlan(selectedPlan);
   const checkoutHref = buildCheckoutUrl(slug, search, selectedPlan);
   const payLabel = `Pay ${formatCurrency(bill.toPay, bill.currency)}`;
+  const cancellationPolicy = getSelectedCancellationPolicy(
+    property,
+    selectedPlan,
+  );
 
   function handlePayNow() {
     const form = document.getElementById(guestFormId);
@@ -276,9 +283,93 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
   }
 
   return (
-    <div className="bg-muted/20 pb-28 pt-6 lg:pb-10">
+    <div className="bg-muted/20 pb-24 pt-3 lg:pb-10 lg:pt-6">
       <Container>
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
+        <div className="lg:hidden space-y-3">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              className="size-8 rounded-md"
+              onClick={() => router.back()}
+              aria-label="Go back"
+            >
+              <ArrowLeftIcon className="size-3.5" />
+            </Button>
+            <h1 className="text-base font-semibold tracking-tight">Checkout</h1>
+          </div>
+
+          {isAuthenticated || authLoading ? (
+            <>
+              <BookingHotelCard
+                property={property}
+                search={search}
+                selectedPlan={selectedPlan}
+                layout="mobile-checkout"
+                cancellationPolicy={cancellationPolicy}
+              />
+
+              {intentLoading ? (
+                <div className="rounded-md border bg-white p-4">
+                  <Skeleton className="h-3 w-40 rounded-md" />
+                  <Skeleton className="mt-3 h-20 w-full rounded-md" />
+                </div>
+              ) : null}
+
+              {intentError ? (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+                  {intentError}
+                </div>
+              ) : null}
+
+              {isAuthenticated ? (
+                <>
+                  {payError ? (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                      {payError}
+                    </div>
+                  ) : null}
+                  <BookingGuestForm
+                    key={user?.id ?? "guest"}
+                    formId={guestFormId}
+                    user={user}
+                    layout="mobile-checkout"
+                    showPayButton={false}
+                    payLabel={payLabel}
+                    onSubmit={(values) => void handleSubmit(values)}
+                    disabled={isPaying || !intent}
+                    isSubmitting={isPaying}
+                    fieldErrors={fieldErrors}
+                    coinsBalance={intent?.coinsBalance}
+                    maxCoinsRedeemable={intent?.maxCoinsRedeemable}
+                    coinsToRedeem={coinsToRedeem}
+                    onCoinsToRedeemChange={setCoinsToRedeem}
+                    coinsInputDisabled={intentLoading || !intent}
+                  />
+                  <BookingBillSummary
+                    bill={bill}
+                    layout="mobile-checkout"
+                    coinsBalance={intent?.coinsBalance}
+                    maxCoinsRedeemable={intent?.maxCoinsRedeemable}
+                    coinsToRedeem={coinsToRedeem}
+                    onCoinsToRedeemChange={setCoinsToRedeem}
+                    coinsInputDisabled={intentLoading || !intent}
+                  />
+                </>
+              ) : (
+                <BookingLoginPrompt
+                  summaryUrl={checkoutHref}
+                  showBack={false}
+                />
+              )}
+            </>
+          ) : (
+            <BookingLoginPrompt summaryUrl={checkoutHref} showBack={false} />
+          )}
+        </div>
+
+        <div className="hidden gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
               <Button
@@ -302,6 +393,7 @@ export function CheckoutPage({ slug }: CheckoutPageProps) {
                   property={property}
                   search={search}
                   selectedPlan={selectedPlan}
+                  cancellationPolicy={cancellationPolicy}
                 />
 
                 {intentLoading ? (

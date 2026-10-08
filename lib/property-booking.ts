@@ -68,6 +68,17 @@ export function getSelectedCancellationPolicy(
   return null;
 }
 
+/** Lowest nightly rate across the property (for mobile dock). */
+export function getPropertyMinPricePerNight(
+  property: PropertyDetail,
+): number | null {
+  if (property.minPricePerNight != null && property.minPricePerNight > 0) {
+    return property.minPricePerNight;
+  }
+  const plan = findLowestPricePlan(property);
+  return plan?.pricePerNight ?? null;
+}
+
 /** Picks the cheapest available rate plan across all room types. */
 export function findLowestPricePlan(
   property: PropertyDetail,
