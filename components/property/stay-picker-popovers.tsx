@@ -20,6 +20,7 @@ type StayDatesPopoverProps = {
   onChange: (range: DateRange) => void;
   trigger: React.ReactElement;
   align?: "start" | "center" | "end";
+  compact?: boolean;
 };
 
 export function StayDatesPopover({
@@ -27,6 +28,7 @@ export function StayDatesPopover({
   onChange,
   trigger,
   align = "start",
+  compact = true,
 }: StayDatesPopoverProps) {
   const [open, setOpen] = useState(false);
 
@@ -35,12 +37,13 @@ export function StayDatesPopover({
       <PopoverTrigger render={trigger} />
       <PopoverContent
         align={align}
-        className="w-auto max-w-[calc(100vw-1rem)] p-0"
+        className="w-auto max-w-[min(calc(100vw-1rem),17.5rem)] p-0"
       >
         <StayDatesPicker
           dateRange={dateRange}
           onChange={onChange}
           onComplete={() => setOpen(false)}
+          compact={compact}
         />
       </PopoverContent>
     </Popover>
@@ -52,6 +55,7 @@ type StayGuestsPopoverProps = {
   onChange: (guests: GuestCounts) => void;
   trigger: React.ReactElement;
   align?: "start" | "center" | "end";
+  compact?: boolean;
 };
 
 export function StayGuestsPopover({
@@ -59,6 +63,7 @@ export function StayGuestsPopover({
   onChange,
   trigger,
   align = "start",
+  compact = true,
 }: StayGuestsPopoverProps) {
   const [open, setOpen] = useState(false);
 
@@ -67,12 +72,13 @@ export function StayGuestsPopover({
       <PopoverTrigger render={trigger} />
       <PopoverContent
         align={align}
-        className="w-[min(calc(100vw-2rem),320px)] max-w-[calc(100vw-2rem)] p-4"
+        className="w-[min(calc(100vw-2rem),16.5rem)] max-w-[calc(100vw-2rem)] p-2.5"
       >
         <StayGuestsPicker
           guests={guests}
           onChange={onChange}
           onComplete={() => setOpen(false)}
+          compact={compact}
         />
       </PopoverContent>
     </Popover>

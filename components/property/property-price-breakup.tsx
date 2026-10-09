@@ -53,6 +53,7 @@ export function PropertyPriceBreakup({
               <PropertyTaxesFeesInfo
                 breakup={feeBreakup}
                 currency={currency}
+                compact={compact}
               />
             </span>
             <span className="font-medium">

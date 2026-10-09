@@ -734,7 +734,7 @@ export function BookingGuestForm({
           </button>
 
           <p className="hidden text-center text-xs text-muted-foreground lg:block">
-            By proceeding, I agree to AlterStays&apos;s Privacy Policy and T&amp;Cs
+            By proceeding, I agree to Alterstays&apos;s Privacy Policy and T&amp;Cs
           </p>
         </>
       ) : null}

@@ -23,7 +23,7 @@ function TaxesFeesBreakdown({
   compact = false,
 }: PropertyTaxesFeesInfoProps) {
   return (
-    <div className={cn("space-y-1.5", compact ? "text-[11px]" : "text-sm")}>
+    <div className={cn("space-y-1", compact ? "text-[10px]" : "text-xs")}>
       <div className="flex justify-between gap-3">
         <span className="text-muted-foreground">Tax (18% GST)</span>
         <span className="font-medium">
@@ -51,24 +51,24 @@ export function PropertyTaxesFeesInfo({
         type="button"
         className={cn(
           "inline-flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-          compact ? "size-4" : "size-5",
+          compact ? "size-3.5" : "size-4",
         )}
         aria-label="View taxes and fees breakdown"
         title="View taxes and fees breakdown"
       >
         <InfoIcon
-          className={compact ? "size-2.5" : "size-3.5"}
+          className={compact ? "size-2.5" : "size-3"}
           strokeWidth={2}
         />
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className={cn(compact ? "w-48 p-2" : "w-64 p-3")}
+        className={cn(compact ? "w-44 gap-1.5 p-2" : "w-52 gap-1.5 p-2.5")}
       >
         <p
           className={cn(
             "mb-1.5 font-semibold uppercase tracking-wide text-muted-foreground",
-            compact ? "text-[10px]" : "text-xs",
+            compact ? "text-[9px]" : "text-[10px]",
           )}
         >
           Taxes and fees

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  CheckCircle2Icon,
   Clock3Icon,
   Loader2Icon,
   RefreshCwIcon,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { BookingPaymentResultLayout } from "@/components/booking/booking-payment-result-layout";
 import { PaymentResultShell } from "@/components/payment/payment-result-shell";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
@@ -21,14 +21,19 @@ import {
   clearCheckoutSession,
   isTerminalBookingStatus,
 } from "@/lib/booking-checkout-state";
-import { buildRebookUrl, formatHelpStayLine } from "@/lib/booking-format";
+import {
+  buildRebookUrl,
+  formatHelpStayLine,
+  formatPayableAmount,
+} from "@/lib/booking-format";
 import { retryPaymentForBooking } from "@/lib/booking-payment";
 import { setPostLoginRedirect } from "@/lib/booking-url";
-import { formatCurrency } from "@/lib/format";
 import { toCustomerPaymentFailureMessage } from "@/lib/payment-failure-copy";
 import {
   BOOKING_RESULT_POLL_INTERVAL_MS,
+  isHoldExpired,
   shouldEnterStillProcessing,
+  shouldGiveUpWaitingForPayment,
 } from "@/lib/booking-result-polling";
 import {
   canRetryPayment,
@@ -42,35 +47,19 @@ type ResultPhase =
   | "loading"
   | "processing"
   | "still_processing"
+  | "payment_timeout"
   | "success"
   | "failed"
   | "refund"
   | "expired";
 
-function BookingSummaryCard({ booking }: { booking: BookingResponse }) {
-  return (
-    <div className="rounded-2xl border bg-muted/20 p-4 text-left">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        Booking summary
-      </p>
-      <p className="mt-2 text-sm font-semibold text-foreground">
-        {booking.property.name}
-      </p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {booking.property.city ? `${booking.property.city} · ` : ""}
-        {booking.reservationNumber}
-      </p>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {formatHelpStayLine(booking.checkIn, booking.checkOut, booking.nights)}
-      </p>
-      <div className="mt-3 flex items-center justify-between border-t pt-3 text-sm">
-        <span className="text-muted-foreground">Amount</span>
-        <span className="font-semibold">
-          {formatCurrency(booking.totalAmount, booking.currency)}
-        </span>
-      </div>
-    </div>
-  );
+function ticketDateIso(booking: BookingResponse): string {
+  return booking.confirmedAt ?? booking.payment?.paidAt ?? booking.createdAt;
+}
+
+function ticketBarcode(booking: BookingResponse): string {
+  const ref = booking.payment?.paymentReference ?? booking.reservationNumber;
+  return ref.replace(/\W/g, "").slice(0, 14) || booking.reservationNumber;
 }
 
 export function BookingPaymentResultPage() {
@@ -95,7 +84,11 @@ export function BookingPaymentResultPage() {
   const resolvePhase = useCallback((next: BookingResponse): ResultPhase => {
     if (isBookingSuccess(next)) return "success";
     if (needsRefundNotice(next)) return "refund";
-    if (next.status === "EXPIRED" || next.status === "CANCELLED") {
+    if (
+      next.status === "EXPIRED" ||
+      next.status === "CANCELLED" ||
+      (next.status === "PAYMENT_PENDING" && isHoldExpired(next.holdExpiresAt))
+    ) {
       return "expired";
     }
     if (canRetryPayment(next)) return "failed";
@@ -159,14 +152,29 @@ export function BookingPaymentResultPage() {
 
     pollTimer.current = window.setInterval(() => {
       const started = pollStartedAt.current ?? Date.now();
-      if (shouldEnterStillProcessing(started, Date.now())) {
+      const now = Date.now();
+
+      if (shouldGiveUpWaitingForPayment(started, now)) {
         stopPolling();
+        void loadBooking().then((next) => {
+          if (!next) {
+            setPhase("payment_timeout");
+            return;
+          }
+          const nextPhase = resolvePhase(next);
+          if (nextPhase === "processing") {
+            setPhase("payment_timeout");
+          }
+        });
+        return;
+      }
+
+      if (shouldEnterStillProcessing(started, now)) {
         setPhase((current) =>
           current === "processing" || current === "loading"
             ? "still_processing"
             : current,
         );
-        return;
       }
 
       void loadBooking().then((next) => {
@@ -284,60 +292,81 @@ export function BookingPaymentResultPage() {
 
   if (phase === "success" && booking) {
     return (
-      <PaymentResultShell
-        tone="success"
-        icon={<CheckCircle2Icon className="size-8" />}
-        title="You're all set"
-        description="Your stay is confirmed. A confirmation has been sent to your registered contact details."
+      <BookingPaymentResultLayout
+        ticket={{
+          variant: "success",
+          title: "You're all set!",
+          subtitle:
+            "Your stay is confirmed. We've sent the details to your registered contact.",
+          reservationNumber: booking.reservationNumber,
+          amount: formatPayableAmount(booking),
+          dateIso: ticketDateIso(booking),
+          propertyName: booking.property.name,
+          stayLine: formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          ),
+          barcodeValue: ticketBarcode(booking),
+          showConfetti: true,
+        }}
         actions={
           <>
             <Button
               render={<Link href={ROUTES.bookings} />}
-              className="rounded-xl sm:min-w-36"
+              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
             >
               View booking
             </Button>
             <Button
               variant="outline"
               render={<Link href={ROUTES.home} />}
-              className="rounded-xl sm:min-w-36"
+              className="h-10 flex-1 rounded-md"
             >
               Back home
             </Button>
           </>
         }
-      >
-        <BookingSummaryCard booking={booking} />
-      </PaymentResultShell>
+      />
     );
   }
 
-  if (phase === "processing" || phase === "still_processing") {
+  if (
+    (phase === "processing" || phase === "still_processing") &&
+    booking
+  ) {
+    const waitingSubtitle =
+      phase === "still_processing"
+        ? "This is taking longer than usual. Your payment may still be on its way — refresh for the latest status."
+        : "Please wait while we confirm your payment. You can keep this page open.";
+
     return (
-      <PaymentResultShell
-        tone="info"
-        icon={
-          phase === "still_processing" ? (
-            <Clock3Icon className="size-8" />
-          ) : (
-            <Loader2Icon className="size-8 animate-spin" />
-          )
-        }
-        title={
-          phase === "still_processing"
-            ? "Still confirming your payment"
-            : "Processing payment"
-        }
-        description={
-          phase === "still_processing"
-            ? "This is taking a little longer than usual. Your payment may still be on its way — refresh anytime for the latest status."
-            : "Please wait while we confirm your payment with the hotel. You can leave this page open."
-        }
+      <BookingPaymentResultLayout
+        ticket={{
+          variant: "processing",
+          title:
+            phase === "still_processing"
+              ? "Still confirming"
+              : "Processing payment",
+          subtitle: waitingSubtitle,
+          reservationNumber: booking.reservationNumber,
+          amountLabel: "Amount",
+          amount: formatPayableAmount(booking),
+          dateIso: booking.createdAt,
+          propertyName: booking.property.name,
+          stayLine: formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          ),
+          barcodeValue: ticketBarcode(booking),
+          iconSpin: phase === "processing",
+        }}
         actions={
           <Button
             type="button"
             variant="outline"
-            className="rounded-xl"
+            className="h-10 w-full rounded-md"
             disabled={isRefreshing}
             onClick={() => void handleRefresh()}
           >
@@ -345,26 +374,82 @@ export function BookingPaymentResultPage() {
             {isRefreshing ? "Refreshing…" : "Refresh status"}
           </Button>
         }
-      >
-        {booking ? <BookingSummaryCard booking={booking} /> : null}
-      </PaymentResultShell>
+      />
+    );
+  }
+
+  if (phase === "payment_timeout" && booking) {
+    return (
+      <BookingPaymentResultLayout
+        ticket={{
+          variant: "warning",
+          title: "Payment not confirmed",
+          subtitle:
+            "We didn't receive payment confirmation in time. Your room hold may have been released — try again or check My bookings.",
+          reservationNumber: booking.reservationNumber,
+          amountLabel: "Amount",
+          amount: formatPayableAmount(booking),
+          dateIso: booking.createdAt,
+          propertyName: booking.property.name,
+          stayLine: formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          ),
+          barcodeValue: ticketBarcode(booking),
+        }}
+        actions={
+          <>
+            <Button
+              type="button"
+              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
+              disabled={isRefreshing}
+              onClick={() => void handleRefresh()}
+            >
+              {isRefreshing ? "Refreshing…" : "Refresh status"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 flex-1 rounded-md"
+              disabled={isRetrying}
+              onClick={() => void handleRetryPayment()}
+            >
+              {isRetrying ? "Starting…" : "Try payment again"}
+            </Button>
+          </>
+        }
+        footer="If you were charged, it will be reversed automatically or contact support with your booking ID."
+      />
     );
   }
 
   if (phase === "failed" && booking) {
     return (
-      <PaymentResultShell
-        tone="danger"
-        icon={<XCircleIcon className="size-8" />}
-        title="Payment didn't go through"
-        description={toCustomerPaymentFailureMessage(
-          booking.payment?.failureReason,
-        )}
+      <BookingPaymentResultLayout
+        ticket={{
+          variant: "failed",
+          title: "Payment didn't go through",
+          subtitle: toCustomerPaymentFailureMessage(
+            booking.payment?.failureReason,
+          ),
+          reservationNumber: booking.reservationNumber,
+          amountLabel: "Amount",
+          amount: formatPayableAmount(booking),
+          dateIso: booking.createdAt,
+          propertyName: booking.property.name,
+          stayLine: formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          ),
+          barcodeValue: ticketBarcode(booking),
+        }}
         actions={
           <>
             <Button
               type="button"
-              className="rounded-xl sm:min-w-40"
+              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
               disabled={isRetrying}
               onClick={() => void handleRetryPayment()}
             >
@@ -373,69 +458,90 @@ export function BookingPaymentResultPage() {
             <Button
               variant="outline"
               render={<Link href={ROUTES.help.root} />}
-              className="rounded-xl"
+              className="h-10 flex-1 rounded-md"
             >
               Need help?
             </Button>
           </>
         }
-      >
-        <BookingSummaryCard booking={booking} />
-        {errorMessage ? (
-          <p className="mt-3 text-center text-sm text-destructive">{errorMessage}</p>
-        ) : null}
-      </PaymentResultShell>
+        footer={
+          errorMessage ? (
+            <span className="text-destructive">{errorMessage}</span>
+          ) : undefined
+        }
+      />
     );
   }
 
   if (phase === "refund" && booking) {
     return (
-      <PaymentResultShell
-        tone="warning"
-        icon={<RefreshCwIcon className="size-8" />}
-        title="Refund in progress"
-        description="We received your payment but could not confirm this booking. A refund is being processed to your original payment method."
+      <BookingPaymentResultLayout
+        ticket={{
+          variant: "warning",
+          title: "Refund in progress",
+          subtitle:
+            "We received your payment but couldn't confirm this stay. A refund is being sent to your original payment method.",
+          reservationNumber: booking.reservationNumber,
+          amount: formatPayableAmount(booking),
+          dateIso: ticketDateIso(booking),
+          propertyName: booking.property.name,
+          stayLine: formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          ),
+          barcodeValue: ticketBarcode(booking),
+        }}
         actions={
           <Button
             render={<Link href={ROUTES.help.root} />}
-            className="rounded-xl"
+            className="h-10 w-full rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
           >
             Talk to support
           </Button>
         }
-      >
-        <BookingSummaryCard booking={booking} />
-      </PaymentResultShell>
+      />
     );
   }
 
   if (phase === "expired" && booking) {
     return (
-      <PaymentResultShell
-        tone="warning"
-        icon={<Clock3Icon className="size-8" />}
-        title="This hold has expired"
-        description="The rooms are no longer reserved for this booking. Search again to lock in your next stay."
+      <BookingPaymentResultLayout
+        ticket={{
+          variant: "warning",
+          title: "This hold has expired",
+          subtitle:
+            "These rooms are no longer reserved. Search again to lock in your next stay.",
+          reservationNumber: booking.reservationNumber,
+          amountLabel: "Quoted total",
+          amount: formatPayableAmount(booking),
+          dateIso: booking.createdAt,
+          propertyName: booking.property.name,
+          stayLine: formatHelpStayLine(
+            booking.checkIn,
+            booking.checkOut,
+            booking.nights,
+          ),
+          barcodeValue: ticketBarcode(booking),
+        }}
         actions={
           <>
             <Button
               render={<Link href={buildRebookUrl(booking)} />}
-              className="rounded-xl sm:min-w-36"
+              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
             >
               Book again
             </Button>
             <Button
               variant="outline"
               render={<Link href={ROUTES.search} />}
-              className="rounded-xl"
+              className="h-10 flex-1 rounded-md"
             >
               Browse stays
             </Button>
           </>
         }
-      >
-        <BookingSummaryCard booking={booking} />
-      </PaymentResultShell>
+      />
     );
   }
 

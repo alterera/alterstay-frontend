@@ -49,6 +49,10 @@ interface BorderBeamProps {
    * The border width of the beam.
    */
   borderWidth?: number
+  /**
+   * Corner radius for the beam travel path (`offset-path` round radius).
+   */
+  pathCornerRadius?: number
 }
 
 export const BorderBeam = ({
@@ -63,7 +67,9 @@ export const BorderBeam = ({
   reverse = false,
   initialOffset = 0,
   borderWidth = 1,
+  pathCornerRadius,
 }: BorderBeamProps) => {
+  const cornerRadius = pathCornerRadius ?? size
   return (
     <div
       className="pointer-events-none absolute inset-0 rounded-[inherit] border-(length:--border-beam-width) border-transparent mask-[linear-gradient(transparent,transparent),linear-gradient(#000,#000)] mask-intersect [mask-clip:padding-box,border-box]"
@@ -82,7 +88,7 @@ export const BorderBeam = ({
         style={
           {
             width: size,
-            offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+            offsetPath: `rect(0 auto auto 0 round ${cornerRadius}px)`,
             "--color-from": colorFrom,
             "--color-to": colorTo,
             ...style,

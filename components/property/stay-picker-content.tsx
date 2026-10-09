@@ -14,6 +14,7 @@ type StayDatesPickerProps = {
   onChange: (range: DateRange) => void;
   onComplete?: () => void;
   className?: string;
+  compact?: boolean;
 };
 
 export function StayDatesPicker({
@@ -21,6 +22,7 @@ export function StayDatesPicker({
   onChange,
   onComplete,
   className,
+  compact = false,
 }: StayDatesPickerProps) {
   const [draft, setDraft] = useState(dateRange);
   const today = startOfToday();
@@ -44,10 +46,13 @@ export function StayDatesPicker({
       mode="range"
       selected={draft}
       onSelect={handleSelect}
-      numberOfMonths={2}
+      numberOfMonths={compact ? 1 : 2}
       defaultMonth={draft.from ?? dateRange.from ?? today}
       disabled={{ before: today }}
-      className={className ?? "p-3 md:[--cell-size:--spacing(9)]"}
+      className={
+        className ??
+        (compact ? "p-1 [--cell-size:--spacing(7)]" : "p-2 [--cell-size:--spacing(8)]")
+      }
     />
   );
 }
@@ -56,12 +61,14 @@ type StayGuestsPickerProps = {
   guests: GuestCounts;
   onChange: (guests: GuestCounts) => void;
   onComplete?: () => void;
+  compact?: boolean;
 };
 
 export function StayGuestsPicker({
   guests,
   onChange,
   onComplete,
+  compact = false,
 }: StayGuestsPickerProps) {
   const [draft, setDraft] = useState(guests);
 
@@ -76,10 +83,11 @@ export function StayGuestsPicker({
 
   return (
     <div>
-      <GuestsPickerContent value={draft} onChange={setDraft} />
+      <GuestsPickerContent value={draft} onChange={setDraft} dense={compact} />
       <Button
         type="button"
-        className="mt-4 w-full rounded-xl bg-brand text-brand-foreground hover:bg-brand/90"
+        size={compact ? "sm" : "default"}
+        className="mt-2 w-full rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
         onClick={applyGuests}
       >
         Done

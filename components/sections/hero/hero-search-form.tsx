@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { useIsDesktop } from "@/hooks/use-is-desktop";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "lucide-react";
 
@@ -59,6 +61,7 @@ export function HeroSearchForm({
   borderBeam = false,
 }: HeroSearchFormProps) {
   const showBorderBeam = borderBeam && !morph && !compact;
+  const isPillLayout = useIsDesktop(640);
   const router = useRouter();
   const [searchParams, setSearchParams] = useState<PropertySearchParams>(
     () => defaultValues ?? createDefaultSearchParams(),
@@ -83,7 +86,7 @@ export function HeroSearchForm({
     <div
       className={cn(
         "relative w-full bg-white",
-        showBorderBeam ? "ring-0" : "ring-1 ring-black/5",
+        showBorderBeam ? "overflow-hidden ring-0" : "ring-1 ring-black/5",
         morph && MORPH_TRANSITION,
         // Morph heights are fixed on purpose: the collapsed pill (h-10) sits
         // centred in the 56px navbar row, and a definite height lets the bar
@@ -98,7 +101,8 @@ export function HeroSearchForm({
     >
       {showBorderBeam ? (
         <BorderBeam
-          size={200}
+          size={isPillLayout === true ? 56 : 180}
+          pathCornerRadius={isPillLayout === true ? 9999 : 32}
           duration={10}
           borderWidth={2}
           colorFrom="#ec1846"

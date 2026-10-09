@@ -51,12 +51,23 @@ export function PropertyBookingLegalFooter({
         >
           {policyLinkLabel}
         </PopoverTrigger>
-        <PopoverContent align="center" className="w-80 p-4">
-          <PopoverHeader>
-            <PopoverTitle>
+        <PopoverContent
+          align="center"
+          className={cn(
+            "gap-1.5",
+            compact ? "w-64 p-2.5" : "w-72 p-3",
+          )}
+        >
+          <PopoverHeader className="gap-0.5">
+            <PopoverTitle className={compact ? "text-xs" : "text-sm"}>
               {cancellationPolicy?.name ?? "Cancellation Policy"}
             </PopoverTitle>
-            <PopoverDescription className="text-xs leading-relaxed">
+            <PopoverDescription
+              className={cn(
+                "leading-relaxed",
+                compact ? "text-[10px]" : "text-[11px]",
+              )}
+            >
               {cancellationPolicy?.description ??
                 fallbackIntro ??
                 "Cancellation terms depend on your selected rate plan."}
@@ -64,7 +75,10 @@ export function PropertyBookingLegalFooter({
           </PopoverHeader>
           <Link
             href={ROUTES.cancellationPolicy}
-            className="mt-3 inline-block text-xs font-medium text-brand hover:underline"
+            className={cn(
+              "mt-2 inline-block font-medium text-brand hover:underline",
+              compact ? "text-[10px]" : "text-[11px]",
+            )}
           >
             Read full policy
           </Link>
