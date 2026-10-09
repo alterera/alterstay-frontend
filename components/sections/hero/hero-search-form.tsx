@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "lucide-react";
 
+import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { buildSearchUrl } from "@/lib/search";
@@ -38,6 +39,8 @@ type HeroSearchFormProps = {
   /** Hide the city field (property stay edit). */
   hideCity?: boolean;
   searchButtonLabel?: string;
+  /** Animated border on the white search card (homepage hero). */
+  borderBeam?: boolean;
 };
 
 const MORPH_TRANSITION = "transition-all duration-500 ease-in-out";
@@ -53,7 +56,9 @@ export function HeroSearchForm({
   mobilePickerVariant = "sheet",
   hideCity = false,
   searchButtonLabel = "Search",
+  borderBeam = false,
 }: HeroSearchFormProps) {
+  const showBorderBeam = borderBeam && !morph && !compact;
   const router = useRouter();
   const [searchParams, setSearchParams] = useState<PropertySearchParams>(
     () => defaultValues ?? createDefaultSearchParams(),
@@ -77,7 +82,8 @@ export function HeroSearchForm({
   return (
     <div
       className={cn(
-        "w-full bg-white ring-1 ring-black/5",
+        "relative w-full bg-white",
+        showBorderBeam ? "ring-0" : "ring-1 ring-black/5",
         morph && MORPH_TRANSITION,
         // Morph heights are fixed on purpose: the collapsed pill (h-10) sits
         // centred in the 56px navbar row, and a definite height lets the bar
@@ -90,9 +96,19 @@ export function HeroSearchForm({
         className,
       )}
     >
+      {showBorderBeam ? (
+        <BorderBeam
+          size={200}
+          duration={10}
+          borderWidth={2}
+          colorFrom="#ec1846"
+          colorTo="#fda4af"
+          initialOffset={20}
+        />
+      ) : null}
       <div
         className={cn(
-          "flex",
+          "relative z-10 flex",
           morph
             ? "h-full flex-row items-center"
             : "flex-col lg:flex-row lg:items-center",

@@ -39,7 +39,7 @@ export function HeroSection({ className }: HeroSectionProps) {
           </div>
 
           <div className="w-full max-w-5xl pt-1">
-            <HeroSearchForm dateLayout="combined" />
+            <HeroSearchForm dateLayout="combined" borderBeam />
           </div>
         </div>
       </Container>
