@@ -157,7 +157,7 @@ export type BookingResultTicketProps = React.HTMLAttributes<HTMLDivElement> & {
   title: string;
   subtitle: string;
   reservationNumber: string;
-  amountLabel: string;
+  amountLabel?: string;
   amount: string;
   /** ISO date string */
   dateIso: string;
