@@ -16,6 +16,8 @@ type SubpageHeaderProps = {
   mobileOnly?: boolean;
   /** When true, back button is only shown on mobile (hidden from lg breakpoint up). */
   backMobileOnly?: boolean;
+  /** App-style brand bar on mobile (footer / static pages). */
+  variant?: "default" | "brand";
 };
 
 export function SubpageHeader({
@@ -26,6 +28,7 @@ export function SubpageHeader({
   rightSlot,
   mobileOnly = false,
   backMobileOnly = false,
+  variant = "default",
 }: SubpageHeaderProps) {
   const router = useRouter();
 
@@ -40,18 +43,28 @@ export function SubpageHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+        "sticky top-0 z-30",
+        variant === "brand"
+          ? "border-b border-brand/20 bg-brand pt-[env(safe-area-inset-top,0px)] text-white lg:border-border/70 lg:bg-background/95 lg:text-foreground lg:backdrop-blur lg:supports-[backdrop-filter]:bg-background/80"
+          : "border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
         mobileOnly && "lg:hidden",
         className,
       )}
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <div
+        className={cn(
+          "mx-auto flex max-w-6xl items-center gap-2 px-3 sm:px-6 lg:h-14 lg:gap-3 lg:px-8",
+          variant === "brand" ? "h-11" : "h-14",
+        )}
+      >
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
           className={cn(
             "shrink-0 rounded-lg",
+            variant === "brand" &&
+              "text-white hover:bg-white/15 hover:text-white lg:text-foreground lg:hover:bg-muted",
             backMobileOnly && "lg:hidden",
           )}
           onClick={handleBack}

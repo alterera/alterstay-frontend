@@ -25,7 +25,7 @@ export const footerConfig = {
     { label: "Contact Us", href: ROUTES.contact },
     { label: "Careers", href: ROUTES.careers },
     { label: "Help", href: ROUTES.help.root },
-    { label: "FAQs", href: ROUTES.help.faq },
+    { label: "FAQs", href: ROUTES.faqs },
   ] satisfies FooterLink[],
   paymentLogos: [
     { id: "mastercard", name: "Mastercard", src: "/payment-logo/mastercard.svg" },

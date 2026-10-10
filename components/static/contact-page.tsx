@@ -49,7 +49,12 @@ const CONTACT_CHANNELS = [
 export function ContactPage() {
   return (
     <>
-      <SubpageHeader title="Contact Us" backHref={ROUTES.home} mobileOnly />
+      <SubpageHeader
+        title="Contact Us"
+        backHref={ROUTES.home}
+        mobileOnly
+        variant="brand"
+      />
       <section className="bg-background pb-16 pt-6 sm:pt-10 lg:pt-12">
         <Container className="max-w-6xl">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">

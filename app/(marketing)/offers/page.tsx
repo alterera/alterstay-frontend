@@ -37,7 +37,12 @@ const UPCOMING_PERKS = [
 export default function OffersPage() {
   return (
     <>
-      <SubpageHeader title="Offers" backHref={ROUTES.home} mobileOnly />
+      <SubpageHeader
+        title="Offers"
+        backHref={ROUTES.home}
+        mobileOnly
+        variant="brand"
+      />
 
       <section className="relative hidden overflow-hidden border-b bg-neutral-950 text-white lg:block">
         <div

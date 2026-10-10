@@ -75,7 +75,7 @@ export const profileConfig = {
         {
           id: "faqs",
           label: "FAQs",
-          href: ROUTES.help.faq,
+          href: ROUTES.faqs,
           icon: CircleHelpIcon,
         },
       ],
@@ -161,7 +161,7 @@ export const profileConfig = {
         {
           id: "faqs",
           label: "FAQs",
-          href: ROUTES.help.faq,
+          href: ROUTES.faqs,
           icon: CircleHelpIcon,
         },
       ],

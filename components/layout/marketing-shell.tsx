@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/footer";
 import { MobileDock, Navbar } from "@/components/layout/navbar";
 import { SearchPageLayoutProvider } from "@/components/search/search-page-layout-context";
 import { useNavbarScrollHidden } from "@/hooks/use-navbar-scroll-hidden";
+import { isMarketingAppStylePage } from "@/lib/marketing-app-pages";
 import { cn } from "@/lib/utils";
 
 function MarketingShellInner({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,9 @@ function MarketingShellInner({ children }: { children: React.ReactNode }) {
   const hideFooter =
     pathname.startsWith("/profile") ||
     pathname.startsWith("/bookings");
-  const hideMobileDock = isSearchPage || isPropertyPage || isBookingFlow;
+  const appStylePage = isMarketingAppStylePage(pathname);
+  const hideMobileDock =
+    isSearchPage || isPropertyPage || isBookingFlow || appStylePage;
   const dockHidden = useNavbarScrollHidden(12);
 
   return (

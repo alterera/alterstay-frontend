@@ -155,7 +155,7 @@ function SuccessConfetti() {
 export type BookingResultTicketProps = React.HTMLAttributes<HTMLDivElement> & {
   variant: BookingResultTicketVariant;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   reservationNumber: string;
   amountLabel?: string;
   amount: string;
@@ -234,30 +234,32 @@ export const BookingResultTicket = React.forwardRef<
             aria-hidden
           />
 
-          <div className="flex flex-col items-center px-6 pb-2 pt-8 text-center sm:px-8">
+          <div className="flex flex-col items-center px-5 pb-1 pt-6 text-center sm:px-7">
             <div
               className={cn(
-                "rounded-full p-3 ring-4 ring-white",
+                "rounded-full p-2.5 ring-4 ring-white",
                 variantIconWrap[variant],
               )}
             >
               <Icon
                 className={cn(
-                  "size-9",
+                  "size-8",
                   iconSpin && "animate-spin",
                 )}
                 aria-hidden
               />
             </div>
-            <h1 className="mt-4 text-xl font-semibold tracking-tight sm:text-2xl">
+            <h1 className="mt-3 text-lg font-semibold tracking-tight sm:text-xl">
               {title}
             </h1>
-            <p className="mt-1 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              {subtitle}
-            </p>
+            {subtitle ? (
+              <p className="mt-1 max-w-xs text-xs leading-snug text-muted-foreground">
+                {subtitle}
+              </p>
+            ) : null}
           </div>
 
-          <div className="space-y-5 px-6 pb-8 pt-4 sm:px-8">
+          <div className="space-y-4 px-5 pb-6 pt-3 sm:px-7">
             <DashedLine />
 
             <div className="text-left">
@@ -303,8 +305,12 @@ export const BookingResultTicket = React.forwardRef<
               </div>
             ) : null}
 
-            <DashedLine />
-            <TicketBarcode value={barcodeValue} />
+            {variant === "success" || variant === "failed" ? (
+              <>
+                <DashedLine />
+                <TicketBarcode value={barcodeValue} />
+              </>
+            ) : null}
           </div>
         </div>
       </>

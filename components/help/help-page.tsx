@@ -372,7 +372,7 @@ export function HelpPage() {
                 Looking for quick answers instead?
               </p>
               <Link
-                href={ROUTES.help.faq}
+                href={ROUTES.faqs}
                 className="mt-2 inline-flex text-sm font-semibold text-brand underline"
               >
                 Browse FAQs

@@ -39,10 +39,10 @@ export function BookingPaymentResultLayout({
         aria-hidden
         className="pointer-events-none absolute -left-24 top-10 size-64 rounded-full bg-brand/5 blur-3xl"
       />
-      <Container className="relative flex min-h-[70vh] flex-col items-center justify-center gap-6 py-12 sm:py-16">
+      <Container className="relative flex min-h-[70vh] flex-col items-center justify-center gap-4 py-10 sm:py-12">
         <BookingResultTicket {...ticket} />
         {actions ? (
-          <div className="z-10 flex w-full max-w-sm flex-col gap-2 sm:flex-row sm:justify-center">
+          <div className="z-10 grid w-full max-w-sm grid-cols-1 gap-2 sm:grid-cols-2">
             {actions}
           </div>
         ) : null}

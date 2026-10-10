@@ -40,7 +40,7 @@ export const mainNavigation: NavItem[] = [
       },
       {
         label: "FAQs",
-        href: ROUTES.help.faq,
+        href: ROUTES.faqs,
       },
       {
         label: "Contact Us",

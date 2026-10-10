@@ -296,8 +296,6 @@ export function BookingPaymentResultPage() {
         ticket={{
           variant: "success",
           title: "You're all set!",
-          subtitle:
-            "Your stay is confirmed. We've sent the details to your registered contact.",
           reservationNumber: booking.reservationNumber,
           amount: formatPayableAmount(booking),
           dateIso: ticketDateIso(booking),
@@ -314,14 +312,14 @@ export function BookingPaymentResultPage() {
           <>
             <Button
               render={<Link href={ROUTES.bookings} />}
-              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
+              className="h-9 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
             >
               View booking
             </Button>
             <Button
               variant="outline"
               render={<Link href={ROUTES.home} />}
-              className="h-10 flex-1 rounded-md"
+              className="h-9 w-full rounded-md text-sm"
             >
               Back home
             </Button>
@@ -366,7 +364,7 @@ export function BookingPaymentResultPage() {
           <Button
             type="button"
             variant="outline"
-            className="h-10 w-full rounded-md"
+            className="col-span-full h-9 w-full rounded-md text-sm"
             disabled={isRefreshing}
             onClick={() => void handleRefresh()}
           >
@@ -402,7 +400,7 @@ export function BookingPaymentResultPage() {
           <>
             <Button
               type="button"
-              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
+              className="h-9 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
               disabled={isRefreshing}
               onClick={() => void handleRefresh()}
             >
@@ -411,7 +409,7 @@ export function BookingPaymentResultPage() {
             <Button
               type="button"
               variant="outline"
-              className="h-10 flex-1 rounded-md"
+              className="h-9 w-full rounded-md text-sm"
               disabled={isRetrying}
               onClick={() => void handleRetryPayment()}
             >
@@ -449,7 +447,7 @@ export function BookingPaymentResultPage() {
           <>
             <Button
               type="button"
-              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
+              className="h-9 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
               disabled={isRetrying}
               onClick={() => void handleRetryPayment()}
             >
@@ -458,7 +456,7 @@ export function BookingPaymentResultPage() {
             <Button
               variant="outline"
               render={<Link href={ROUTES.help.root} />}
-              className="h-10 flex-1 rounded-md"
+              className="h-9 w-full rounded-md text-sm"
             >
               Need help?
             </Button>
@@ -495,7 +493,7 @@ export function BookingPaymentResultPage() {
         actions={
           <Button
             render={<Link href={ROUTES.help.root} />}
-            className="h-10 w-full rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
+            className="col-span-full h-9 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
           >
             Talk to support
           </Button>
@@ -528,14 +526,14 @@ export function BookingPaymentResultPage() {
           <>
             <Button
               render={<Link href={buildRebookUrl(booking)} />}
-              className="h-10 flex-1 rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
+              className="h-9 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
             >
               Book again
             </Button>
             <Button
               variant="outline"
               render={<Link href={ROUTES.search} />}
-              className="h-10 flex-1 rounded-md"
+              className="h-9 w-full rounded-md text-sm"
             >
               Browse stays
             </Button>

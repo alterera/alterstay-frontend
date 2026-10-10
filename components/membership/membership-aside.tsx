@@ -105,7 +105,7 @@ export function MembershipAside({ status, loading }: MembershipAsideProps) {
             },
             {
               label: "FAQs",
-              href: ROUTES.help.faq,
+              href: ROUTES.faqs,
               icon: CircleHelpIcon,
             },
           ].map((link) => {

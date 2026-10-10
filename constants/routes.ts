@@ -20,6 +20,7 @@ export const ROUTES = {
   cancellationPolicy: "/cancellation-policy",
   contact: "/contact",
   careers: "/careers",
+  faqs: "/faqs",
   help: {
     root: "/help",
     faq: "/help/faq",
