@@ -83,7 +83,7 @@ export function MyBookingsPage() {
 
   if (isLoading) {
     return (
-      <section className="bg-background pb-8 pt-6 lg:pt-10">
+      <section className="bg-background pb-10 pt-6 lg:pt-8">
         <BookingsListSkeleton />
       </section>
     );
@@ -93,11 +93,11 @@ export function MyBookingsPage() {
     return (
       <section className="bg-background py-16">
         <Container className="max-w-lg text-center">
-          <h1 className="text-2xl font-bold">My Bookings</h1>
+          <h1 className="font-anybody text-2xl font-semibold">My bookings</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to view your bookings.
+            Sign in to view your stays.
           </p>
-          <Button className="mt-6 rounded-xl" onClick={openLogin}>
+          <Button className="mt-6 rounded-md" onClick={openLogin}>
             Login
           </Button>
         </Container>
@@ -106,11 +106,16 @@ export function MyBookingsPage() {
   }
 
   return (
-    <section className="bg-background pb-8 pt-6 lg:pt-10">
-      <Container>
-        <h1 className="mb-5 text-2xl font-bold tracking-tight">My Bookings</h1>
+    <section className="bg-background pb-10 pt-6 lg:pt-8">
+      <Container className="max-w-3xl lg:max-w-5xl">
+        <h1 className="font-anybody text-2xl font-semibold tracking-tight text-foreground">
+          My bookings
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Upcoming trips, past stays, and payments in one place.
+        </p>
 
-        <div className="mb-6 flex border-b overflow-x-auto">
+        <div className="mt-6 flex gap-1 overflow-x-auto border-b border-border">
           {visibleTabs.map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -119,7 +124,7 @@ export function MyBookingsPage() {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "shrink-0 border-b-2 px-4 py-3 text-sm font-medium transition-colors sm:px-5",
+                  "shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors sm:px-4",
                   active
                     ? "border-brand text-brand"
                     : "border-transparent text-muted-foreground hover:text-foreground",
@@ -132,17 +137,17 @@ export function MyBookingsPage() {
         </div>
 
         {error ? (
-          <p className="mb-4 text-sm text-destructive">{error}</p>
+          <p className="mt-4 text-sm text-destructive">{error}</p>
         ) : null}
 
         {loadingBookings ? (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="mt-6 space-y-3">
             {Array.from({ length: 2 }).map((_, index) => (
-              <Skeleton key={index} className="h-44 rounded-2xl" />
+              <Skeleton key={index} className="h-40 rounded-md" />
             ))}
           </div>
         ) : bookings.length === 0 ? (
-          <div className="rounded-2xl border bg-muted/20 px-4 py-12 text-center">
+          <div className="mt-6 rounded-md border border-border bg-muted/15 px-4 py-12 text-center">
             <p className="text-sm text-muted-foreground">
               No{" "}
               {activeTab === "pending"
@@ -154,7 +159,7 @@ export function MyBookingsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="mt-6 space-y-3">
             {bookings.map((booking) => (
               <BookingListCard
                 key={booking.reservationNumber}

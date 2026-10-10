@@ -13,7 +13,9 @@ type HeroSectionProps = {
 
 export function HeroSection({ className }: HeroSectionProps) {
   return (
-    <section className={cn("relative overflow-hidden", className)}>
+    <section
+      className={cn("relative overflow-hidden lg:-mt-14", className)}
+    >
       <div className="absolute inset-0">
         <Image
           src={siteConfig.hero.backgroundImage}
@@ -30,7 +32,7 @@ export function HeroSection({ className }: HeroSectionProps) {
         <div className="flex w-full max-w-4xl flex-col items-center gap-5 sm:gap-6">
           <HeroMobileTopBar />
           <div className="space-y-3">
-            <h1 className="text-xl font-bold leading-snug tracking-tight text-white sm:text-3xl md:text-4xl text-start">
+            <h1 className="font-anybody text-xl font-bold leading-snug tracking-tight text-white sm:text-3xl md:text-4xl text-start">
               {siteConfig.tagline}
             </h1>
             {/* <p className="mx-auto max-w-xl text-sm text-white/85 sm:text-base">

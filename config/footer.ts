@@ -11,8 +11,36 @@ export type PaymentLogo = {
   src: string;
 };
 
+export type SocialLink = {
+  id: string;
+  name: string;
+  href: string;
+};
+
 export const footerConfig = {
-  tagline: "Discover stunning stays.\nBook with confidence.",
+  followUsLabel: "Follow Us",
+  socialLinks: [
+    {
+      id: "facebook",
+      name: "Facebook",
+      href: "https://www.facebook.com/alterstay",
+    },
+    {
+      id: "x",
+      name: "X",
+      href: "https://x.com/alterstay",
+    },
+    {
+      id: "instagram",
+      name: "Instagram",
+      href: "https://www.instagram.com/alterstay",
+    },
+    {
+      id: "linkedin",
+      name: "LinkedIn",
+      href: "https://www.linkedin.com/company/alterstay",
+    },
+  ] satisfies SocialLink[],
   description:
     "Alterstay helps you discover and book stunning resorts and elegant hotels across India. Enjoy seamless booking, trusted payments, and expert support for every stay.",
   linksSectionTitle: "Quick Links",

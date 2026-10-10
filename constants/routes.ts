@@ -19,6 +19,8 @@ export const ROUTES = {
   privacy: "/privacy",
   cancellationPolicy: "/cancellation-policy",
   contact: "/contact",
+  /** Placeholder — list-your-property flow coming soon */
+  listProperty: "/list-property",
   careers: "/careers",
   faqs: "/faqs",
   help: {

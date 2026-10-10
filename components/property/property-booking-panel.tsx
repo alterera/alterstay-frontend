@@ -63,7 +63,7 @@ export function PropertyBookingPanel({
 
   return (
     <aside className={cn("hidden lg:block lg:self-stretch", className)}>
-      <div className="sticky top-20 overflow-hidden rounded-md border bg-white lg:top-28">
+      <div className="sticky top-20 overflow-hidden rounded-md border bg-white lg:top-18">
         {selectedPlan ? (
           <PropertyMemberLoginBanner
             savingsAmount={memberSavings}
@@ -99,12 +99,6 @@ export function PropertyBookingPanel({
             ) : (
               <p className="text-sm text-muted-foreground">Price on request</p>
             )}
-            {nights > 0 ? (
-              <p className="text-[11px] text-muted-foreground">
-                {nights} night{nights === 1 ? "" : "s"} ·{" "}
-                {formatCompactDateRange(search.dateRange)}
-              </p>
-            ) : null}
           </div>
 
           <PropertyStayControls

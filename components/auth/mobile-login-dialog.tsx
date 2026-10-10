@@ -52,6 +52,7 @@ export function MobileLoginDialog({
       onOpenChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid OTP");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -94,6 +95,7 @@ export function MobileLoginDialog({
           <PhoneLoginForm
             loading={loading}
             error={error}
+            onClearError={() => setError(null)}
             onGetOtp={handleGetOtp}
             onVerifyOtp={handleVerifyOtp}
             onLoginWithPassword={handlePasswordLogin}

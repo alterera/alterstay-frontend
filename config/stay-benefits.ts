@@ -1,40 +1,29 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  HandCoinsIcon,
-  HeadsetIcon,
-  RefreshCwIcon,
-  WalletIcon,
-} from "lucide-react";
-
-
 export type StayBenefit = {
   id: string;
-  label: string;
-  icon: LucideIcon;
+  title: string;
+  description: string;
 };
 
+export const STAY_BENEFIT_ICON_SRC = "/offer/offers.webp";
+
 export const stayBenefitsConfig = {
-  headline: "Do more in every Alterstay",
   benefits: [
     {
-      id: "save",
-      label: "Earn up to 10% back in coins",
-      icon: HandCoinsIcon,
+      id: "flexible-check-in",
+      title: "Flexible Check-in",
+      description:
+        "Decide when you check-in with hourly stays of 3, 6 and 12 hours",
     },
     {
-      id: "rebook",
-      label: "Auto rebooking if price drops",
-      icon: RefreshCwIcon,
+      id: "elegant-experience",
+      title: "Elegant Experience",
+      description:
+        "Luxury and premium hotels with exceptional amenities and service",
     },
     {
-      id: "points",
-      label: "Earn coins on every booking",
-      icon: WalletIcon,
-    },
-    {
-      id: "support",
-      label: "24/7 customer support",
-      icon: HeadsetIcon,
+      id: "exciting-offers",
+      title: "Exciting Offers",
+      description: "Enjoy your stay with amazing deals across the website",
     },
   ] satisfies StayBenefit[],
-};
+} as const;

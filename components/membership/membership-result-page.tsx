@@ -3,23 +3,30 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  CheckCircle2Icon,
-  Loader2Icon,
-  TriangleAlertIcon,
-  XCircleIcon,
-} from "lucide-react";
+import { Loader2Icon } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { MembershipPaymentResultLayout } from "@/components/membership/membership-payment-result-layout";
 import { PaymentResultShell } from "@/components/payment/payment-result-shell";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
+import { formatCurrency } from "@/lib/format";
 import { fetchMembershipPurchase } from "@/lib/membership-api";
+import type { MembershipPurchaseStatus } from "@/types/membership";
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_MS = 5 * 60 * 1000;
 
 type Phase = "loading" | "confirming" | "success" | "failed" | "invalid";
+
+function purchaseReference(purchase: MembershipPurchaseStatus): string {
+  return purchase.id.replace(/-/g, "").slice(0, 14).toUpperCase() || purchase.id;
+}
+
+function purchaseDateIso(purchase: MembershipPurchaseStatus): string {
+  return purchase.paidAt ?? new Date().toISOString();
+}
 
 export function MembershipResultPage() {
   const searchParams = useSearchParams();
@@ -29,7 +36,9 @@ export function MembershipResultPage() {
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [message, setMessage] = useState<string | null>(null);
-  const [planName, setPlanName] = useState<string | null>(null);
+  const [purchase, setPurchase] = useState<MembershipPurchaseStatus | null>(
+    null,
+  );
   const startedAt = useMemo(() => Date.now(), []);
 
   useEffect(() => {
@@ -50,19 +59,19 @@ export function MembershipResultPage() {
 
     async function poll() {
       try {
-        const purchase = await fetchMembershipPurchase(purchaseId!);
+        const next = await fetchMembershipPurchase(purchaseId!);
         if (cancelled) return;
-        setPlanName(purchase.planName);
+        setPurchase(next);
 
-        if (purchase.status === "CAPTURED" && purchase.membership) {
+        if (next.status === "CAPTURED" && next.membership) {
           setPhase("success");
           setMessage(
-            `Your ${purchase.planName} is active until ${new Date(purchase.membership.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}.`,
+            `Your ${next.planName} is active until ${format(parseISO(next.membership.expiresAt), "d MMM yyyy")}.`,
           );
           return;
         }
 
-        if (purchase.status === "FAILED" || purchase.status === "EXPIRED") {
+        if (next.status === "FAILED" || next.status === "EXPIRED") {
           setPhase("failed");
           setMessage(
             "Payment was not completed. You can try again from the membership plans page.",
@@ -73,7 +82,7 @@ export function MembershipResultPage() {
         if (Date.now() - startedAt >= MAX_POLL_MS) {
           setPhase("confirming");
           setMessage(
-            "We're still confirming your payment. This can take a few minutes — check your membership page shortly.",
+            "We're still confirming your payment. Check your membership page in a few minutes.",
           );
           return;
         }
@@ -95,61 +104,91 @@ export function MembershipResultPage() {
     };
   }, [purchaseId, isAuthenticated, authLoading, router, startedAt]);
 
-  if (phase === "loading" || phase === "confirming") {
+  const amountLabel = formatCurrency(purchase?.amount ?? 0, purchase?.currency ?? "INR");
+
+  if (phase === "loading" || (phase === "confirming" && !purchase)) {
     return (
       <PaymentResultShell
         tone="info"
-        icon={<Loader2Icon className="size-8 animate-spin" />}
+        icon={<Loader2Icon className="size-7 animate-spin" />}
         title="Confirming your membership"
-        description={
-          message ??
-          "Please wait while we verify your purchase. Keep this page open for a moment."
-        }
-        actions={
-          phase === "confirming" && message ? (
-            <Button
-              variant="outline"
-              render={<Link href={ROUTES.membership} />}
-              className="rounded-xl"
-            >
-              Go to membership
-            </Button>
-          ) : undefined
-        }
+        description="Please wait while we verify your purchase."
       >
-        {planName ? (
-          <div className="rounded-2xl border bg-muted/20 p-4 text-center text-sm">
+        {purchase?.planName ? (
+          <div className="rounded-md border border-border bg-muted/20 px-4 py-3 text-left text-sm">
             <p className="text-muted-foreground">Plan</p>
-            <p className="mt-1 font-semibold">{planName}</p>
+            <p className="mt-0.5 font-medium">{purchase.planName}</p>
           </div>
         ) : null}
       </PaymentResultShell>
     );
   }
 
-  if (phase === "success") {
+  if (phase === "confirming" && purchase) {
     return (
-      <PaymentResultShell
-        tone="success"
-        icon={<CheckCircle2Icon className="size-8" />}
-        title="Membership activated"
-        description={
-          message ?? "Your membership is ready. Enjoy savings on your next stay."
+      <MembershipPaymentResultLayout
+        ticket={{
+          variant: "processing",
+          title: "Still confirming",
+          subtitle: message ?? "This can take a minute. You can check membership shortly.",
+          reservationNumber: purchase.id.slice(0, 12).toUpperCase(),
+          amountLabel: "Amount",
+          amount: amountLabel,
+          dateIso: purchaseDateIso(purchase),
+          propertyName: purchase.planName,
+          detailLabel: "Plan",
+          detailValue: purchase.planName,
+          barcodeValue: purchaseReference(purchase),
+          iconSpin: true,
+        }}
+        actions={
+          <Button
+            variant="outline"
+            render={<Link href={ROUTES.membership} />}
+            className="col-span-full h-10 w-full rounded-md text-sm"
+          >
+            Go to membership
+          </Button>
         }
+      />
+    );
+  }
+
+  if (phase === "success" && purchase?.membership) {
+    const expiresLabel = format(
+      parseISO(purchase.membership.expiresAt),
+      "d MMM yyyy",
+    );
+
+    return (
+      <MembershipPaymentResultLayout
+        showFireworks
+        ticket={{
+          variant: "success",
+          title: "Membership activated",
+          subtitle: message ?? undefined,
+          reservationNumber: purchase.id.slice(0, 12).toUpperCase(),
+          amount: amountLabel,
+          dateIso: purchaseDateIso(purchase),
+          propertyName: purchase.planName,
+          detailLabel: "Valid until",
+          detailValue: expiresLabel,
+          barcodeValue: purchaseReference(purchase),
+        }}
         actions={
           <>
             <Button
               render={<Link href={ROUTES.membership} />}
-              className="rounded-xl sm:min-w-36"
+              className="h-10 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
             >
-              View membership
+              Go to membership
             </Button>
             <Button
               variant="outline"
-              render={<Link href={ROUTES.search} />}
-              className="rounded-xl sm:min-w-36"
+              render={<Link href={ROUTES.home} />}
+              className="h-10 w-full rounded-md text-sm"
             >
-              Book a stay
+              Go to home
             </Button>
           </>
         }
@@ -157,30 +196,64 @@ export function MembershipResultPage() {
     );
   }
 
+  if (phase === "invalid") {
+    return (
+      <MembershipPaymentResultLayout
+        ticket={{
+          variant: "warning",
+          title: "Invalid link",
+          subtitle: "This result link is missing a purchase reference.",
+          reservationNumber: "—",
+          amount: "—",
+          dateIso: new Date().toISOString(),
+          propertyName: "Membership",
+          barcodeValue: "INVALID",
+        }}
+        actions={
+          <Button
+            render={<Link href={ROUTES.membershipPlans} />}
+            className="col-span-full h-10 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
+          >
+            View plans
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
-    <PaymentResultShell
-      tone={phase === "invalid" ? "neutral" : "danger"}
-      icon={
-        phase === "invalid" ? (
-          <TriangleAlertIcon className="size-8" />
-        ) : (
-          <XCircleIcon className="size-8" />
-        )
-      }
-      title={phase === "invalid" ? "Invalid link" : "Payment incomplete"}
-      description={
-        message ??
-        (phase === "invalid"
-          ? "This result link is missing a purchase reference."
-          : "Something went wrong with this payment.")
-      }
+    <MembershipPaymentResultLayout
+      ticket={{
+        variant: "failed",
+        title: "Payment incomplete",
+        subtitle:
+          message ?? "Something went wrong with this payment. Try again from plans.",
+        reservationNumber:
+          purchase?.id.slice(0, 12).toUpperCase() ?? purchaseId?.slice(0, 12) ?? "—",
+        amountLabel: "Amount",
+        amount: purchase ? amountLabel : "—",
+        dateIso: purchase ? purchaseDateIso(purchase) : new Date().toISOString(),
+        propertyName: purchase?.planName ?? "Membership plan",
+        barcodeValue: purchase
+          ? purchaseReference(purchase)
+          : (purchaseId ?? "FAILED").replace(/\W/g, "").slice(0, 14),
+      }}
       actions={
-        <Button
-          className="rounded-xl"
-          render={<Link href={ROUTES.membershipPlans} />}
-        >
-          Back to plans
-        </Button>
+        <>
+          <Button
+            render={<Link href={ROUTES.membershipPlans} />}
+            className="h-10 w-full rounded-md bg-brand text-sm text-brand-foreground hover:bg-brand/90"
+          >
+            Back to plans
+          </Button>
+          <Button
+            variant="outline"
+            render={<Link href={ROUTES.home} />}
+            className="h-10 w-full rounded-md text-sm"
+          >
+            Go to home
+          </Button>
+        </>
       }
     />
   );

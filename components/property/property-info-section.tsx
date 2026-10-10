@@ -55,7 +55,7 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
       </div>
 
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h1 className="font-anybody text-2xl font-semibold tracking-tight sm:text-3xl">
           {property.name}
         </h1>
         {locationLabel ? (

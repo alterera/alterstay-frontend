@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ChevronDownIcon } from "lucide-react";
 
 import { mainNavigation } from "@/config/navigation";
-import { ROUTES } from "@/constants/routes";
 import { profileConfig } from "@/config/profile";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -49,25 +48,13 @@ type NavbarDesktopNavProps = {
 };
 
 export function NavbarDesktopNav({ variant = "default" }: NavbarDesktopNavProps) {
-  const { isAuthenticated } = useAuth();
   const linkClass = navLinkClass(variant);
   const triggerClass = dropdownTriggerClass(variant);
-
-  const navigation = mainNavigation.map((item) => {
-    if (item.type !== "dropdown") return item;
-    return {
-      ...item,
-      items: item.items.filter(
-        (subItem) =>
-          subItem.href !== ROUTES.help.root || isAuthenticated,
-      ),
-    };
-  });
 
   return (
     <NavigationMenu align="start" className="hidden lg:flex">
       <NavigationMenuList className="gap-1">
-        {navigation.map((item) => {
+        {mainNavigation.map((item) => {
           if (item.type === "link") {
             return (
               <NavigationMenuItem key={item.href}>

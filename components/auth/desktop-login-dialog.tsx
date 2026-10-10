@@ -51,6 +51,7 @@ export function DesktopLoginDialog({
       onOpenChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid OTP");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -88,6 +89,7 @@ export function DesktopLoginDialog({
             <PhoneLoginForm
               loading={loading}
               error={error}
+              onClearError={() => setError(null)}
               onGetOtp={handleGetOtp}
               onVerifyOtp={handleVerifyOtp}
               onLoginWithPassword={handlePasswordLogin}

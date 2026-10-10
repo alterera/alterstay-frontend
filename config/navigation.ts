@@ -31,22 +31,14 @@ export const mainNavigation: NavItem[] = [
     href: ROUTES.offers,
   },
   {
-    type: "dropdown",
-    label: "Help & Support",
-    items: [
-      {
-        label: "Help Center",
-        href: ROUTES.help.root,
-      },
-      {
-        label: "FAQs",
-        href: ROUTES.faqs,
-      },
-      {
-        label: "Contact Us",
-        href: ROUTES.contact,
-      },
-    ],
+    type: "link",
+    label: "How It Works",
+    href: ROUTES.listProperty,
+  },
+  {
+    type: "link",
+    label: "Contact Us",
+    href: ROUTES.contact,
   },
 ];
 

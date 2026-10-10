@@ -31,6 +31,14 @@ export function formatHelpStayLine(
   return `${from} [${nights}N] ${to}`;
 }
 
+export function formatBookingCheckInDate(checkIn: string): string {
+  return format(parseISO(checkIn), "EEE, d MMM");
+}
+
+export function formatBookingCheckOutDate(checkOut: string): string {
+  return format(parseISO(checkOut), "EEE, d MMM");
+}
+
 export function formatPayableAmount(booking: BookingResponse): string {
   return formatCurrency(booking.totalAmount, booking.currency);
 }

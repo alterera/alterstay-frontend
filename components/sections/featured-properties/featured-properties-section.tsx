@@ -20,32 +20,21 @@ type FeaturedPropertiesSectionProps = {
   limit?: number;
   title?: string;
   subtitle?: string;
-  /** Full-bleed horizontal carousel (homepage). */
-  bleed?: boolean;
 };
 
 const FALLBACK =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop";
 
-const CARD_CLASS_CONTAINED =
+const CARD_CLASS =
   "w-[calc((100%-0.75rem)/2)] shrink-0 snap-start sm:w-[calc((100%-2.25rem)/3)] lg:w-[calc((100%-3rem)/4)]";
 
-const CARD_CLASS_BLEED =
-  "w-[calc((100vw-2rem-0.75rem)/2)] shrink-0 snap-start sm:w-[calc((100vw-3rem-2.25rem)/3)] lg:w-[calc((100vw-4rem-3rem)/4)]";
-
-function PropertyCard({
-  property,
-  cardClass,
-}: {
-  property: FeaturedProperty;
-  cardClass: string;
-}) {
+function PropertyCard({ property }: { property: FeaturedProperty }) {
   const image = property.imageUrl || FALLBACK;
 
   return (
     <Link
       href={ROUTES.propertyDetail(property.slug)}
-      className={cn("group block", cardClass)}
+      className={cn("group block", CARD_CLASS)}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-neutral-200">
         <Image
@@ -108,12 +97,10 @@ export function FeaturedPropertiesSection({
   limit = 8,
   title = "Book stays across India",
   subtitle = "Featured properties travellers love right now",
-  bleed = false,
 }: FeaturedPropertiesSectionProps) {
   const [properties, setProperties] = useState<FeaturedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const cardClass = bleed ? CARD_CLASS_BLEED : CARD_CLASS_CONTAINED;
 
   useEffect(() => {
     let cancelled = false;
@@ -154,35 +141,6 @@ export function FeaturedPropertiesSection({
 
   const showArrows = !loading && properties.length > 1;
 
-  const carousel = loading ? (
-    <div className="flex gap-3 overflow-hidden">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className={cn("space-y-2", cardClass)}>
-          <Skeleton className="aspect-[4/3] rounded-md" />
-          <Skeleton className="h-4 w-3/4 rounded-md" />
-          <Skeleton className="h-3 w-1/2 rounded-md" />
-        </div>
-      ))}
-    </div>
-  ) : (
-    <div
-      ref={scrollRef}
-      className={cn(
-        "flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        bleed &&
-          "scroll-pl-4 scroll-pr-4 pl-4 pr-4 sm:scroll-pl-6 sm:scroll-pr-6 sm:pl-6 sm:pr-6 lg:scroll-pl-8 lg:scroll-pr-8 lg:pl-8 lg:pr-8",
-      )}
-    >
-      {properties.map((property) => (
-        <PropertyCard
-          key={property.id}
-          property={property}
-          cardClass={cardClass}
-        />
-      ))}
-    </div>
-  );
-
   return (
     <section className={cn("bg-background py-8 sm:py-10", className)}>
       <Container>
@@ -218,13 +176,28 @@ export function FeaturedPropertiesSection({
             </div>
           ) : null}
         </div>
-      </Container>
 
-      {bleed ? (
-        <div className="-mx-0 overflow-hidden">{carousel}</div>
-      ) : (
-        <Container>{carousel}</Container>
-      )}
+        {loading ? (
+          <div className="flex gap-3 overflow-hidden">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className={cn("space-y-2", CARD_CLASS)}>
+                <Skeleton className="aspect-[4/3] rounded-md" />
+                <Skeleton className="h-4 w-3/4 rounded-md" />
+                <Skeleton className="h-3 w-1/2 rounded-md" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            ref={scrollRef}
+            className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
+      </Container>
     </section>
   );
 }

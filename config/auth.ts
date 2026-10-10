@@ -11,6 +11,7 @@ export const authConfig = {
   brandName: "Alterstay",
   welcomeTitle: "Welcome to Alterstay",
   welcomeSubtitle: "Please enter your mobile number to login",
+  otpLength: 6,
   getOtpLabel: "Get OTP",
   otpResendSeconds: 30,
   otpResendLabel: "Resend OTP",

@@ -13,8 +13,8 @@ export default function HomePage() {
       <HeroSection />
       <CitiesSection />
       <CouponBannerSection />
-      <FeaturedPropertiesSection bleed />
-      <StayBenefitsBanner />
+      <FeaturedPropertiesSection />
+      {/* <StayBenefitsBanner /> */}
       <MembershipUpsellSection />
       <TestimonialsSection />
       <FaqsSection />

@@ -219,7 +219,7 @@ export const BookingResultTicket = React.forwardRef<
         <div
           ref={ref}
           className={cn(
-            "relative z-10 w-full max-w-sm rounded-2xl border border-black/5 bg-white font-sans text-foreground shadow-[0_20px_60px_-28px_rgba(15,23,42,0.35)]",
+            "relative z-10 w-full max-w-sm rounded-md border border-border bg-white font-sans text-foreground",
             "animate-in fade-in-0 zoom-in-95 duration-500",
             className,
           )}
@@ -249,7 +249,7 @@ export const BookingResultTicket = React.forwardRef<
                 aria-hidden
               />
             </div>
-            <h1 className="mt-3 text-lg font-semibold tracking-tight sm:text-xl">
+            <h1 className="font-anybody mt-3 text-lg font-semibold tracking-tight sm:text-xl">
               {title}
             </h1>
             {subtitle ? (

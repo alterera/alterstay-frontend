@@ -10,10 +10,10 @@ import {
   bookingNeedsPayment,
   buildRebookUrl,
   canPayWithHoldRemaining,
-  formatBookedOn,
+  formatBookingCheckInDate,
+  formatBookingCheckOutDate,
   formatHoldCountdown,
   formatPayableAmount,
-  formatStayLine,
   getDirectionsUrl,
   getHoldRemainingMs,
   getRefundStatusLabel,
@@ -29,6 +29,15 @@ type BookingListCardProps = {
   tab: BookingListTab;
   className?: string;
 };
+
+function DashedDivider() {
+  return (
+    <div
+      className="border-t border-dashed border-border"
+      aria-hidden="true"
+    />
+  );
+}
 
 export function BookingListCard({ booking, tab, className }: BookingListCardProps) {
   const [paying, setPaying] = useState(false);
@@ -50,12 +59,9 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
 
   const imageUrl = booking.property.imageUrl ?? FALLBACK_IMAGE;
   const cityLabel = booking.property.city ?? "—";
-  const bookedOn = formatBookedOn(booking.createdAt);
-  const stayLine = formatStayLine(
-    booking.checkIn,
-    booking.checkOut,
-    booking.nights,
-  );
+  const checkInLabel = formatBookingCheckInDate(booking.checkIn);
+  const checkOutLabel = formatBookingCheckOutDate(booking.checkOut);
+  const nightsLabel = `-${booking.nights}N-`;
   const refundLabel = getRefundStatusLabel(booking);
   const canPay =
     tab === "pending" &&
@@ -84,43 +90,63 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-2xl border bg-white shadow-sm",
+        "overflow-hidden rounded-md border border-border bg-white",
         className,
       )}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_120px] sm:gap-4">
-        <div className="min-w-0 space-y-2">
-          <p className="text-xs text-muted-foreground">
-            {cityLabel} · BOOKED ON {bookedOn}
-          </p>
-          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground sm:text-base">
+      <div className="flex gap-3 p-4 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h3 className="font-anybody line-clamp-2 text-base font-semibold leading-snug text-foreground">
             {booking.property.name}
           </h3>
-          <p className="text-sm text-muted-foreground">{stayLine}</p>
-          {tab === "pending" || tab === "upcoming" ? (
-            <p className="text-sm font-medium text-foreground">
-              Payable amount: {formatPayableAmount(booking)}
-            </p>
-          ) : null}
-          {tab === "pending" && holdRemainingMs !== null && holdRemainingMs > 0 ? (
-            <p className="text-sm font-medium text-coral">
-              Complete payment in {formatHoldCountdown(holdRemainingMs)}
-            </p>
-          ) : null}
+          <p className="mt-0.5 text-sm text-muted-foreground">{cityLabel}</p>
         </div>
-
-        <div className="relative size-24 justify-self-end overflow-hidden rounded-xl bg-muted sm:size-[7.5rem]">
+        <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-muted sm:size-16">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl}
-            alt={booking.property.name}
+            alt=""
             className="size-full object-cover"
           />
         </div>
       </div>
 
+      <div className="px-4">
+        <DashedDivider />
+      </div>
+
+      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2 px-4 py-4">
+        <div>
+          <p className="text-sm font-semibold text-foreground">{checkInLabel}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Check-in</p>
+        </div>
+        <span
+          className="mt-0.5 rounded border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground"
+        >
+          {nightsLabel}
+        </span>
+        <div className="text-right">
+          <p className="text-sm font-semibold text-foreground">{checkOutLabel}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Checkout</p>
+        </div>
+      </div>
+
+      {(tab === "pending" || tab === "upcoming") && (
+        <div className="border-t border-border px-4 py-2.5">
+          <p className="text-sm text-foreground">
+            <span className="text-muted-foreground">Payable </span>
+            <span className="font-medium">{formatPayableAmount(booking)}</span>
+          </p>
+          {tab === "pending" && holdRemainingMs !== null && holdRemainingMs > 0 ? (
+            <p className="mt-1 text-xs font-medium text-brand">
+              Complete payment in {formatHoldCountdown(holdRemainingMs)}
+            </p>
+          ) : null}
+        </div>
+      )}
+
       {tab === "pending" ? (
-        <div className="border-t px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           {payError ? (
             <p className="mb-2 text-xs text-destructive">{payError}</p>
           ) : null}
@@ -128,7 +154,7 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
             {canPay ? (
               <Button
                 type="button"
-                className="w-full rounded-xl bg-brand text-brand-foreground hover:bg-brand/90"
+                className="h-10 w-full rounded-md bg-brand text-brand-foreground hover:bg-brand/90"
                 disabled={paying}
                 onClick={() => void handlePayNow()}
               >
@@ -138,7 +164,7 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
             {holdExpired || !canPayWithHoldRemaining(booking.holdExpiresAt) ? (
               <Link
                 href={buildRebookUrl(booking)}
-                className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+                className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border bg-background text-sm font-medium hover:bg-muted/50"
               >
                 Rebook
               </Link>
@@ -148,31 +174,31 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
       ) : null}
 
       {tab === "upcoming" ? (
-        <div className="border-t px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           <div className="grid grid-cols-2 gap-2">
             <a
               href={getDirectionsUrl(booking)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background text-sm font-medium hover:bg-muted/50"
             >
-              Get Direction
+              Get direction
             </a>
             <Link
-              href={ROUTES.help.root}
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+              href={ROUTES.contact}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background text-sm font-medium hover:bg-muted/50"
             >
-              Need Help?
+              Contact us
             </Link>
           </div>
         </div>
       ) : null}
 
       {tab === "ongoing" ? (
-        <div className="border-t px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           <Link
             href={ROUTES.propertyDetail(booking.property.slug)}
-            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-input bg-background text-sm font-medium hover:bg-muted"
+            className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border bg-background text-sm font-medium hover:bg-muted/50"
           >
             Book again
           </Link>
@@ -180,15 +206,15 @@ export function BookingListCard({ booking, tab, className }: BookingListCardProp
       ) : null}
 
       {tab === "cancelled" || tab === "previous" ? (
-        <div className="border-t px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           {tab === "cancelled" && refundLabel ? (
-            <p className="mb-3 text-sm font-medium text-muted-foreground">
-              Refund status: {refundLabel}
+            <p className="mb-2 text-sm text-muted-foreground">
+              Refund: <span className="font-medium text-foreground">{refundLabel}</span>
             </p>
           ) : null}
           <Link
             href={ROUTES.propertyDetail(booking.property.slug)}
-            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-input bg-background text-sm font-medium hover:bg-muted"
+            className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border bg-background text-sm font-medium hover:bg-muted/50"
           >
             Book again
           </Link>

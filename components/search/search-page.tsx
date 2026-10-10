@@ -207,7 +207,7 @@ export function SearchPage() {
       <div
         ref={desktopHeaderRef}
         className={cn(
-          "sticky top-14 z-50 hidden h-32 border-b transition-[background-color,border-color,box-shadow] duration-500 ease-in-out lg:block",
+          "sticky top-0 z-50 hidden h-32 border-b transition-[background-color,border-color,box-shadow] duration-500 ease-in-out lg:block",
           desktopExpanded
             ? "border-brand/20 bg-white"
             : "pointer-events-none border-transparent bg-transparent",

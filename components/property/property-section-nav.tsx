@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
-import { useNavbarScrollHidden } from "@/hooks/use-navbar-scroll-hidden";
 import { cn } from "@/lib/utils";
 import {
   PROPERTY_SECTIONS,
@@ -43,7 +42,6 @@ export function PropertySectionNav({
   mobileStickyTopClassName,
 }: PropertySectionNavProps) {
   const isDesktop = useIsDesktop();
-  const navHidden = useNavbarScrollHidden();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef(new Map<string, HTMLButtonElement>());
 
@@ -66,11 +64,10 @@ export function PropertySectionNav({
     <nav
       aria-label="Property sections"
       className={cn(
-        "sticky z-40 border-b bg-white transition-[top] duration-300 ease-in-out",
+        "sticky z-40 border-b bg-white",
         mobileStickyTopClassName ??
           "top-[calc(2.75rem+env(safe-area-inset-top,0px))]",
         "lg:top-0",
-        navHidden ? "lg:top-0" : "lg:top-14",
         className,
       )}
     >
